@@ -1,5 +1,7 @@
 """ORM models. Importing here ensures Base.metadata registers every table."""
 from app.models.class_session import ClassSession
+from app.models.meeting import Meeting
+from app.models.meeting_participant import MeetingParticipant
 from app.models.exam_result import ExamResult
 from app.models.lesson import Lesson
 from app.models.letter import Letter
@@ -19,6 +21,8 @@ from app.models.video_job import VideoJob
 
 __all__ = [
     "ClassSession",
+    "Meeting",
+    "MeetingParticipant",
     "ExamResult",
     "Lesson",
     "Letter",

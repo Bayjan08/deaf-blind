@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/design_colors.dart';
+import '../../live_class/live_class.dart';
 import 'models/music_note.dart';
 import 'app_screen.dart';
 import 'screens/alphabet_screens.dart';
@@ -23,9 +24,13 @@ class _DeafSchoolShellState extends State<DeafSchoolShell> {
   String? _activeNoteId;
   bool _showTranslator = false;
   String? _gamePick;
+  MeetingConnection? _activeMeeting;
 
   void _go(AppScreen screen) {
     setState(() {
+      if (_screen == AppScreen.liveclass && screen != AppScreen.liveclass) {
+        _activeMeeting = null;
+      }
       _screen = screen;
       _practice = PracticeState.ready;
       _activeNoteId = null;
@@ -72,7 +77,7 @@ class _DeafSchoolShellState extends State<DeafSchoolShell> {
                   activeTab: navTabForScreen(_screen),
                   onHome: () => _go(AppScreen.home),
                   onSubjects: () => _go(AppScreen.subjects),
-                  onClass: () => _go(AppScreen.liveclass),
+                  onClass: () => _go(AppScreen.classLobby),
                   onProfile: () => _go(AppScreen.profile),
                 ),
               ),
@@ -138,8 +143,22 @@ class _DeafSchoolShellState extends State<DeafSchoolShell> {
       AppScreen.pronunciation => PronunciationScreen(
           onBack: () => _go(AppScreen.subjects),
         ),
-      AppScreen.liveclass => LiveClassScreen(
-          onBack: () => _go(AppScreen.home),
+      AppScreen.classLobby => MeetingLobbyScreen(
+          onEnterMeeting: (connection) {
+            setState(() {
+              _activeMeeting = connection;
+              _screen = AppScreen.liveclass;
+            });
+          },
+        ),
+      AppScreen.liveclass => MeetingRoomScreen(
+          connection: _activeMeeting!,
+          onExit: () {
+            setState(() {
+              _activeMeeting = null;
+              _screen = AppScreen.classLobby;
+            });
+          },
         ),
       AppScreen.profile => ProfileScreen(
           onAlphabetMap: () => _go(AppScreen.alphabetMap),

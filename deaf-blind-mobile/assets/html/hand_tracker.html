@@ -6,312 +6,282 @@
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body { width: 100%; height: 100%; background: #000; overflow: hidden; }
-
     #container { position: relative; width: 100vw; height: 100vh; }
 
-    /* Hidden video element — MediaPipe reads from this */
-    #video { display: none; }
-
-    /* Canvas fills the screen and mirrors the selfie camera */
-    #canvas {
+    /* Native video render (cheap) — NOT redrawn into canvas each frame */
+    #video {
       position: absolute; top: 0; left: 0;
       width: 100%; height: 100%;
       object-fit: cover;
     }
-
-    /* Gesture name pill at the bottom */
-    #pill {
-      position: absolute; bottom: 18px; left: 50%;
-      transform: translateX(-50%);
-      background: rgba(0,0,0,0.72);
-      color: #00E5FF;
-      padding: 10px 28px;
-      border-radius: 24px;
-      font: 700 18px/1 'Arial', sans-serif;
-      letter-spacing: 0.5px;
-      border: 2px solid #00E5FF;
-      white-space: nowrap;
-      transition: border-color 0.2s;
-      z-index: 10;
+    /* Transparent overlay — draws ONLY the skeleton */
+    #overlay {
+      position: absolute; top: 0; left: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+      pointer-events: none;
     }
 
-    /* Hold progress bar that grows inside the pill border */
+    #pill {
+      position: absolute; bottom: 28px; left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.75);
+      color: #00E5FF;
+      padding: 10px 22px;
+      border-radius: 24px;
+      font: 700 15px/1 'Arial', sans-serif;
+      border: 2px solid #555;
+      white-space: nowrap;
+      max-width: 92vw;
+      overflow: hidden; text-overflow: ellipsis;
+      z-index: 10;
+    }
     #progress-bar {
-      position: absolute;
-      bottom: 0; left: 0;
-      height: 3px;
-      background: #00FF88;
+      position: absolute; bottom: 0; left: 0;
+      height: 3px; background: #00FF88;
       border-radius: 0 0 24px 24px;
-      width: 0%;
-      transition: width 0.1s linear;
+      width: 0%; transition: width 0.08s linear;
+    }
+    #rec-dot {
+      display: none;
+      position: absolute; top: 14px; left: 50%;
+      transform: translateX(-50%);
+      background: rgba(244,67,54,0.9);
+      color: #fff;
+      padding: 6px 16px;
+      border-radius: 20px;
+      font: 700 13px 'Arial', sans-serif;
+      z-index: 30;
     }
   </style>
 </head>
 <body>
 <div id="container">
   <video id="video" autoplay playsinline muted></video>
-  <canvas id="canvas"></canvas>
+  <canvas id="overlay"></canvas>
+  <div id="rec-dot">⏺ ЗАПИСЬ ЖЕСТА</div>
   <div id="pill">
     Загрузка...
     <div id="progress-bar"></div>
   </div>
 </div>
 
-<!-- MediaPipe Hands CDN (classic, no ES modules — works in WebView) -->
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils@0.3/drawing_utils.js" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4/hands.js" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils@0.3/camera_utils.js" crossorigin="anonymous"></script>
 
 <script>
-// ─── Constants ────────────────────────────────────────────────────────────────
-const MEANINGS = {
-  hello : 'Привет 👋',
-  yes   : 'Да 👍',
-  no    : 'Нет ☝️',
-  stop  : 'Стоп ✊',
-  good  : 'Хорошо ✌️',
-  help  : 'Помощь 🤘',
-  bad   : 'Плохо 👎',
-  thanks: 'Спасибо 🙏',
-};
+// ─── Config ───────────────────────────────────────────────────────────────────
+const TIPS = [4, 8, 12, 16, 20];
 
-// Landmark indices (MediaPipe Hands, 21 points)
-// 0=WRIST, 1=THUMB_CMC, 2=THUMB_MCP, 3=THUMB_IP, 4=THUMB_TIP,
-// 5=INDEX_MCP … 8=INDEX_TIP,  9=MID_MCP … 12=MID_TIP,
-// 13=RING_MCP … 16=RING_TIP, 17=PINKY_MCP … 20=PINKY_TIP
-const TIPS = [4, 8, 12, 16, 20];   // fingertip indices
-const PIPS = [3, 6, 10, 14, 18];   // pip / knuckle indices just below tip
-
-const HOLD_THRESHOLD = 10; // frames to hold before sending to Flutter
+// Auto-motion capture
+const START_VEL   = 0.020;  // wrist movement (normalised) to START recording
+const STOP_VEL    = 0.012;  // below this = "settling"
+const STILL_HOLD  = 6;      // consecutive still frames → end of sign
+const MIN_FRAMES  = 10;     // shorter than this = noise, discard
+const MAX_FRAMES  = 48;     // hard cap on a single capture
+const SEND_FRAMES = 32;     // resample to exactly this many for Slovo
+const COOLDOWN_MS = 1200;   // pause after a prediction
+const CAP_W = 320, CAP_H = 240;  // JPEG capture size (4:3, matches camera)
 
 // ─── State ────────────────────────────────────────────────────────────────────
-let holdGesture = '';
-let holdCount   = 0;
+let state        = 'idle';   // idle | capturing | sending | cooldown
+let jpegBuffer   = [];
+let prevWrist    = null;
+let stillCount   = 0;
+let mpBusy       = false;     // skip frames while MediaPipe is still working
 
-const canvas   = document.getElementById('canvas');
-const ctx      = canvas.getContext('2d');
+// ─── DOM ──────────────────────────────────────────────────────────────────────
+const video    = document.getElementById('video');
+const overlay  = document.getElementById('overlay');
+const octx     = overlay.getContext('2d');
 const pill     = document.getElementById('pill');
 const progress = document.getElementById('progress-bar');
+const recDot   = document.getElementById('rec-dot');
 
-// ─── Gesture classifier ───────────────────────────────────────────────────────
-function dist(p1, p2) {
-  return Math.sqrt((p1.x - p2.x) ** 2 + (p1.y - p2.y) ** 2);
-}
+// Off-screen canvas for JPEG capture (used ONLY while recording)
+const capCv  = document.createElement('canvas');
+capCv.width  = CAP_W; capCv.height = CAP_H;
+const capCtx = capCv.getContext('2d');
 
-// Uses normalized landmark coordinates [0,1].
-// Y increases downward, so tip.y < pip.y means the finger points UP.
-function classify(lm) {
-  const palmWidth = dist(lm[5], lm[17]);
-  const thumbUp  = dist(lm[4], lm[9]) > palmWidth * 0.95;
-  const indexUp  = lm[TIPS[1]].y < lm[PIPS[1]].y;
-  const middleUp = lm[TIPS[2]].y < lm[PIPS[2]].y;
-  const ringUp   = lm[TIPS[3]].y < lm[PIPS[3]].y;
-  const pinkyUp  = lm[TIPS[4]].y < lm[PIPS[4]].y;
-
-  // Open palm: all 5 fingers up → hello
-  if (thumbUp && indexUp && middleUp && ringUp && pinkyUp) return 'hello';
-
-  // Thumbs-up only → yes
-  if (thumbUp && !indexUp && !middleUp && !ringUp && !pinkyUp) return 'yes';
-
-  // Fist — all closed → stop
-  if (!thumbUp && !indexUp && !middleUp && !ringUp && !pinkyUp) return 'stop';
-
-  // Peace/victory — index + middle → good
-  if (!thumbUp && indexUp && middleUp && !ringUp && !pinkyUp) return 'good';
-
-  // Index only → no
-  if (!thumbUp && indexUp && !middleUp && !ringUp && !pinkyUp) return 'no';
-
-  // Devil horns — index + pinky → help
-  if (!thumbUp && indexUp && !middleUp && !ringUp && pinkyUp) return 'help';
-
-  // Three fingers — index + middle + ring → thanks
-  if (!thumbUp && indexUp && middleUp && ringUp && !pinkyUp) return 'thanks';
-
-  // Thumbs-down (thumb on left side when mirrored) → bad
-  if (!thumbUp && !indexUp && !middleUp && !ringUp && !pinkyUp) return 'bad';
-
-  return null;
-}
-
-// ─── Draw helpers ─────────────────────────────────────────────────────────────
-function drawDots(lm, w, h) {
-  for (let i = 0; i < lm.length; i++) {
-    const x = lm[i].x * w;
-    const y = lm[i].y * h;
-    const isTip   = TIPS.includes(i);
-    const isWrist = i === 0;
-    const r = isWrist ? 8 : (isTip ? 7 : 5);
-
-    // Outer glow
-    ctx.beginPath();
-    ctx.arc(x, y, r + 5, 0, Math.PI * 2);
-    ctx.fillStyle = 'rgba(0,229,255,0.18)';
-    ctx.fill();
-
-    // Filled dot
-    ctx.beginPath();
-    ctx.arc(x, y, r, 0, Math.PI * 2);
-    ctx.fillStyle = isTip ? '#FF4081' : '#00E5FF';   // pink tips, cyan joints
-    ctx.fill();
-
-    // White center for wrist landmark
-    if (isWrist) {
-      ctx.beginPath();
-      ctx.arc(x, y, 3, 0, Math.PI * 2);
-      ctx.fillStyle = '#fff';
-      ctx.fill();
-    }
+// ─── Send to Flutter ──────────────────────────────────────────────────────────
+function sendToFlutter(payload) {
+  const str = typeof payload === 'string' ? payload : JSON.stringify(payload);
+  if (window.flutter_inappwebview) {
+    window.flutter_inappwebview.callHandler('GestureChannel', str);
+  } else if (window.GestureChannel) {
+    GestureChannel.postMessage(str);
   }
 }
 
-// ─── MediaPipe callback ───────────────────────────────────────────────────────
+function setPill(text, color) {
+  pill.firstChild.textContent = text + ' ';
+  pill.style.borderColor = color || '#555';
+}
+
+// ─── Capture lifecycle ─────────────────────────────────────────────────────────
+function startCapture() {
+  state = 'capturing';
+  jpegBuffer = [];
+  stillCount = 0;
+  recDot.style.display = 'block';
+  setPill('⏺ Записываю жест…', '#f44336');
+}
+
+function pushFrame() {
+  // Draw RAW (un-mirrored) video frame → JPEG. Slovo expects natural orientation.
+  capCtx.drawImage(video, 0, 0, CAP_W, CAP_H);
+  const b64 = capCv.toDataURL('image/jpeg', 0.8).split(',')[1];
+  jpegBuffer.push(b64);
+  progress.style.width = Math.min(jpegBuffer.length / SEND_FRAMES * 100, 100) + '%';
+}
+
+function finishCapture() {
+  recDot.style.display = 'none';
+
+  if (jpegBuffer.length < MIN_FRAMES) {
+    // Too short — was just noise. Reset to idle.
+    jpegBuffer = [];
+    state = 'idle';
+    progress.style.width = '0%';
+    return;
+  }
+
+  state = 'sending';
+  setPill('🧠 Распознаю…', '#FF9800');
+
+  // Resample buffer to exactly SEND_FRAMES, evenly spaced
+  const frames = [];
+  for (let i = 0; i < SEND_FRAMES; i++) {
+    const idx = Math.floor(i * (jpegBuffer.length - 1) / (SEND_FRAMES - 1));
+    frames.push(jpegBuffer[idx]);
+  }
+  jpegBuffer = [];
+  sendToFlutter({ type: 'clip', frames });
+
+  // Flutter calls clipDone() when the backend responds; meanwhile cooldown
+  enterCooldown();
+}
+
+function enterCooldown() {
+  state = 'cooldown';
+  setTimeout(() => {
+    state = 'idle';
+    progress.style.width = '0%';
+    setPill('✋ Покажите жест — запись начнётся сама', '#555');
+  }, COOLDOWN_MS);
+}
+
+// Called from Flutter after the word is shown (optional UX hook)
+window.clipDone = function (word) {
+  if (word) setPill('✅ ' + word, '#00FF88');
+};
+
+// ─── MediaPipe results ─────────────────────────────────────────────────────────
 function onResults(results) {
-  if (!results.image) return;
+  mpBusy = false;
 
-  // Resize canvas to match video frame
-  canvas.width  = results.image.width;
-  canvas.height = results.image.height;
+  // Resize overlay to match the actual video resolution once known
+  if (overlay.width !== (results.image?.width || 0) && results.image) {
+    overlay.width  = results.image.width;
+    overlay.height = results.image.height;
+  }
+  octx.clearRect(0, 0, overlay.width, overlay.height);
 
-  // Draw the camera frame (canvas itself is CSS-mirrored)
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  ctx.drawImage(results.image, 0, 0, canvas.width, canvas.height);
+  const hand = results.multiHandLandmarks && results.multiHandLandmarks[0];
 
-  const detected = results.multiHandLandmarks && results.multiHandLandmarks.length > 0;
-
-  if (detected) {
-    const lm = results.multiHandLandmarks[0];
-    const w  = canvas.width;
-    const h  = canvas.height;
-
-    // Draw MediaPipe skeleton using the built-in utility
-    drawConnectors(ctx, lm, HAND_CONNECTIONS, { color: 'rgba(0,229,255,0.65)', lineWidth: 2 });
-
-    // Draw custom dots over the skeleton
-    drawDots(lm, w, h);
-
-    // Classify gesture and update hold counter
-    const gesture = classify(lm);
-
-    if (gesture && gesture === holdGesture) {
-      holdCount++;
-      progress.style.width = Math.min(holdCount / HOLD_THRESHOLD * 100, 100) + '%';
-
-      if (holdCount >= HOLD_THRESHOLD) {
-        holdCount = 0;
-        progress.style.width = '0%';
-        // Send to Flutter via JS channel
-        if (window.GestureChannel) {
-          GestureChannel.postMessage(gesture);
-        } else if (window.flutter_inappwebview) {
-          window.flutter_inappwebview.callHandler('GestureChannel', gesture);
-        }
-      }
-    } else {
-      holdGesture = gesture || '';
-      holdCount = 0;
-      progress.style.width = '0%';
+  if (hand) {
+    // Skeleton overlay (cheap — no camera redraw)
+    drawConnectors(octx, hand, HAND_CONNECTIONS, { color: 'rgba(0,229,255,0.65)', lineWidth: 3 });
+    for (let i = 0; i < hand.length; i++) {
+      const x = hand[i].x * overlay.width, y = hand[i].y * overlay.height;
+      const isTip = TIPS.includes(i), isWrist = i === 0;
+      octx.beginPath();
+      octx.arc(x, y, isWrist ? 8 : (isTip ? 7 : 5), 0, Math.PI * 2);
+      octx.fillStyle = isTip ? '#FF4081' : '#00E5FF';
+      octx.fill();
     }
 
-    // Update pill
-    if (gesture) {
-      pill.firstChild.textContent = (MEANINGS[gesture] || gesture) + ' ';
-      pill.style.borderColor = '#00FF88';
-    } else {
-      pill.firstChild.textContent = '🔍 Распознаю жест... ';
-      pill.style.borderColor = '#00E5FF';
+    // ── Motion tracking on the wrist ──
+    const wrist = hand[0];
+    let vel = 0;
+    if (prevWrist) {
+      const dx = wrist.x - prevWrist.x, dy = wrist.y - prevWrist.y;
+      vel = Math.sqrt(dx * dx + dy * dy);
+    }
+    prevWrist = { x: wrist.x, y: wrist.y };
+
+    if (state === 'idle') {
+      setPill('✋ Покажите жест — запись начнётся сама', '#00E5FF');
+      if (vel > START_VEL) startCapture();
+    } else if (state === 'capturing') {
+      pushFrame();
+      if (vel < STOP_VEL) {
+        if (++stillCount >= STILL_HOLD) finishCapture();
+      } else {
+        stillCount = 0;
+      }
+      if (jpegBuffer.length >= MAX_FRAMES) finishCapture();
     }
   } else {
-    holdGesture = '';
-    holdCount   = 0;
-    progress.style.width = '0%';
-    pill.firstChild.textContent = '✋ Покажите руку ';
-    pill.style.borderColor = '#555';
+    // No hand visible
+    prevWrist = null;
+    if (state === 'capturing') {
+      // hand left mid-capture → finish with what we have
+      finishCapture();
+    } else if (state === 'idle') {
+      setPill('✋ Покажите руку перед камерой', '#555');
+    }
   }
 }
 
-// ─── MediaPipe Hands setup ────────────────────────────────────────────────────
+// ─── MediaPipe + Camera ───────────────────────────────────────────────────────
+let currentFacingMode = 'user';
+let activeStream = null, activeCamera = null;
+
 const hands = new Hands({
-  locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4/${file}`
+  locateFile: f => `https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4/${f}`
 });
-
 hands.setOptions({
-  selfieMode            : true,   // mirror mode
-  maxNumHands           : 1,
-  modelComplexity       : 1,
+  selfieMode: false,        // raw orientation — matches Slovo training data
+  maxNumHands: 1,
+  modelComplexity: 0,       // LITE model — ~3× faster, no freeze
   minDetectionConfidence: 0.6,
-  minTrackingConfidence : 0.5,
+  minTrackingConfidence: 0.5,
 });
-
 hands.onResults(onResults);
 
-// ─── Camera bootstrap ─────────────────────────────────────────────────────────
-const video = document.getElementById('video');
-let currentFacingMode = 'user';
-let activeStream = null;
-let activeCamera = null;
-let isMirrored = false;
-
-function updateMirroring() {
-  hands.setOptions({
-    selfieMode: isMirrored,
-  });
-  if (isMirrored) {
-    canvas.style.transform = 'scaleX(-1)';
-  } else {
-    canvas.style.transform = 'scaleX(1)';
-  }
-}
-
-function toggleMirror() {
-  isMirrored = !isMirrored;
-  updateMirroring();
-  return isMirrored;
-}
-
 function startCamera() {
-  if (activeCamera) {
-    activeCamera.stop();
-  }
-  if (activeStream) {
-    activeStream.getTracks().forEach(track => track.stop());
-  }
-
-  updateMirroring();
-
+  if (activeCamera) activeCamera.stop();
+  if (activeStream) activeStream.getTracks().forEach(t => t.stop());
   navigator.mediaDevices.getUserMedia({
     video: { facingMode: currentFacingMode, width: { ideal: 640 }, height: { ideal: 480 } },
     audio: false,
-  })
-  .then((stream) => {
+  }).then(stream => {
     activeStream = stream;
     video.srcObject = stream;
-    video.style.display = 'block';
-
     activeCamera = new Camera(video, {
-      onFrame: async () => { await hands.send({ image: video }); },
-      width : 640,
-      height: 480,
+      onFrame: async () => {
+        if (mpBusy) return;     // skip if previous inference not done — prevents backlog freeze
+        mpBusy = true;
+        await hands.send({ image: video });
+      },
+      width: 640, height: 480,
     });
     activeCamera.start();
-    pill.firstChild.textContent = '✋ Покажите руку ';
-    pill.style.borderColor = '#555';
-  })
-  .catch((err) => {
-    pill.firstChild.textContent = '❌ ' + err.message;
-    pill.style.borderColor = '#f44';
-    console.error('Camera error:', err);
+    setPill('✋ Покажите руку перед камерой', '#555');
+  }).catch(err => {
+    setPill('❌ ' + err.message, '#f44');
+    console.error(err);
   });
 }
 
 function switchCamera() {
-  currentFacingMode = (currentFacingMode === 'user') ? 'environment' : 'user';
+  currentFacingMode = currentFacingMode === 'user' ? 'environment' : 'user';
   startCamera();
-  return currentFacingMode;
 }
 
-// Initial bootstrap
+window.switchCamera = switchCamera;
 startCamera();
 </script>
 </body>

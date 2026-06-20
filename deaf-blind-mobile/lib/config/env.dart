@@ -13,11 +13,29 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 ///   flutter run --dart-define=BACKEND_URL=http://localhost:9000    (iOS sim)
 ///   flutter run --dart-define=BACKEND_URL=http://192.168.1.x:9000 (real device)
 class Env {
-  /// Injected at build time. Default covers Android emulator.
-  static const String baseUrl = String.fromEnvironment(
+  static String _resolvedBaseUrl = const String.fromEnvironment(
     'BACKEND_URL',
     defaultValue: 'http://10.0.2.2:9000',
   );
+
+  static bool _isPhysicalDevice = false;
+
+  static String get baseUrl => _resolvedBaseUrl;
+
+  static void init({required bool isPhysicalDevice}) {
+    _isPhysicalDevice = isPhysicalDevice;
+    const injected = String.fromEnvironment('BACKEND_URL');
+    if (injected.isNotEmpty) {
+      _resolvedBaseUrl = injected;
+      return;
+    }
+    // If not injected, automatically switch default based on device type
+    if (isPhysicalDevice) {
+      _resolvedBaseUrl = 'http://127.0.0.1:9000';
+    } else {
+      _resolvedBaseUrl = 'http://10.0.2.2:9000';
+    }
+  }
 
   static const String apiPrefix = '/api/v1';
 
@@ -54,7 +72,7 @@ class Env {
       return livekitUri.replace(host: backendHost).toString();
     }
 
-    if (!kIsWeb && Platform.isAndroid) {
+    if (!kIsWeb && Platform.isAndroid && !_isPhysicalDevice) {
       return fromBackend
           .replaceAll('localhost', '10.0.2.2')
           .replaceAll('127.0.0.1', '10.0.2.2');

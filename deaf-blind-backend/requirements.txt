@@ -21,4 +21,6 @@ PyJWT==2.10.1
 
 # Integrations (stubs depend on these when implemented)
 google-genai
+google-auth
+python-multipart
 # google-cloud-speech, firebase-admin — add when wiring §4/§5

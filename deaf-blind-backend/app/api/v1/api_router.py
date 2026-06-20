@@ -6,7 +6,6 @@ from app.api.v1.endpoints import (
     ai_controller,
     ai_translator,
     auth,
-    health,
     live_class,
     music,
     pronunciation,
@@ -17,7 +16,6 @@ from app.api.v1.endpoints import (
 
 api_router = APIRouter()
 
-api_router.include_router(health.router)
 api_router.include_router(auth.router)
 api_router.include_router(users.router)
 api_router.include_router(translation.router)       # §1/§6/§7 shared engine

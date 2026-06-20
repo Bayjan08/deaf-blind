@@ -1,11 +1,13 @@
 import 'package:go_router/go_router.dart';
 
-/// App routes (go_router). Screens are added per feature.
-/// Routes: /auth, /live-class, /alphabet (pet-select, level-map, lesson, exam),
-/// /music, /pronunciation, /ai-controller, /video-translation, /ai-translator.
+import '../features/deaf_school/presentation/deaf_school_shell.dart';
+
 final GoRouter appRouter = GoRouter(
   initialLocation: '/',
   routes: <RouteBase>[
-    // TODO: register feature routes.
+    GoRoute(
+      path: '/',
+      builder: (_, __) => const DeafSchoolShell(),
+    ),
   ],
 );

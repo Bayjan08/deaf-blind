@@ -33,7 +33,7 @@ def health():
     return {"status": "healthy", "env": settings.ENV}
 
 
-@app.get("/test")
+@app.get("/test_number_1")
 def test():
     """Test endpoint — shows the deployment is working."""
     return {"message": "Backend deployed and running!", "env": settings.ENV, "version": "0.1.0"}

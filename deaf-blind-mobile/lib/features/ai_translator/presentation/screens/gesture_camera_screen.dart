@@ -88,6 +88,14 @@ class _GestureCameraScreenState extends State<GestureCameraScreen> {
     }
   }
 
+  void _toggleCamera() {
+    _webController?.evaluateJavascript(source: 'switchCamera();');
+  }
+
+  void _toggleMirror() {
+    _webController?.evaluateJavascript(source: 'toggleMirror();');
+  }
+
   // ── Build ────────────────────────────────────────────────────────────────
   @override
   Widget build(BuildContext context) {
@@ -99,6 +107,16 @@ class _GestureCameraScreenState extends State<GestureCameraScreen> {
         title: Text('Распознавание жестов',
             style: AppTheme.baloo(color: Colors.white, fontSize: 17)),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.flip_camera_ios_rounded),
+            onPressed: _toggleCamera,
+            tooltip: 'Переключить камеру',
+          ),
+          IconButton(
+            icon: const Icon(Icons.swap_horiz_rounded),
+            onPressed: _toggleMirror,
+            tooltip: 'Отразить зеркально',
+          ),
           if (_capturedLabels.isNotEmpty)
             IconButton(
                 icon: const Icon(Icons.delete_outline_rounded),

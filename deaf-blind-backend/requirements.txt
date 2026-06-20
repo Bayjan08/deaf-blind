@@ -20,5 +20,6 @@ livekit-api==0.8.2
 PyJWT==2.10.1
 
 # Integrations (stubs depend on these when implemented)
-google-genai
+google-generativeai
+python-multipart
 # google-cloud-speech, firebase-admin — add when wiring §4/§5

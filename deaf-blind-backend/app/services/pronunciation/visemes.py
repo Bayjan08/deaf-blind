@@ -27,6 +27,10 @@ _CUES: dict[str, tuple[str, str]] = {
 }
 
 # viseme id -> definition. `ranges` maps metric -> [min, max] (normalized).
+# `stress_pattern` is a distinct haptic "feel" per viseme group (the only
+# blind-accessible cue) — reuses the music-vibration feature's NotePattern
+# shape. Letters that share a viseme also share its rhythm, matching how the
+# mouth-shape score already treats them as the same target.
 VISEMES: dict[str, dict] = {
     "PBM": {
         "word": "mama",
@@ -37,6 +41,11 @@ VISEMES: dict[str, dict] = {
             "lipClosure": [0.7, 1.0],
             "mouthWidth": [0.38, 0.62],
         },
+        # Press-release, press-release — two equal short pulses.
+        "stress_pattern": [
+            {"name": "press", "colorHex": 0xFFEF5350, "vibrationHz": 160.0, "durationMs": 160, "intensity": 0.85},
+            {"name": "press", "colorHex": 0xFFEF5350, "vibrationHz": 160.0, "durationMs": 160, "intensity": 0.85},
+        ],
     },
     "AA": {
         "word": "ah",
@@ -47,6 +56,10 @@ VISEMES: dict[str, dict] = {
             "jawOpen": [0.5, 1.0],
             "mouthWidth": [0.4, 0.66],
         },
+        # One long, strong, sustained pulse — open and held.
+        "stress_pattern": [
+            {"name": "open", "colorHex": 0xFFFF7043, "vibrationHz": 130.0, "durationMs": 550, "intensity": 1.0},
+        ],
     },
     "EE": {
         "word": "see",
@@ -57,6 +70,10 @@ VISEMES: dict[str, dict] = {
             "mouthWidth": [0.6, 0.92],
             "rounding": [1.5, 6.0],
         },
+        # One short, bright, high-frequency pulse.
+        "stress_pattern": [
+            {"name": "bright", "colorHex": 0xFF42A5F5, "vibrationHz": 220.0, "durationMs": 140, "intensity": 0.9},
+        ],
     },
     "OW": {
         "word": "you",
@@ -67,6 +84,10 @@ VISEMES: dict[str, dict] = {
             "mouthWidth": [0.26, 0.46],
             "rounding": [0.0, 1.2],
         },
+        # One medium, lower-frequency "round" pulse.
+        "stress_pattern": [
+            {"name": "round", "colorHex": 0xFF66BB6A, "vibrationHz": 90.0, "durationMs": 320, "intensity": 0.65},
+        ],
     },
     "FV": {
         "word": "five",
@@ -77,33 +98,38 @@ VISEMES: dict[str, dict] = {
             "mouthWidth": [0.42, 0.66],
             "lipClosure": [0.3, 0.7],
         },
+        # Three quick, light flutters — airflow texture.
+        "stress_pattern": [
+            {"name": "flutter", "colorHex": 0xFFAB47BC, "vibrationHz": 240.0, "durationMs": 70, "intensity": 0.4},
+            {"name": "flutter", "colorHex": 0xFFAB47BC, "vibrationHz": 240.0, "durationMs": 70, "intensity": 0.4},
+            {"name": "flutter", "colorHex": 0xFFAB47BC, "vibrationHz": 240.0, "durationMs": 70, "intensity": 0.4},
+        ],
     },
 }
 
-# A simple 2-beat stress cue (stronger pulse on the stressed syllable). Reuses
-# the same NotePattern shape the music-vibration feature uses on the client.
-_STRESS_PATTERN: list[dict] = [
-    {
-        "name": "stressed",
-        "colorHex": 0xFFEF5350,
-        "vibrationHz": 200.0,
-        "durationMs": 320,
-        "intensity": 1.0,
-    },
-    {
-        "name": "unstressed",
-        "colorHex": 0xFF90A4AE,
-        "vibrationHz": 120.0,
-        "durationMs": 180,
-        "intensity": 0.45,
-    },
-]
-
 DEFAULT_VISEME = "AA"
+
+# v1 scope: single Russian letters -> their viseme group (visually-distinct
+# mouth shape). Many letters share a shape, which is expected.
+LETTER_VISEMES: dict[str, str] = {
+    "А": "AA",
+    "О": "OW",
+    "У": "OW",
+    "И": "EE",
+    "Ы": "EE",
+    "Э": "AA",
+    "М": "PBM",
+    "Б": "PBM",
+    "П": "PBM",
+    "Ф": "FV",
+    "В": "FV",
+}
 
 
 def resolve(key: str) -> str:
-    """Map a lesson path param (viseme id or phoneme) to a known viseme id."""
+    """Map a lesson path param (letter, viseme id or phoneme) to a viseme id."""
+    if key in LETTER_VISEMES:
+        return LETTER_VISEMES[key]
     if key in VISEMES:
         return key
     upper = key.upper()
@@ -119,14 +145,25 @@ def lesson(key: str) -> dict:
     """Lesson payload for the client: target ranges, copy and the haptic cue."""
     vid = resolve(key)
     spec = VISEMES[vid]
+    is_letter = key in LETTER_VISEMES
     return {
         "viseme": vid,
-        "word": spec["word"],
+        "letter": key if is_letter else None,
+        # For a letter lesson, show the letter itself; otherwise the example word.
+        "word": key if is_letter else spec["word"],
         "phoneme": spec["phoneme"],
         "instructions": spec["instructions"],
         "target_metrics": spec["ranges"],
-        "stress_pattern": _STRESS_PATTERN,
+        "stress_pattern": spec["stress_pattern"],
     }
+
+
+def letters() -> list[dict]:
+    """The catalogue of practiceable letters (v1 alphabet scope)."""
+    return [
+        {"letter": ltr, "viseme": vid, "example": VISEMES[vid]["word"]}
+        for ltr, vid in LETTER_VISEMES.items()
+    ]
 
 
 def score(target_viseme: str, metrics: dict[str, float]) -> dict:

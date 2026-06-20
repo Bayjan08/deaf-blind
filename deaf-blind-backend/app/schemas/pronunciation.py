@@ -13,6 +13,7 @@ class StressBeat(ORMModel):
 
 class PronunciationLesson(ORMModel):
     viseme: str
+    letter: str | None = None
     word: str
     phoneme: str
     instructions: str
@@ -21,13 +22,15 @@ class PronunciationLesson(ORMModel):
     stress_pattern: list[StressBeat]
 
 
-class MouthAttemptRequest(ORMModel):
-    """Derived mouth metrics for one attempt. No face video is ever sent."""
-    target_viseme: str
-    metrics: dict[str, float]
+class LetterEntry(ORMModel):
+    letter: str
+    viseme: str
+    example: str
 
 
 class PronunciationFeedback(ORMModel):
     target_viseme: str
     feedback_text: str
     cues: list[str] = []
+    audio_url: str | None = None
+    ai_feedback_text: str | None = None

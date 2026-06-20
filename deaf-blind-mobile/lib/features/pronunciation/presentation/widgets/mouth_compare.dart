@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/ml/face_landmark_models.dart';
+import '../../../../core/ml/mouth_metrics.dart';
 import '../../../../core/theme/design_colors.dart';
 
 /// §4.4 Side-by-side stylized mouths: the target shape vs the learner's best

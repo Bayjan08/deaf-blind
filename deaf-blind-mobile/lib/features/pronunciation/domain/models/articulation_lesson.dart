@@ -13,9 +13,11 @@ class ArticulationLesson {
     required this.instructions,
     required this.targetMetrics,
     required this.stressPattern,
+    this.letter,
   });
 
   final String viseme;
+  final String? letter;
   final String word;
   final String phoneme;
   final String instructions;
@@ -39,6 +41,7 @@ class ArticulationLesson {
         .toList();
     return ArticulationLesson(
       viseme: json['viseme'] as String,
+      letter: json['letter'] as String?,
       word: json['word'] as String? ?? '',
       phoneme: json['phoneme'] as String? ?? '',
       instructions: json['instructions'] as String? ?? '',

@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_colors.dart';
@@ -388,10 +389,7 @@ class SubjectsScreen extends StatelessWidget {
                 borderRadius: BorderRadius.circular(20),
               ),
               alignment: Alignment.center,
-              child: Text(
-                'Аа',
-                style: AppTextStyles.style(fontSize: 28, fontWeight: FontWeight.w800, color: Colors.white),
-              ),
+              child: const Icon(CupertinoIcons.textformat_abc, color: Colors.white, size: 30),
             ),
             title: 'Алфавит жестами',
             subtitle: 'Игра с питомцем · 4 уровня',
@@ -410,24 +408,7 @@ class SubjectsScreen extends StatelessWidget {
                 borderRadius: BorderRadius.circular(20),
               ),
               alignment: Alignment.center,
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  Text(
-                    '5',
-                    style: AppTextStyles.style(
-                      fontSize: 32,
-                      fontWeight: FontWeight.w800,
-                      color: Colors.white,
-                    ),
-                  ),
-                  Positioned(
-                    bottom: 8,
-                    right: 8,
-                    child: Text('🧱', style: TextStyle(fontSize: 14)),
-                  ),
-                ],
-              ),
+              child: const Icon(CupertinoIcons.textformat_123, color: Colors.white, size: 30),
             ),
             title: 'Математика',
             subtitle: 'Числа · счёт · задачи · 5 уровней',
@@ -464,7 +445,7 @@ class SubjectsScreen extends StatelessWidget {
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(14),
                   ),
-                  child: const Icon(Icons.music_note_rounded, color: AppColors.textPrimary, size: 20),
+                  child: const Icon(CupertinoIcons.music_note, color: AppColors.textPrimary, size: 20),
                 ),
               ),
             ),
@@ -494,7 +475,7 @@ class SubjectsScreen extends StatelessWidget {
                 color: const Color(0xFFFFF0E9),
                 borderRadius: BorderRadius.circular(20),
               ),
-              child: const Icon(Icons.chat_bubble_outline_rounded, color: AppColors.primary, size: 30),
+              child: const Icon(CupertinoIcons.chat_bubble_text, color: AppColors.primary, size: 30),
             ),
             title: 'Произношение',
             subtitle: 'Артикуляция звуков · необязательно',

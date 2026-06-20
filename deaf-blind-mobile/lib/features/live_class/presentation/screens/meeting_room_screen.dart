@@ -43,6 +43,14 @@ class _MeetingRoomScreenState extends ConsumerState<MeetingRoomScreen> {
     if (mounted) widget.onExit();
   }
 
+  Future<void> _exitAfterError() async {
+    try {
+      await ref.read(meetingRepositoryProvider).leaveMeeting(widget.connection.meeting.id);
+    } catch (_) {}
+    await ref.read(meetingRoomControllerProvider).disconnect();
+    if (mounted) widget.onExit();
+  }
+
   Future<void> _endMeeting() async {
     final confirmed = await showDialog<bool>(
       context: context,
@@ -85,7 +93,7 @@ class _MeetingRoomScreenState extends ConsumerState<MeetingRoomScreen> {
             (controller.phase == MeetingRoomPhase.disconnected
                 ? 'Встреча завершена'
                 : 'Ошибка подключения'),
-        onBack: widget.onExit,
+        onBack: _exitAfterError,
       );
     }
 

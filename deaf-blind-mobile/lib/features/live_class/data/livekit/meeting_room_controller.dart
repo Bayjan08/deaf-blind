@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io' show Platform;
 
 import 'package:flutter/foundation.dart';
@@ -6,6 +7,7 @@ import 'package:permission_handler/permission_handler.dart';
 
 import '../../domain/models/meeting.dart';
 import '../../domain/models/meeting_room_phase.dart';
+import '../mappers/meeting_error_mapper.dart';
 import 'meeting_room_listener.dart';
 
 /// Manages LiveKit room connection, tracks, and in-call controls.
@@ -69,8 +71,11 @@ class MeetingRoomController extends ChangeNotifier {
       );
       _roomListener = MeetingRoomListener(this)..attach(_room!);
 
-      await _room!.prepareConnection(connection.livekitUrl, connection.token);
-      await _room!.connect(connection.livekitUrl, connection.token);
+      final livekitUrl = connection.livekitUrl;
+      debugPrint('[LiveKit] connecting to $livekitUrl room=${connection.meeting.id}');
+
+      await _room!.prepareConnection(livekitUrl, connection.token);
+      await _room!.connect(livekitUrl, connection.token);
 
       // Mic and camera are enabled independently — camera often fails on iOS
       // Simulator even when permissions are granted (LiveKit SDK note).
@@ -108,8 +113,9 @@ class MeetingRoomController extends ChangeNotifier {
       notifyListeners();
     } catch (e) {
       _phase = MeetingRoomPhase.error;
-      _errorMessage = 'Не удалось подключиться: $e';
+      _errorMessage = MeetingErrorMapper.fromLivekit(e.toString());
       notifyListeners();
+      await _safeDisconnect();
     }
   }
 
@@ -122,7 +128,7 @@ class MeetingRoomController extends ChangeNotifier {
 
   void onDisconnected(String reason) {
     _phase = MeetingRoomPhase.disconnected;
-    _errorMessage = reason;
+    _errorMessage = MeetingErrorMapper.fromLivekit(reason);
     notifyListeners();
   }
 
@@ -218,7 +224,7 @@ class MeetingRoomController extends ChangeNotifier {
   }
 
   Future<void> disconnect() async {
-    await _room?.disconnect();
+    await _safeDisconnect();
     _roomListener?.dispose();
     _roomListener = null;
     _room = null;
@@ -226,10 +232,24 @@ class MeetingRoomController extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> _safeDisconnect() async {
+    final room = _room;
+    if (room == null) return;
+    try {
+      await room.disconnect().timeout(const Duration(seconds: 3));
+    } catch (e) {
+      debugPrint('[LiveKit] disconnect ignored: $e');
+    }
+  }
+
   @override
   void dispose() {
     _roomListener?.dispose();
-    _room?.disconnect();
+    final room = _room;
+    _room = null;
+    if (room != null) {
+      unawaited(_safeDisconnect());
+    }
     super.dispose();
   }
 }

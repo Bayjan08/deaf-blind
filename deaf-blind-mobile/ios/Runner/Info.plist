@@ -7,7 +7,17 @@
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Микрофон нужен для видеоуроков в классе и распознавания речи.</string>
 	<key>NSLocalNetworkUsageDescription</key>
-	<string>Локальная сеть нужна для видеозвонков с LiveKit.</string>
+	<string>Локальная сеть нужна для видеозвонков с LiveKit и связи с локальным сервером.</string>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<!-- Allow plain HTTP to the local dev backend (LAN IP / localhost).
+		     Required because the dev server runs over http://, not https://.
+		     Remove or tighten before shipping to production. -->
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
+	</dict>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>

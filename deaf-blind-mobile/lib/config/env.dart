@@ -4,18 +4,24 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 
 /// Environment configuration — injected at build time via --dart-define.
 ///
-/// Android emulator → host machine is 10.0.2.2 (NOT localhost)
-/// iOS Simulator   → host machine is localhost
-/// Physical device → use your Mac's LAN IP, e.g. 192.168.1.x
+/// How each device reaches the LOCAL backend (uvicorn on the Mac, port 9000):
+///   Android emulator → 10.0.2.2      (special host alias inside the emulator)
+///   iOS Simulator    → 127.0.0.1     (simulator shares the Mac's network stack)
+///   Physical iPhone  → Mac LAN IP    (e.g. 192.168.0.140) + SAME WiFi network
 ///
-/// Usage:
-///   flutter run --dart-define=BACKEND_URL=http://10.0.2.2:9000   (Android emu)
-///   flutter run --dart-define=BACKEND_URL=http://localhost:9000    (iOS sim)
-///   flutter run --dart-define=BACKEND_URL=http://192.168.1.x:9000 (real device)
+/// The backend MUST be started bound to all interfaces so the phone can reach it:
+///   uvicorn main:app --reload --host 0.0.0.0 --port 9000
+///
+/// Override at build time (works on any device / any network):
+///   flutter run --dart-define=BACKEND_URL=http://192.168.0.140:9000
 class Env {
+  /// Your Mac's current LAN IP. Update this if your WiFi network/IP changes
+  /// (check with: `ipconfig getifaddr en0`).
+  static const String _macLanIp = '192.168.0.140';
+
   static String _resolvedBaseUrl = const String.fromEnvironment(
     'BACKEND_URL',
-    defaultValue: 'http://10.0.2.2:9000',
+    defaultValue: 'http://$_macLanIp:9000',
   );
 
   static bool _isPhysicalDevice = false;
@@ -29,18 +35,17 @@ class Env {
       _resolvedBaseUrl = injected;
       return;
     }
-    // If not injected, automatically switch default based on device type + platform
+    // No override — pick the right host automatically for the running device.
     if (isPhysicalDevice) {
-      // Physical device — user must supply BACKEND_URL via --dart-define
-      _resolvedBaseUrl = 'http://192.168.0.158:9000';
+      // Physical iPhone/Android: localhost would mean the phone itself.
+      // Must hit the Mac over the LAN (phone + Mac on the same WiFi).
+      _resolvedBaseUrl = 'http://$_macLanIp:9000';
     } else if (!kIsWeb && Platform.isAndroid) {
-      // Android emulator: host machine is reachable via 10.0.2.2
+      // Android emulator: the host Mac is reachable via 10.0.2.2.
       _resolvedBaseUrl = 'http://10.0.2.2:9000';
     } else {
-      // iOS Simulator (Xcode 14+ on Apple Silicon uses Virtualization.framework —
-      // its 127.0.0.1 is the VM's own loopback, not the Mac host).
-      // Use the Mac's LAN IP so the simulator can reach the host backend.
-      _resolvedBaseUrl = 'http://192.168.0.140:9000';
+      // iOS Simulator / macOS: shares the Mac's network — localhost is the Mac.
+      _resolvedBaseUrl = 'http://127.0.0.1:9000';
     }
   }
 

@@ -9,6 +9,11 @@ enum AppScreen {
   musicNotes,
   musicGame,
   pronunciation,
+  mathMap,
+  mathIntro,
+  mathPractice,
+  mathSuccess,
+  classLobby,
   liveclass,
   profile,
 }
@@ -27,9 +32,14 @@ NavTab navTabForScreen(AppScreen screen) {
     AppScreen.musicNotes,
     AppScreen.musicGame,
     AppScreen.pronunciation,
+    AppScreen.mathMap,
+    AppScreen.mathIntro,
+    AppScreen.mathPractice,
+    AppScreen.mathSuccess,
   };
   return switch (screen) {
     AppScreen.home => NavTab.home,
+    AppScreen.classLobby => NavTab.class_,
     AppScreen.liveclass => NavTab.class_,
     AppScreen.profile => NavTab.profile,
     _ when subjectScreens.contains(screen) => NavTab.subjects,
@@ -38,7 +48,11 @@ NavTab navTabForScreen(AppScreen screen) {
 }
 
 bool showBottomNav(AppScreen screen) =>
-    screen != AppScreen.alphabetPractice && screen != AppScreen.liveclass;
+    screen != AppScreen.alphabetPractice &&
+    screen != AppScreen.mathPractice &&
+    screen != AppScreen.liveclass;
 
 bool showAiFab(AppScreen screen) =>
-    screen != AppScreen.alphabetPractice && screen != AppScreen.liveclass;
+    screen != AppScreen.alphabetPractice &&
+    screen != AppScreen.mathPractice &&
+    screen != AppScreen.liveclass;

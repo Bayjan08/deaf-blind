@@ -352,12 +352,14 @@ class SubjectsScreen extends StatelessWidget {
     required this.onMathMap,
     required this.onMusicNotes,
     required this.onPronunciation,
+    required this.onFlashcards,
   });
 
   final VoidCallback onAlphabetMap;
   final VoidCallback onMathMap;
   final VoidCallback onMusicNotes;
   final VoidCallback onPronunciation;
+  final VoidCallback onFlashcards;
 
   @override
   Widget build(BuildContext context) {
@@ -454,6 +456,25 @@ class SubjectsScreen extends StatelessWidget {
             badge: '7 нот',
             badgeBg: const Color(0xFFF0F6FF),
             badgeColor: const Color(0xFF4D8BFF),
+          ),
+          const SizedBox(height: 14),
+          _SubjectCard(
+            onTap: onFlashcards,
+            icon: Container(
+              width: 64,
+              height: 64,
+              decoration: BoxDecoration(
+                color: const Color(0xFF6BCB77),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              alignment: Alignment.center,
+              child: const Icon(CupertinoIcons.rectangle_stack, color: Colors.white, size: 30),
+            ),
+            title: 'Карточки жестов',
+            subtitle: 'Учи жесты в игровом формате',
+            badge: '25 карточек',
+            badgeBg: const Color(0xFFEAF8EC),
+            badgeColor: const Color(0xFF6BCB77),
           ),
           const SizedBox(height: 26),
           Text(

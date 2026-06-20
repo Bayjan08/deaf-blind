@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../ai_translator/presentation/screens/gesture_camera_screen.dart';
+import '../../flashcards/flashcards.dart';
 import '../../live_class/live_class.dart';
 import '../../pronunciation/pronunciation.dart';
 import 'models/music_note.dart';
@@ -143,6 +144,7 @@ class _DeafSchoolShellState extends State<DeafSchoolShell> {
           onMathMap: () => _go(AppScreen.mathMap),
           onMusicNotes: () => _go(AppScreen.musicNotes),
           onPronunciation: () => _go(AppScreen.pronunciation),
+          onFlashcards: () => _go(AppScreen.flashcards),
         ),
       AppScreen.alphabetMap => AlphabetMapScreen(
           onBack: () => _go(AppScreen.subjects),
@@ -200,6 +202,9 @@ class _DeafSchoolShellState extends State<DeafSchoolShell> {
             if (next != null) _openMathNode(next);
           },
           hasNext: nextMathNodeId(_activeMathNodeId) != null,
+        ),
+      AppScreen.flashcards => FlashcardsScreen(
+          onBack: () => _go(AppScreen.subjects),
         ),
       AppScreen.classLobby => MeetingLobbyScreen(
           onEnterMeeting: (connection) {

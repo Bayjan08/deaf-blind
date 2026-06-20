@@ -4,5 +4,9 @@ import '../../../core/network/api_client.dart';
 class AcademyRemoteSource {
   AcademyRemoteSource(this._api);
   final ApiClient _api;
-  Future<List<dynamic>> getLevels() async => throw UnimplementedError();
+
+  Future<List<dynamic>> getLevels() async {
+    final res = await _api.dio.get('/academy/levels');
+    return res.data as List<dynamic>;
+  }
 }

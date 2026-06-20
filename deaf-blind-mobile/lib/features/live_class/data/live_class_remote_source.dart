@@ -4,5 +4,9 @@ import '../../../core/network/api_client.dart';
 class LiveClassRemoteSource {
   LiveClassRemoteSource(this._api);
   final ApiClient _api;
-  Future<Map<String, dynamic>> createSession() async => throw UnimplementedError();
+
+  Future<Map<String, dynamic>> createSession() async {
+    final res = await _api.dio.post('/live-class/sessions');
+    return res.data as Map<String, dynamic>;
+  }
 }

@@ -13,7 +13,9 @@ env/
 # OS / editor
 .DS_Store
 .idea/
-.vscode/
+# Keep .vscode/tasks.json committed so the team shares run tasks
+.vscode/*
+!.vscode/tasks.json
 
 # Mobile (adjust to your stack)
 node_modules/

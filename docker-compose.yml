@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./deaf-blind-backend
+      dockerfile: Dockerfile
+    ports:
+      - "9000:9000"
+    environment:
+      ENV: dev
+      PORT: 9000
+    volumes:
+      - ./deaf-blind-backend:/app
+    command: uvicorn main:app --host 0.0.0.0 --port 9000 --reload
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
+  # Uncomment when mobile app is ready
+  # mobile:
+  #   build:
+  #     context: ./deaf-blind-mobile
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - "8081:8081"  # or whatever port your mobile dev server uses
+  #   environment:
+  #     BACKEND_URL: http://backend:9000
+  #   volumes:
+  #     - ./deaf-blind-mobile:/app

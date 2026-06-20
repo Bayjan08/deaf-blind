@@ -6,7 +6,7 @@ import '../../domain/models/meeting.dart';
 
 /// Local cache for recent meetings (offline / fallback).
 class RecentMeetingsCache {
-  RecentMeetingsCache({SharedPreferences? prefs}) : _prefs = prefs;
+  RecentMeetingsCache([this._prefs]);
 
   SharedPreferences? _prefs;
   static const _key = 'recent_meetings_v1';

@@ -57,6 +57,11 @@ class MeetingVideoStage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (room == null) {
+      return const Center(
+        child: CircularProgressIndicator(),
+      );
+    }
     final screenTrack = screenShareTrack(room);
     final oneToOne = remotes.length <= 1;
 

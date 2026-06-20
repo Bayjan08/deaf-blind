@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/design_colors.dart';
+import '../../../ai_translator/presentation/screens/ai_translator_screen.dart';
 import '../models/music_note.dart';
 
 class NoteOverlay extends StatelessWidget {
@@ -120,7 +121,7 @@ class _RingState extends State<_Ring> with SingleTickerProviderStateMixin {
   Widget build(BuildContext context) {
     return AnimatedBuilder(
       animation: _controller,
-      builder: (_, __) {
+      builder: (context, child) {
         final t = _controller.value;
         return Transform.scale(
           scale: 0.4 + t * 1.1,
@@ -143,9 +144,14 @@ class _RingState extends State<_Ring> with SingleTickerProviderStateMixin {
 }
 
 class TranslatorOverlay extends StatelessWidget {
-  const TranslatorOverlay({super.key, required this.onClose});
+  const TranslatorOverlay({
+    super.key,
+    required this.onClose,
+    this.onGestureToText,
+  });
 
   final VoidCallback onClose;
+  final VoidCallback? onGestureToText;
 
   @override
   Widget build(BuildContext context) {
@@ -244,6 +250,15 @@ class TranslatorOverlay extends StatelessWidget {
                   icon: Icons.mic_rounded,
                   title: 'Голос → жесты',
                   subtitle: 'Говорите — аватар покажет жесты',
+                  onTap: () {
+                    onClose();
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const AiTranslatorScreen(initialMode: 0),
+                      ),
+                    );
+                  },
                 ),
                 const SizedBox(height: 10),
                 _TranslatorOption(
@@ -253,6 +268,7 @@ class TranslatorOverlay extends StatelessWidget {
                   icon: Icons.videocam_rounded,
                   title: 'Жесты → текст',
                   subtitle: 'Камера распознаёт ваши жесты',
+                  onTap: onGestureToText,
                 ),
                 const SizedBox(height: 10),
                 _TranslatorOption(
@@ -262,6 +278,15 @@ class TranslatorOverlay extends StatelessWidget {
                   icon: Icons.text_fields_rounded,
                   title: 'Ввести текст',
                   subtitle: 'Напечатайте — переведём в жесты',
+                  onTap: () {
+                    onClose();
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const AiTranslatorScreen(initialMode: 2),
+                      ),
+                    );
+                  },
                 ),
               ],
             ),
@@ -280,6 +305,7 @@ class _TranslatorOption extends StatelessWidget {
     required this.icon,
     required this.title,
     required this.subtitle,
+    this.onTap,
   });
 
   final Color bg;
@@ -288,10 +314,13 @@ class _TranslatorOption extends StatelessWidget {
   final IconData icon;
   final String title;
   final String subtitle;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: bg,
@@ -335,6 +364,7 @@ class _TranslatorOption extends StatelessWidget {
           ),
         ],
       ),
+    ),
     );
   }
 }

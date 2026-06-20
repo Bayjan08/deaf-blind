@@ -388,7 +388,7 @@ class _AnimatedRingState extends State<_AnimatedRing>
   Widget build(BuildContext context) {
     return AnimatedBuilder(
       animation: _c,
-      builder: (_, __) {
+      builder: (context, child) {
         final t = _c.value;
         return Transform.scale(
           scale: 0.4 + t * 1.1,
@@ -884,7 +884,7 @@ class _LiveDotState extends State<_LiveDot> with SingleTickerProviderStateMixin 
   Widget build(BuildContext context) {
     return AnimatedBuilder(
       animation: _c,
-      builder: (_, __) {
+      builder: (context, child) {
         final t = _c.value;
         return Container(
           width: 7,

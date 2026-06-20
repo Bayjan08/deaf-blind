@@ -1,8 +1,8 @@
 """§5 Turn the analytics summary into recommendations via the Gemini LLM.
 
-Degrades gracefully: if Gemini isn't configured (no GEMINI_API_KEY) or there's
-no attempt history yet, we fall back to deterministic suggestions drawn from the
-viseme catalogue so the dashboard always returns something useful.
+Degrades gracefully: if Gemini isn't configured (no VERTEX_SERVICE_ACCOUNT/ADC) or
+there's no attempt history yet, we fall back to deterministic suggestions drawn
+from the viseme catalogue so the dashboard always returns something useful.
 """
 from __future__ import annotations
 
@@ -11,6 +11,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.integrations.gemini_client import GeminiClient
 from app.services.ai_controller import analytics
 from app.services.pronunciation import visemes
+
+_SYSTEM_PROMPT = """
+Ты — AI-наставник для школы жестового языка для глухих и слабослышащих.
+Анализируй прогресс ученика и давай конкретные, мотивирующие рекомендации на русском языке.
+Будь кратким (2-3 пункта), говори как добрый учитель.
+""".strip()
 
 
 async def recommend(db: AsyncSession, student_id: str) -> dict:
@@ -25,7 +31,7 @@ async def recommend(db: AsyncSession, student_id: str) -> dict:
     # Try Gemini for a friendlier summary + example sentences; never block on it.
     if weak:
         try:
-            text = await GeminiClient().summarize(_prompt(perf))
+            text = await GeminiClient().generate(_prompt(perf), system_instruction=_SYSTEM_PROMPT)
             if text and text.strip():
                 summary = text.strip()
         except Exception:

@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/design_colors.dart';
+import '../../ai_translator/presentation/screens/gesture_camera_screen.dart';
 import '../../live_class/live_class.dart';
 import '../../pronunciation/pronunciation.dart';
 import 'models/music_note.dart';
 import 'app_screen.dart';
 import 'screens/alphabet_screens.dart';
 import 'screens/home_subjects_map.dart';
+import 'screens/math_screens.dart';
 import 'screens/other_screens.dart';
+import 'models/math_content.dart';
 import 'widgets/bottom_nav_bar.dart';
 import 'widgets/overlays.dart';
 
@@ -26,6 +29,9 @@ class _DeafSchoolShellState extends State<DeafSchoolShell> {
   bool _showTranslator = false;
   String? _gamePick;
   MeetingConnection? _activeMeeting;
+  String _activeMathNodeId = 'L1_N0';
+  final Set<String> _mathCompletedIds = {};
+  final Set<String> _mathUnlockedIds = {'L1_N0'};
 
   void _go(AppScreen screen) {
     setState(() {
@@ -45,6 +51,24 @@ class _DeafSchoolShellState extends State<DeafSchoolShell> {
       if (mounted) setState(() => _practice = PracticeState.success);
     });
   }
+
+  void _completeMathNode() {
+    setState(() {
+      _mathCompletedIds.add(_activeMathNodeId);
+      final next = nextMathNodeId(_activeMathNodeId);
+      if (next != null) _mathUnlockedIds.add(next);
+      _screen = AppScreen.mathSuccess;
+    });
+  }
+
+  void _openMathNode(String id) {
+    setState(() {
+      _activeMathNodeId = id;
+      _screen = AppScreen.mathIntro;
+    });
+  }
+
+  MathNode? get _activeMathNode => mathNodeById(_activeMathNodeId);
 
   @override
   Widget build(BuildContext context) {
@@ -93,6 +117,14 @@ class _DeafSchoolShellState extends State<DeafSchoolShell> {
               Positioned.fill(
                 child: TranslatorOverlay(
                   onClose: () => setState(() => _showTranslator = false),
+                  onGestureToText: () {
+                    setState(() => _showTranslator = false);
+                    Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => const GestureCameraScreen(),
+                      ),
+                    );
+                  },
                 ),
               ),
           ],
@@ -110,6 +142,7 @@ class _DeafSchoolShellState extends State<DeafSchoolShell> {
         ),
       AppScreen.subjects => SubjectsScreen(
           onAlphabetMap: () => _go(AppScreen.alphabetMap),
+          onMathMap: () => _go(AppScreen.mathMap),
           onMusicNotes: () => _go(AppScreen.musicNotes),
           onPronunciation: () => _go(AppScreen.pronunciation),
         ),
@@ -143,6 +176,34 @@ class _DeafSchoolShellState extends State<DeafSchoolShell> {
         ),
       AppScreen.pronunciation => PronunciationLessonScreen(
           onBack: () => _go(AppScreen.subjects),
+        ),
+      AppScreen.mathMap => MathMapScreen(
+          onBack: () => _go(AppScreen.subjects),
+          onNodeTap: _openMathNode,
+          completedIds: _mathCompletedIds,
+          unlockedIds: _mathUnlockedIds,
+          currentId: _activeMathNodeId,
+        ),
+      AppScreen.mathIntro => MathIntroScreen(
+          node: _activeMathNode!,
+          onBack: () => _go(AppScreen.mathMap),
+          onPractice: () => _go(AppScreen.mathPractice),
+        ),
+      AppScreen.mathPractice => MathPracticeScreen(
+          node: _activeMathNode!,
+          onBack: () => _go(AppScreen.mathIntro),
+          onComplete: _completeMathNode,
+        ),
+      AppScreen.mathSuccess => MathSuccessScreen(
+          node: _activeMathNode!,
+          completedCount: _mathCompletedIds.length,
+          totalCount: buildMathCatalog().length,
+          onMap: () => _go(AppScreen.mathMap),
+          onNext: () {
+            final next = nextMathNodeId(_activeMathNodeId);
+            if (next != null) _openMathNode(next);
+          },
+          hasNext: nextMathNodeId(_activeMathNodeId) != null,
         ),
       AppScreen.classLobby => MeetingLobbyScreen(
           onEnterMeeting: (connection) {

@@ -1,19 +1,88 @@
-"""Gemini LLM client (§5 AI controller recommendations, optional translation assist)."""
-from google import genai
+"""Vertex AI / Gemini client — mirrors cistech's production pattern.
+
+Auth resolution (same as cistech vertex_auth.py):
+  Local dev  → VERTEX_SERVICE_ACCOUNT points to credentials/vertex-service-account.json
+  Cloud Run  → Application Default Credentials (ADC) from the attached service account
+               No key file needed — GCP handles it automatically.
+
+Usage:
+    client = GeminiClient()
+    text = await client.generate("Analyse this student's performance...",
+                                  system_instruction="You are a helpful tutor.")
+"""
+from __future__ import annotations
+
+import asyncio
+import logging
+import os
+from typing import Optional
+
 from app.core.config import settings
+
+logger = logging.getLogger(__name__)
+
 
 class GeminiClient:
     def __init__(self) -> None:
-        if not settings.GEMINI_API_KEY:
-            raise ValueError(
-                "GEMINI_API_KEY is not configured. Please add it to your .env file."
-            )
-        self.client = genai.Client(api_key=settings.GEMINI_API_KEY)
+        import vertexai
+        from vertexai.generative_models import GenerativeModel  # noqa: F401 (import check)
 
-    async def summarize(self, prompt: str) -> str:
-        """Send a prompt to Gemini and return the text response asynchronously."""
-        response = await self.client.aio.models.generate_content(
-            model='gemini-2.5-flash',
-            contents=prompt,
+        credentials = _load_vertex_credentials()
+        vertexai.init(
+            project=settings.GCP_PROJECT_ID,
+            location=settings.GCP_LOCATION,
+            credentials=credentials,
         )
-        return response.text
+        self._model_name = settings.GEMINI_MODEL
+        logger.info(
+            "GeminiClient: Vertex AI | project=%s location=%s model=%s credentials=%s",
+            settings.GCP_PROJECT_ID,
+            settings.GCP_LOCATION,
+            self._model_name,
+            "service-account-file" if credentials else "ADC",
+        )
+
+    async def generate(self, prompt: str, system_instruction: Optional[str] = None) -> str:
+        """Send a prompt to Gemini and return the text response."""
+        from vertexai.generative_models import GenerationConfig, GenerativeModel
+
+        model = (
+            GenerativeModel(self._model_name, system_instruction=system_instruction)
+            if system_instruction
+            else GenerativeModel(self._model_name)
+        )
+        response = await asyncio.to_thread(
+            model.generate_content,
+            prompt,
+            generation_config=GenerationConfig(temperature=0.3),
+        )
+        try:
+            return response.text or ""
+        except ValueError:
+            # Blocked by safety filter
+            return ""
+
+
+def _load_vertex_credentials():
+    """Return explicit service-account credentials, or None to use ADC.
+
+    Mirrors cistech's vertex_auth.load_vertex_credentials():
+    - If VERTEX_SERVICE_ACCOUNT points to an existing file → load it.
+    - Otherwise → return None so vertexai.init() falls back to ADC
+      (which Cloud Run provides automatically via the attached service account).
+    """
+    cred_path = settings.VERTEX_SERVICE_ACCOUNT
+    if not cred_path or not os.path.exists(cred_path):
+        return None
+    try:
+        from google.oauth2 import service_account
+
+        creds = service_account.Credentials.from_service_account_file(
+            cred_path,
+            scopes=["https://www.googleapis.com/auth/cloud-platform"],
+        )
+        logger.info("Vertex AI: loaded service-account key from %s", cred_path)
+        return creds
+    except Exception as exc:
+        logger.warning("Failed to load Vertex credentials from %s: %s — falling back to ADC", cred_path, exc)
+        return None

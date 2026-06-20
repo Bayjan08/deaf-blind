@@ -37,7 +37,26 @@ class MeetingErrorMapper {
     if (msg.contains('SocketException') || msg.contains('connection')) {
       return 'Не удалось подключиться к серверу';
     }
-    return 'Ошибка: $error';
+    return fromLivekit(msg);
+  }
+
+  /// Maps LiveKit [DisconnectReason] / connection errors to Russian UX copy.
+  static String fromLivekit(String raw) {
+    if (raw.contains('joinFailure') || raw.contains('JoinFailure')) {
+      return 'Не удалось подключиться к видеосерверу. '
+          'Проверьте, что LiveKit запущен (docker compose up) и '
+          'LIVEKIT_URL указывает на ваш Mac (не localhost на физическом iPhone).';
+    }
+    if (raw.contains('duplicate') || raw.contains('Duplicate')) {
+      return 'Вы уже подключены к этой встрече с другого устройства';
+    }
+    if (raw.contains('Timeout') || raw.contains('timeout')) {
+      return 'Превышено время ожидания видеосервера';
+    }
+    if (raw.startsWith('DisconnectReason.')) {
+      return 'Соединение прервано';
+    }
+    return raw.startsWith('Ошибка:') ? raw : 'Ошибка: $raw';
   }
 
   static String _detailMessage(Object? data) {

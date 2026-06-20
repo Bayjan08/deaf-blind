@@ -6,6 +6,8 @@
 	<string>Камера нужна для видеоуроков в классе.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Микрофон нужен для видеоуроков в классе.</string>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>Локальная сеть нужна для видеозвонков с LiveKit.</string>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>

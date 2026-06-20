@@ -40,12 +40,29 @@ class Env {
 
   static String resolveLivekitUrl(String fromBackend) {
     if (livekitUrlOverride.isNotEmpty) return livekitUrlOverride;
-    // Backend returns ws://localhost:7880; on Android emulator that must be 10.0.2.2.
+
+    final backendUri = Uri.tryParse(baseUrl);
+    final livekitUri = Uri.tryParse(fromBackend);
+    if (backendUri == null || livekitUri == null) return fromBackend;
+
+    // Use the same host as BACKEND_URL so LiveKit is reachable from the device
+    // (physical iPhone cannot use localhost; Android emulator needs 10.0.2.2).
+    final backendHost = backendUri.host;
+    if (backendHost.isNotEmpty &&
+        backendHost != 'localhost' &&
+        backendHost != '127.0.0.1') {
+      return livekitUri.replace(host: backendHost).toString();
+    }
+
     if (!kIsWeb && Platform.isAndroid) {
       return fromBackend
           .replaceAll('localhost', '10.0.2.2')
           .replaceAll('127.0.0.1', '10.0.2.2');
     }
-    return fromBackend;
+
+    // iOS/macOS: prefer IPv4 loopback — WebSocket/WebRTC can fail on ::1.
+    return fromBackend
+        .replaceAll('localhost', '127.0.0.1')
+        .replaceAll('[::1]', '127.0.0.1');
   }
 }

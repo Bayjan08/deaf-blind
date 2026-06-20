@@ -32,6 +32,8 @@ def upgrade() -> None:
         sa.Column("metrics", sa.JSON(), nullable=False),
         sa.Column("coarse_score", sa.Float(), nullable=False, server_default="0"),
         sa.Column("feedback_text", sa.String(length=400), nullable=False, server_default=""),
+        sa.Column("audio_url", sa.String(length=512), nullable=True),
+        sa.Column("ai_feedback_text", sa.String(length=800), nullable=True),
         sa.Column(
             "created_at",
             sa.DateTime(timezone=True),

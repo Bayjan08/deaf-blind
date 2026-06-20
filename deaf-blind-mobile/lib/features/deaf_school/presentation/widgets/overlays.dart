@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/haptics/haptic_service.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/design_colors.dart';
 import '../../../ai_translator/presentation/screens/ai_translator_screen.dart';
 import '../models/music_note.dart';
 
-class NoteOverlay extends StatelessWidget {
+class NoteOverlay extends StatefulWidget {
   const NoteOverlay({
     super.key,
     required this.note,
@@ -16,40 +17,59 @@ class NoteOverlay extends StatelessWidget {
   final VoidCallback onDismiss;
 
   @override
+  State<NoteOverlay> createState() => _NoteOverlayState();
+}
+
+class _NoteOverlayState extends State<NoteOverlay> {
+  final HapticService _haptics = const VibrationHapticService();
+
+  @override
+  void initState() {
+    super.initState();
+    _play();
+  }
+
+  void _play() => _haptics.playPattern(widget.note.pattern);
+
+  @override
   Widget build(BuildContext context) {
+    final note = widget.note;
     return GestureDetector(
-      onTap: onDismiss,
+      onTap: widget.onDismiss,
       child: Container(
         color: note.color,
         child: Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              SizedBox(
-                width: 200,
-                height: 200,
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    ...List.generate(3, (i) => _Ring(delay: i * 0.5)),
-                    Container(
-                      width: 120,
-                      height: 120,
-                      decoration: const BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
-                      ),
-                      alignment: Alignment.center,
-                      child: Text(
-                        note.name,
-                        style: AppTheme.baloo(
-                          fontSize: 52,
-                          fontWeight: FontWeight.w800,
-                          color: note.color,
+              GestureDetector(
+                onTap: _play,
+                child: SizedBox(
+                  width: 200,
+                  height: 200,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      ...List.generate(3, (i) => _Ring(delay: i * 0.5)),
+                      Container(
+                        width: 120,
+                        height: 120,
+                        decoration: const BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                        ),
+                        alignment: Alignment.center,
+                        child: Text(
+                          note.name,
+                          style: AppTheme.baloo(
+                            fontSize: 52,
+                            fontWeight: FontWeight.w800,
+                            color: note.color,
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
               const SizedBox(height: 26),
@@ -70,9 +90,28 @@ class NoteOverlay extends StatelessWidget {
                   fontWeight: FontWeight.w700,
                 ),
               ),
-              const SizedBox(height: 30),
+              const SizedBox(height: 14),
+              GestureDetector(
+                onTap: _play,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.25),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: const Text(
+                    '🔁 Почувствовать снова',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Colors.white,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
               Text(
-                'Нажми, чтобы вернуться',
+                'Нажми вне кнопки, чтобы вернуться',
                 style: TextStyle(
                   fontSize: 14,
                   color: Colors.white.withValues(alpha: 0.85),

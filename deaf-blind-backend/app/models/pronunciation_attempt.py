@@ -23,6 +23,10 @@ class PronunciationAttempt(Base):
     metrics: Mapped[dict] = mapped_column(JSON, nullable=False)
     coarse_score: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
     feedback_text: Mapped[str] = mapped_column(String(400), nullable=False, default="")
+    # Optional recorded audio clip, archived for reference (never the face video).
+    audio_url: Mapped[str | None] = mapped_column(String(512))
+    # AI-generated pronunciation feedback from the audio clip (Gemini), shown to the student directly.
+    ai_feedback_text: Mapped[str | None] = mapped_column(String(800))
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )

@@ -27,7 +27,6 @@ class _DeafSchoolShellState extends State<DeafSchoolShell> {
   PracticeState _practice = PracticeState.ready;
   String? _activeNoteId;
   bool _showTranslator = false;
-  String? _gamePick;
   MeetingConnection? _activeMeeting;
   String _activeMathNodeId = 'L1_N0';
   final Set<String> _mathCompletedIds = {};
@@ -41,7 +40,6 @@ class _DeafSchoolShellState extends State<DeafSchoolShell> {
       _screen = screen;
       _practice = PracticeState.ready;
       _activeNoteId = null;
-      _gamePick = null;
     });
   }
 
@@ -171,8 +169,6 @@ class _DeafSchoolShellState extends State<DeafSchoolShell> {
         ),
       AppScreen.musicGame => MusicGameScreen(
           onBack: () => _go(AppScreen.musicNotes),
-          gamePick: _gamePick,
-          onPick: (id) => setState(() => _gamePick = id),
         ),
       AppScreen.pronunciation => PronunciationLessonScreen(
           onBack: () => _go(AppScreen.subjects),

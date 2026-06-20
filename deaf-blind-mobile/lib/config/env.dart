@@ -18,9 +18,12 @@ class Env {
     defaultValue: 'http://10.0.2.2:9000',
   );
 
+  static bool _isPhysicalDevice = false;
+
   static String get baseUrl => _resolvedBaseUrl;
 
   static void init({required bool isPhysicalDevice}) {
+    _isPhysicalDevice = isPhysicalDevice;
     const injected = String.fromEnvironment('BACKEND_URL');
     if (injected.isNotEmpty) {
       _resolvedBaseUrl = injected;
@@ -69,7 +72,7 @@ class Env {
       return livekitUri.replace(host: backendHost).toString();
     }
 
-    if (!kIsWeb && Platform.isAndroid) {
+    if (!kIsWeb && Platform.isAndroid && !_isPhysicalDevice) {
       return fromBackend
           .replaceAll('localhost', '10.0.2.2')
           .replaceAll('127.0.0.1', '10.0.2.2');

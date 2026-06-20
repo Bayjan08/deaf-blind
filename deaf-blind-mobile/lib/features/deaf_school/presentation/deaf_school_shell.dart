@@ -23,6 +23,7 @@ class _DeafSchoolShellState extends State<DeafSchoolShell> {
   String? _activeNoteId;
   bool _showTranslator = false;
   String? _gamePick;
+  int _gameQuestionIndex = 0;
 
   void _go(AppScreen screen) {
     setState(() {
@@ -30,7 +31,45 @@ class _DeafSchoolShellState extends State<DeafSchoolShell> {
       _practice = PracticeState.ready;
       _activeNoteId = null;
       _gamePick = null;
+      _gameQuestionIndex = 0;
     });
+  }
+
+  void _startMusicGame() {
+    setState(() {
+      _screen = AppScreen.musicGame;
+      _gamePick = null;
+      _gameQuestionIndex = 0;
+      _activeNoteId = null;
+      _practice = PracticeState.ready;
+    });
+  }
+
+  void _nextGameQuestion() {
+    final isLast = _gameQuestionIndex >= musicQuizQuestions.length - 1;
+    if (isLast) {
+      _go(AppScreen.musicNotes);
+      return;
+    }
+    setState(() {
+      _gameQuestionIndex++;
+      _gamePick = null;
+    });
+  }
+
+  void _openNote(MusicNote note) {
+    setState(() {
+      _screen = AppScreen.musicNoteDetail;
+      _activeNoteId = note.id;
+      _gamePick = null;
+      _practice = PracticeState.ready;
+    });
+  }
+
+  void _nextNote() {
+    final currentId = _activeNoteId;
+    if (currentId == null) return;
+    setState(() => _activeNoteId = nextNoteAfter(currentId).id);
   }
 
   void _checkPractice() {
@@ -42,7 +81,6 @@ class _DeafSchoolShellState extends State<DeafSchoolShell> {
 
   @override
   Widget build(BuildContext context) {
-    final activeNote = noteById(_activeNoteId);
     final showNav = showBottomNav(_screen);
     final showFab = showAiFab(_screen);
 
@@ -74,13 +112,6 @@ class _DeafSchoolShellState extends State<DeafSchoolShell> {
                   onSubjects: () => _go(AppScreen.subjects),
                   onClass: () => _go(AppScreen.liveclass),
                   onProfile: () => _go(AppScreen.profile),
-                ),
-              ),
-            if (activeNote != null)
-              Positioned.fill(
-                child: NoteOverlay(
-                  note: activeNote,
-                  onDismiss: () => setState(() => _activeNoteId = null),
                 ),
               ),
             if (_showTranslator)
@@ -127,13 +158,21 @@ class _DeafSchoolShellState extends State<DeafSchoolShell> {
         ),
       AppScreen.musicNotes => MusicNotesScreen(
           onBack: () => _go(AppScreen.subjects),
-          onNoteTap: (n) => setState(() => _activeNoteId = n.id),
-          onGame: () => _go(AppScreen.musicGame),
+          onNoteTap: _openNote,
+          onGame: _startMusicGame,
+        ),
+      AppScreen.musicNoteDetail => MusicNoteDetailScreen(
+          note: noteById(_activeNoteId)!,
+          onBack: () => _go(AppScreen.musicNotes),
+          onNext: _nextNote,
         ),
       AppScreen.musicGame => MusicGameScreen(
           onBack: () => _go(AppScreen.musicNotes),
+          questionIndex: _gameQuestionIndex,
+          question: musicQuizQuestions[_gameQuestionIndex],
           gamePick: _gamePick,
           onPick: (id) => setState(() => _gamePick = id),
+          onNext: _nextGameQuestion,
         ),
       AppScreen.pronunciation => PronunciationScreen(
           onBack: () => _go(AppScreen.subjects),

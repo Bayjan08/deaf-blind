@@ -153,31 +153,245 @@ class MusicNotesScreen extends StatelessWidget {
   }
 }
 
+class MusicNoteDetailScreen extends StatelessWidget {
+  const MusicNoteDetailScreen({
+    super.key,
+    required this.note,
+    required this.onBack,
+    required this.onNext,
+  });
+
+  final MusicNote note;
+  final VoidCallback onBack;
+  final VoidCallback onNext;
+
+  @override
+  Widget build(BuildContext context) {
+    final next = nextNoteAfter(note.id);
+
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 320),
+      curve: Curves.easeOutCubic,
+      color: note.color,
+      padding: const EdgeInsets.fromLTRB(20, 56, 20, 36),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              DesignBackButton(onTap: onBack, light: true),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'Нота «${note.name}»',
+                  style: AppTheme.baloo(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                    height: 1,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const Spacer(),
+          Center(child: _MusicNoteVibrationView(note: note)),
+          const SizedBox(height: 28),
+          Center(
+            child: Text(
+              'Вибрация: ${note.desc}',
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 16,
+                color: Colors.white,
+                fontWeight: FontWeight.w700,
+                height: 1.45,
+              ),
+            ),
+          ),
+          const Spacer(),
+          GestureDetector(
+            onTap: onNext,
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 17),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: DesignColors.textDark.withValues(alpha: 0.18),
+                    blurRadius: 20,
+                    offset: const Offset(0, 10),
+                  ),
+                ],
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.skip_next_rounded, color: note.color, size: 22),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Следующая нота: ${next.name}',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w800,
+                      fontSize: 16,
+                      color: note.color,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MusicNoteVibrationView extends StatelessWidget {
+  const _MusicNoteVibrationView({required this.note});
+
+  final MusicNote note;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 220,
+      height: 220,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          _NotePulseRing(delay: 0),
+          _NotePulseRing(delay: 0.5),
+          _NotePulseRing(delay: 1.0),
+          Container(
+            width: 132,
+            height: 132,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: DesignColors.textDark.withValues(alpha: 0.25),
+                  blurRadius: 28,
+                  offset: const Offset(0, 12),
+                ),
+              ],
+            ),
+            alignment: Alignment.center,
+            child: Text(
+              note.name,
+              style: AppTheme.baloo(
+                fontSize: 56,
+                fontWeight: FontWeight.w800,
+                color: note.color,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _NotePulseRing extends StatefulWidget {
+  const _NotePulseRing({required this.delay});
+
+  final double delay;
+
+  @override
+  State<_NotePulseRing> createState() => _NotePulseRingState();
+}
+
+class _NotePulseRingState extends State<_NotePulseRing>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1600),
+    );
+    Future.delayed(Duration(milliseconds: (widget.delay * 1000).round()), () {
+      if (mounted) _controller.repeat();
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (_, _) {
+        final t = _controller.value;
+        return Transform.scale(
+          scale: 0.4 + t * 1.1,
+          child: Opacity(
+            opacity: (1 - t) * 0.55,
+            child: Container(
+              width: 220,
+              height: 220,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: Colors.white.withValues(alpha: 0.6),
+                  width: 5,
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
 // ─── MUSIC GAME ──────────────────────────────────────────────────────────────
 
 class MusicGameScreen extends StatelessWidget {
   const MusicGameScreen({
     super.key,
     required this.onBack,
+    required this.questionIndex,
+    required this.question,
     required this.gamePick,
     required this.onPick,
+    required this.onNext,
   });
 
   final VoidCallback onBack;
+  final int questionIndex;
+  final MusicQuizQuestion question;
   final String? gamePick;
   final ValueChanged<String> onPick;
+  final VoidCallback onNext;
 
-  bool get gameSolved => gamePick == 'fa';
+  bool get answered => gamePick != null;
+  bool get isCorrect => gamePick == question.correctId;
+  bool get isLastQuestion => questionIndex >= musicQuizQuestions.length - 1;
 
   @override
   Widget build(BuildContext context) {
-    final bg = gameSolved ? const Color(0xFFEAF8F1) : DesignColors.bg;
-    final ring = gameSolved
-        ? const Color(0x803DD68C)
-        : const Color(0x66969DB9);
-    final center = gameSolved ? const Color(0xFF3DD68C) : const Color(0xFFAEB4CC);
-
-    const options = ['fa', 're', 'la', 'mi'];
+    final correctNote = noteById(question.correctId)!;
+    final bg = !answered
+        ? DesignColors.bg
+        : isCorrect
+            ? const Color(0xFFEAF8F1)
+            : const Color(0xFFFFF0EE);
+    final ring = !answered
+        ? correctNote.color.withValues(alpha: 0.45)
+        : isCorrect
+            ? const Color(0x803DD68C)
+            : const Color(0x80FF7A66);
+    final center = !answered ? correctNote.color : isCorrect ? const Color(0xFF3DD68C) : const Color(0xFFFF7A66);
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 400),
@@ -203,9 +417,9 @@ class MusicGameScreen extends StatelessWidget {
                     color: Colors.white.withValues(alpha: 0.7),
                     borderRadius: BorderRadius.circular(14),
                   ),
-                  child: const Text(
-                    '3/5',
-                    style: TextStyle(
+                  child: Text(
+                    '${questionIndex + 1}/${musicQuizQuestions.length}',
+                    style: const TextStyle(
                       fontWeight: FontWeight.w800,
                       fontSize: 13,
                       color: DesignColors.purple,
@@ -248,64 +462,113 @@ class MusicGameScreen extends StatelessWidget {
                 mainAxisSpacing: 12,
                 childAspectRatio: 1.8,
               ),
-              itemCount: options.length,
+              itemCount: question.optionIds.length,
               itemBuilder: (_, i) {
-                final id = options[i];
+                final id = question.optionIds[i];
                 final n = noteById(id)!;
                 final picked = gamePick == id;
-                final border = picked
-                    ? (id == 'fa' ? DesignColors.green : const Color(0xFFFF7A66))
-                    : const Color(0xFFF1F2F8);
+                final isCorrectOption = id == question.correctId;
+
+                Color border;
+                if (!answered) {
+                  border = const Color(0xFFF1F2F8);
+                } else if (isCorrectOption) {
+                  border = DesignColors.green;
+                } else if (picked) {
+                  border = const Color(0xFFFF7A66);
+                } else {
+                  border = const Color(0xFFF1F2F8);
+                }
+
                 return GestureDetector(
-                  onTap: () => onPick(id),
-                  child: Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: border, width: 3),
-                      boxShadow: [
-                        BoxShadow(
-                          color: DesignColors.textDark.withValues(alpha: 0.12),
-                          blurRadius: 22,
-                          offset: const Offset(0, 10),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 34,
-                          height: 34,
-                          decoration: BoxDecoration(
-                            color: n.color,
-                            borderRadius: BorderRadius.circular(11),
+                  onTap: answered ? null : () => onPick(id),
+                  child: Opacity(
+                    opacity: answered && !picked && !isCorrectOption ? 0.55 : 1,
+                    child: Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(color: border, width: 3),
+                        boxShadow: [
+                          BoxShadow(
+                            color: DesignColors.textDark.withValues(alpha: 0.12),
+                            blurRadius: 22,
+                            offset: const Offset(0, 10),
                           ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            n.name,
-                            style: AppTheme.baloo(fontSize: 20, fontWeight: FontWeight.w800),
+                        ],
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 34,
+                            height: 34,
+                            decoration: BoxDecoration(
+                              color: n.color,
+                              borderRadius: BorderRadius.circular(11),
+                            ),
                           ),
-                        ),
-                        if (gameSolved && id == 'fa')
-                          const Icon(Icons.check_rounded, color: DesignColors.green, size: 22),
-                      ],
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              n.name,
+                              style: AppTheme.baloo(fontSize: 20, fontWeight: FontWeight.w800),
+                            ),
+                          ),
+                          if (answered && isCorrectOption)
+                            const Icon(Icons.check_rounded, color: DesignColors.green, size: 22),
+                          if (answered && picked && !isCorrectOption)
+                            const Icon(Icons.close_rounded, color: Color(0xFFFF7A66), size: 22),
+                        ],
+                      ),
                     ),
                   ),
                 );
               },
             ),
-            if (gameSolved) ...[
+            if (answered) ...[
               const SizedBox(height: 18),
               Center(
                 child: Text(
-                  'Верно — это «Фа»!',
+                  isCorrect
+                      ? 'Верно — это «${correctNote.name}»!'
+                      : 'Неверно. Правильный ответ — «${correctNote.name}».',
+                  textAlign: TextAlign.center,
                   style: AppTheme.baloo(
-                    fontSize: 22,
+                    fontSize: 20,
                     fontWeight: FontWeight.w800,
-                    color: DesignColors.green,
+                    color: isCorrect ? DesignColors.green : const Color(0xFFFF7A66),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 22),
+              GestureDetector(
+                onTap: onNext,
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(vertical: 17),
+                  decoration: BoxDecoration(
+                    color: isLastQuestion ? DesignColors.textDark : DesignColors.purple,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        isLastQuestion ? Icons.flag_rounded : Icons.arrow_forward_rounded,
+                        color: Colors.white,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 10),
+                      Text(
+                        isLastQuestion ? 'Завершить' : 'Следующий вопрос',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w800,
+                          fontSize: 16,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),

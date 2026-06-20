@@ -75,3 +75,27 @@ MusicNote? noteById(String? id) {
   }
   return null;
 }
+
+MusicNote nextNoteAfter(String id) {
+  final index = musicNotes.indexWhere((n) => n.id == id);
+  if (index == -1) return musicNotes.first;
+  return musicNotes[(index + 1) % musicNotes.length];
+}
+
+class MusicQuizQuestion {
+  const MusicQuizQuestion({
+    required this.correctId,
+    required this.optionIds,
+  });
+
+  final String correctId;
+  final List<String> optionIds;
+}
+
+const List<MusicQuizQuestion> musicQuizQuestions = [
+  MusicQuizQuestion(correctId: 'fa', optionIds: ['fa', 're', 'la', 'mi']),
+  MusicQuizQuestion(correctId: 'do', optionIds: ['do', 're', 'mi', 'sol']),
+  MusicQuizQuestion(correctId: 'sol', optionIds: ['fa', 'sol', 'la', 'si']),
+  MusicQuizQuestion(correctId: 'la', optionIds: ['re', 'mi', 'la', 'do']),
+  MusicQuizQuestion(correctId: 'si', optionIds: ['mi', 'fa', 'si', 're']),
+];

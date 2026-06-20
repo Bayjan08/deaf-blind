@@ -7,6 +7,7 @@ enum AppScreen {
   alphabetPractice,
   alphabetSuccess,
   musicNotes,
+  musicNoteDetail,
   musicGame,
   pronunciation,
   liveclass,
@@ -25,6 +26,7 @@ NavTab navTabForScreen(AppScreen screen) {
     AppScreen.alphabetPractice,
     AppScreen.alphabetSuccess,
     AppScreen.musicNotes,
+    AppScreen.musicNoteDetail,
     AppScreen.musicGame,
     AppScreen.pronunciation,
   };
@@ -38,7 +40,9 @@ NavTab navTabForScreen(AppScreen screen) {
 }
 
 bool showBottomNav(AppScreen screen) =>
-    screen != AppScreen.alphabetPractice && screen != AppScreen.liveclass;
+    screen != AppScreen.alphabetPractice &&
+    screen != AppScreen.liveclass &&
+    screen != AppScreen.musicNoteDetail;
 
 bool showAiFab(AppScreen screen) =>
     screen != AppScreen.alphabetPractice && screen != AppScreen.liveclass;

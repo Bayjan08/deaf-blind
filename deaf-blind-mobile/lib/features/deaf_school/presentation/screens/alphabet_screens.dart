@@ -2,8 +2,8 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_theme.dart';
-import '../../../../core/theme/design_colors.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_text_styles.dart';
 import '../app_screen.dart';
 import '../widgets/design_widgets.dart';
 
@@ -36,7 +36,7 @@ class AlphabetIntroScreen extends StatelessWidget {
                     value: 0.6,
                     minHeight: 10,
                     backgroundColor: const Color(0xFFE6E8F1),
-                    color: DesignColors.purple,
+                    color: AppColors.primary,
                   ),
                 ),
               ),
@@ -46,7 +46,7 @@ class AlphabetIntroScreen extends StatelessWidget {
                 style: TextStyle(
                   fontWeight: FontWeight.w800,
                   fontSize: 13,
-                  color: DesignColors.purple,
+                  color: AppColors.primary,
                 ),
               ),
             ],
@@ -54,10 +54,10 @@ class AlphabetIntroScreen extends StatelessWidget {
           const SizedBox(height: 22),
           Text(
             'Аа',
-            style: AppTheme.baloo(
+            style: AppTextStyles.style(
               fontSize: 96,
               fontWeight: FontWeight.w800,
-              color: DesignColors.purple,
+              color: AppColors.primary,
               height: 1,
             ),
           ),
@@ -65,7 +65,7 @@ class AlphabetIntroScreen extends StatelessWidget {
             'Буква «А»',
             style: TextStyle(
               fontSize: 15,
-              color: DesignColors.textMuted,
+              color: AppColors.textSecondary,
               fontWeight: FontWeight.w700,
             ),
           ),
@@ -77,7 +77,7 @@ class AlphabetIntroScreen extends StatelessWidget {
               borderRadius: BorderRadius.circular(26),
               boxShadow: [
                 BoxShadow(
-                  color: DesignColors.textDark.withValues(alpha: 0.12),
+                  color: AppColors.textPrimary.withValues(alpha: 0.12),
                   blurRadius: 26,
                   offset: const Offset(0, 12),
                 ),
@@ -105,7 +105,7 @@ class AlphabetIntroScreen extends StatelessWidget {
                       ),
                       Text(
                         'Арбуз',
-                        style: AppTheme.baloo(
+                        style: AppTextStyles.style(
                           fontSize: 22,
                           fontWeight: FontWeight.w700,
                           color: const Color(0xFFE08A5C),
@@ -119,14 +119,14 @@ class AlphabetIntroScreen extends StatelessWidget {
                   text: TextSpan(
                     style: TextStyle(
                       fontSize: 14,
-                      color: DesignColors.textMuted,
+                      color: AppColors.textSecondary,
                       fontWeight: FontWeight.w700,
                     ),
                     children: const [
                       TextSpan(
                         text: 'А',
                         style: TextStyle(
-                          color: DesignColors.textDark,
+                          color: AppColors.textPrimary,
                           fontWeight: FontWeight.w800,
                         ),
                       ),
@@ -141,7 +141,7 @@ class AlphabetIntroScreen extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(18),
             decoration: BoxDecoration(
-              color: DesignColors.purpleMap,
+              color: AppColors.grey100,
               borderRadius: BorderRadius.circular(26),
             ),
             child: Row(
@@ -183,7 +183,7 @@ class AlphabetIntroScreen extends StatelessWidget {
                         style: TextStyle(
                           fontWeight: FontWeight.w800,
                           fontSize: 15,
-                          color: DesignColors.textDark,
+                          color: AppColors.textPrimary,
                         ),
                       ),
                       Text(
@@ -249,7 +249,7 @@ class _RingBorderState extends State<_RingBorder>
             child: Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(22),
-                border: Border.all(color: DesignColors.purple, width: 3),
+                border: Border.all(color: AppColors.primary, width: 3),
               ),
             ),
           ),
@@ -285,7 +285,7 @@ class AlphabetPracticeScreen extends StatelessWidget {
             gradient: RadialGradient(
               center: Alignment(0, -0.4),
               radius: 1.2,
-              colors: [Color(0xFF2A2748), DesignColors.darkBg],
+              colors: [Color(0xFF2A2748), AppColors.textPrimary],
             ),
           ),
         ),
@@ -351,10 +351,10 @@ class AlphabetPracticeScreen extends StatelessWidget {
                 children: [
                   Text(
                     'Аа',
-                    style: AppTheme.baloo(
+                    style: AppTextStyles.style(
                       fontSize: 46,
                       fontWeight: FontWeight.w800,
-                      color: DesignColors.purple,
+                      color: AppColors.primary,
                       height: 1,
                     ),
                   ),
@@ -366,7 +366,7 @@ class AlphabetPracticeScreen extends StatelessWidget {
                         'ПОКАЖИ',
                         style: TextStyle(
                           fontSize: 12,
-                          color: DesignColors.textMuted,
+                          color: AppColors.textSecondary,
                           fontWeight: FontWeight.w800,
                         ),
                       ),
@@ -375,7 +375,7 @@ class AlphabetPracticeScreen extends StatelessWidget {
                         style: TextStyle(
                           fontWeight: FontWeight.w800,
                           fontSize: 15,
-                          color: DesignColors.textDark,
+                          color: AppColors.textPrimary,
                         ),
                       ),
                     ],
@@ -444,7 +444,7 @@ class AlphabetPracticeScreen extends StatelessWidget {
           ),
         if (practiceState == PracticeState.success)
           Container(
-            color: DesignColors.green.withValues(alpha: 0.92),
+            color: AppColors.success.withValues(alpha: 0.92),
             child: Center(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -466,7 +466,7 @@ class AlphabetPracticeScreen extends StatelessWidget {
                         ),
                         child: const Icon(
                           Icons.check_rounded,
-                          color: DesignColors.green,
+                          color: AppColors.success,
                           size: 44,
                         ),
                       ),
@@ -475,7 +475,7 @@ class AlphabetPracticeScreen extends StatelessWidget {
                   const SizedBox(height: 18),
                   Text(
                     'Верно!',
-                    style: AppTheme.baloo(
+                    style: AppTextStyles.style(
                       fontSize: 32,
                       fontWeight: FontWeight.w800,
                       color: Colors.white,
@@ -505,7 +505,7 @@ class AlphabetPracticeScreen extends StatelessWidget {
                         style: TextStyle(
                           fontWeight: FontWeight.w800,
                           fontSize: 16,
-                          color: DesignColors.green,
+                          color: AppColors.success,
                         ),
                       ),
                     ),
@@ -591,7 +591,7 @@ class AlphabetSuccessScreen extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [DesignColors.purple, DesignColors.purpleLight],
+          colors: [AppColors.primary, AppColors.primaryLight],
         ),
       ),
       child: SingleChildScrollView(
@@ -602,7 +602,7 @@ class AlphabetSuccessScreen extends StatelessWidget {
             const SizedBox(height: 26),
             Text(
               'Буква выучена!',
-              style: AppTheme.baloo(
+              style: AppTextStyles.style(
                 fontSize: 30,
                 fontWeight: FontWeight.w800,
                 color: Colors.white,
@@ -668,7 +668,7 @@ class AlphabetSuccessScreen extends StatelessWidget {
               label: 'На карту уровней',
               onTap: onMap,
               color: Colors.white,
-              textColor: DesignColors.purple,
+              textColor: AppColors.primary,
             ),
             const SizedBox(height: 10),
             TextButton(

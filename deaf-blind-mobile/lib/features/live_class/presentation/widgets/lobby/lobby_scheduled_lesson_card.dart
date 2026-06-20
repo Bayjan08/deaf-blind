@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../../core/theme/design_colors.dart';
+import '../../../../../core/theme/app_colors.dart';
 import 'lobby_actions.dart';
 
 class LobbyScheduledLessonCard extends StatelessWidget {
@@ -24,7 +24,7 @@ class LobbyScheduledLessonCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: DesignColors.textDark.withValues(alpha: 0.06),
+            color: AppColors.textPrimary.withValues(alpha: 0.06),
             blurRadius: 20,
             offset: const Offset(0, 8),
           ),
@@ -39,7 +39,7 @@ class LobbyScheduledLessonCard extends StatelessWidget {
               fontWeight: FontWeight.w700,
               fontSize: 16,
               height: 1.4,
-              color: DesignColors.textDark,
+              color: AppColors.textPrimary,
             ),
           ),
           const SizedBox(height: 8),
@@ -49,7 +49,7 @@ class LobbyScheduledLessonCard extends StatelessWidget {
               fontWeight: FontWeight.w500,
               fontSize: 14,
               height: 1.4,
-              color: DesignColors.textMuted,
+              color: AppColors.textSecondary,
             ),
           ),
           const SizedBox(height: 16),

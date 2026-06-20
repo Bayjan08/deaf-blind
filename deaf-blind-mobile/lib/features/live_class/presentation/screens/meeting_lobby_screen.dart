@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/theme/design_colors.dart';
+import '../../../../core/theme/app_colors.dart';
 import '../../data/mappers/meeting_error_mapper.dart';
 import '../../domain/models/meeting.dart';
 import '../providers/meeting_providers.dart';
@@ -95,13 +95,13 @@ class _MeetingLobbyScreenState extends ConsumerState<MeetingLobbyScreen> {
             const SizedBox(height: 12),
             Text(
               _error!,
-              style: const TextStyle(color: DesignColors.redLive, fontWeight: FontWeight.w600),
+              style: const TextStyle(color: AppColors.error, fontWeight: FontWeight.w600),
             ),
           ],
           const SizedBox(height: 24),
           const Text(
             'Недавние',
-            style: TextStyle(fontWeight: FontWeight.w800, color: DesignColors.textDark),
+            style: TextStyle(fontWeight: FontWeight.w800, color: AppColors.textPrimary),
           ),
           const SizedBox(height: 10),
           Expanded(

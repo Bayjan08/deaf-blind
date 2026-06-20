@@ -7,8 +7,8 @@ import 'package:flutter_tts/flutter_tts.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import '../../../../core/network/api_client.dart';
-import '../../../../core/theme/app_theme.dart';
-import '../../../../core/theme/design_colors.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_text_styles.dart';
 
 
 /// §7 AI Gesture Camera Screen.
@@ -194,7 +194,7 @@ class _GestureCameraScreenState extends State<GestureCameraScreen> {
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
         title: Text('AI Переводчик жестов',
-            style: AppTheme.baloo(color: Colors.white, fontSize: 17)),
+            style: AppTextStyles.style(color: Colors.white, fontSize: 17)),
         actions: [
           IconButton(
             icon: const Icon(Icons.flip_camera_ios_rounded),
@@ -276,7 +276,7 @@ class _GestureCameraScreenState extends State<GestureCameraScreen> {
     final busy = _isClipProcessing || _isMakingSentence;
 
     return Container(
-      color: DesignColors.bg,
+      color: AppColors.background,
       padding: const EdgeInsets.fromLTRB(16, 10, 16, 14),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -292,15 +292,15 @@ class _GestureCameraScreenState extends State<GestureCameraScreen> {
                         strokeWidth: 2, color: Color(0xFFFF9800))),
                 const SizedBox(width: 8),
                 Text('🧠 Распознаю жест РЖЯ...',
-                    style: AppTheme.nunito(
+                    style: AppTextStyles.style(
                         fontSize: 11, color: const Color(0xFFFF9800))),
               ] else
                 Text(
                   _captured.isEmpty
                       ? '✋ Покажите жест — запись начнётся автоматически'
                       : '🎙 Слово добавлено и произнесено',
-                  style: AppTheme.nunito(
-                      fontSize: 11, color: DesignColors.textMuted),
+                  style: AppTextStyles.style(
+                      fontSize: 11, color: AppColors.textSecondary),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -324,8 +324,8 @@ class _GestureCameraScreenState extends State<GestureCameraScreen> {
                               fontSize: 11, fontWeight: FontWeight.w700)),
                       onDeleted: () => _removeCapture(e.key),
                       onPressed: () => _speak(aiWord),
-                      backgroundColor: DesignColors.purpleSoft,
-                      deleteIconColor: DesignColors.purple,
+                      backgroundColor: AppColors.grey100,
+                      deleteIconColor: AppColors.primary,
                       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     ),
                   );
@@ -349,11 +349,11 @@ class _GestureCameraScreenState extends State<GestureCameraScreen> {
                               color: Colors.white, strokeWidth: 2))
                       : const Icon(Icons.auto_awesome_rounded, size: 18),
                   label: Text('Составить фразу',
-                      style: AppTheme.baloo(color: Colors.white, fontSize: 13)),
+                      style: AppTextStyles.style(color: Colors.white, fontSize: 13)),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF6C3AE8),
+                    backgroundColor: AppColors.primary,
                     foregroundColor: Colors.white,
-                    disabledBackgroundColor: DesignColors.purpleSoft,
+                    disabledBackgroundColor: AppColors.grey100,
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(14)),
@@ -369,8 +369,8 @@ class _GestureCameraScreenState extends State<GestureCameraScreen> {
                         : null),
                 icon: const Icon(Icons.volume_up_rounded),
                 style: IconButton.styleFrom(
-                  backgroundColor: DesignColors.purpleSoft,
-                  foregroundColor: DesignColors.purple,
+                  backgroundColor: AppColors.grey100,
+                  foregroundColor: AppColors.primary,
                 ),
                 tooltip: 'Повторить',
               ),
@@ -386,25 +386,25 @@ class _GestureCameraScreenState extends State<GestureCameraScreen> {
                 width: double.infinity,
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: DesignColors.purpleSoft,
+                  color: AppColors.grey100,
                   borderRadius: BorderRadius.circular(14),
                   border: Border.all(
-                      color: DesignColors.purple.withValues(alpha: 0.3)),
+                      color: AppColors.primary.withValues(alpha: 0.2)),
                 ),
                 child: Row(
                   children: [
                     const Icon(Icons.auto_awesome_rounded,
-                        size: 16, color: Color(0xFF6C3AE8)),
+                        size: 16, color: AppColors.primary),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         _sentenceText!,
-                        style: AppTheme.baloo(
-                            fontSize: 18, color: DesignColors.purple),
+                        style: AppTextStyles.style(
+                            fontSize: 18, color: AppColors.primary),
                       ),
                     ),
                     const Icon(Icons.volume_up_rounded,
-                        size: 16, color: Color(0xFF6C3AE8)),
+                        size: 16, color: AppColors.primary),
                   ],
                 ),
               ),

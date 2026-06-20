@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../../core/theme/design_colors.dart';
+import '../../../../../core/theme/app_colors.dart';
 
 class LobbyPrimaryButton extends StatelessWidget {
   const LobbyPrimaryButton({
@@ -17,7 +17,7 @@ class LobbyPrimaryButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: DesignColors.purple,
+      color: AppColors.primary,
       borderRadius: BorderRadius.circular(18),
       child: InkWell(
         onTap: onTap,
@@ -57,8 +57,8 @@ class LobbySecondaryButton extends StatelessWidget {
     return OutlinedButton(
       onPressed: onTap,
       style: OutlinedButton.styleFrom(
-        foregroundColor: DesignColors.purple,
-        side: const BorderSide(color: DesignColors.purpleSoft),
+        foregroundColor: AppColors.primary,
+        side: const BorderSide(color: AppColors.grey100),
         padding: const EdgeInsets.symmetric(vertical: 14),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
       ),

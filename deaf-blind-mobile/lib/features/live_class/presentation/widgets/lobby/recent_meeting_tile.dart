@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../../core/theme/design_colors.dart';
+import '../../../../../core/theme/app_colors.dart';
 import '../../../domain/models/meeting.dart';
 
 class RecentMeetingTile extends StatelessWidget {
@@ -25,10 +25,10 @@ class RecentMeetingTile extends StatelessWidget {
                 width: 42,
                 height: 42,
                 decoration: BoxDecoration(
-                  color: DesignColors.purpleSoft,
+                  color: AppColors.grey100,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Icon(Icons.groups_rounded, color: DesignColors.purple),
+                child: const Icon(Icons.groups_rounded, color: AppColors.primary),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -39,13 +39,13 @@ class RecentMeetingTile extends StatelessWidget {
                       meeting.title,
                       style: const TextStyle(
                         fontWeight: FontWeight.w800,
-                        color: DesignColors.textDark,
+                        color: AppColors.textPrimary,
                       ),
                     ),
                     Text(
                       'Код ${meeting.code} · ${meeting.isActive ? 'активна' : 'завершена'}',
                       style: const TextStyle(
-                        color: DesignColors.textMuted,
+                        color: AppColors.textSecondary,
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
                       ),
@@ -54,7 +54,7 @@ class RecentMeetingTile extends StatelessWidget {
                 ),
               ),
               if (onTap != null)
-                const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: DesignColors.textMuted),
+                const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: AppColors.textSecondary),
             ],
           ),
         ),

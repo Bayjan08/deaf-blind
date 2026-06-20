@@ -1,7 +1,10 @@
 import 'dart:math' as math;
 
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/design_colors.dart';
 import '../widgets/design_widgets.dart';
@@ -365,13 +368,13 @@ class SubjectsScreen extends StatelessWidget {
         children: [
           Text(
             'Предметы',
-            style: AppTheme.baloo(fontSize: 28, fontWeight: FontWeight.w700),
+            style: AppTextStyles.style(fontSize: 28, fontWeight: FontWeight.w700),
           ),
           Text(
             'Выбери, чем хочешь заняться',
             style: TextStyle(
               fontSize: 14,
-              color: DesignColors.textMuted,
+              color: AppColors.textSecondary,
               fontWeight: FontWeight.w700,
             ),
           ),
@@ -382,20 +385,17 @@ class SubjectsScreen extends StatelessWidget {
               width: 64,
               height: 64,
               decoration: BoxDecoration(
-                color: DesignColors.purple,
+                color: AppColors.primary,
                 borderRadius: BorderRadius.circular(20),
               ),
               alignment: Alignment.center,
-              child: Text(
-                'Аа',
-                style: AppTheme.baloo(fontSize: 28, fontWeight: FontWeight.w800, color: Colors.white),
-              ),
+              child: const Icon(CupertinoIcons.textformat_abc, color: Colors.white, size: 30),
             ),
             title: 'Алфавит жестами',
             subtitle: 'Игра с питомцем · 4 уровня',
             badge: 'Уровень 1 · 3/5',
-            badgeBg: DesignColors.greenSoft,
-            badgeColor: DesignColors.green,
+            badgeBg: AppColors.grey100,
+            badgeColor: AppColors.success,
           ),
           const SizedBox(height: 14),
           _SubjectCard(
@@ -408,24 +408,7 @@ class SubjectsScreen extends StatelessWidget {
                 borderRadius: BorderRadius.circular(20),
               ),
               alignment: Alignment.center,
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  Text(
-                    '5',
-                    style: AppTheme.baloo(
-                      fontSize: 32,
-                      fontWeight: FontWeight.w800,
-                      color: Colors.white,
-                    ),
-                  ),
-                  Positioned(
-                    bottom: 8,
-                    right: 8,
-                    child: Text('🧱', style: TextStyle(fontSize: 14)),
-                  ),
-                ],
-              ),
+              child: const Icon(CupertinoIcons.textformat_123, color: Colors.white, size: 30),
             ),
             title: 'Математика',
             subtitle: 'Числа · счёт · задачи · 5 уровней',
@@ -462,7 +445,7 @@ class SubjectsScreen extends StatelessWidget {
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(14),
                   ),
-                  child: const Icon(Icons.music_note_rounded, color: DesignColors.textDark, size: 20),
+                  child: const Icon(CupertinoIcons.music_note, color: AppColors.textPrimary, size: 20),
                 ),
               ),
             ),
@@ -478,7 +461,7 @@ class SubjectsScreen extends StatelessWidget {
             style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w800,
-              color: DesignColors.textDim,
+              color: AppColors.textTertiary,
               letterSpacing: 0.4,
             ),
           ),
@@ -492,7 +475,7 @@ class SubjectsScreen extends StatelessWidget {
                 color: const Color(0xFFFFF0E9),
                 borderRadius: BorderRadius.circular(20),
               ),
-              child: const Icon(Icons.chat_bubble_outline_rounded, color: DesignColors.orange, size: 30),
+              child: const Icon(CupertinoIcons.chat_bubble_text, color: AppColors.primary, size: 30),
             ),
             title: 'Произношение',
             subtitle: 'Артикуляция звуков · необязательно',
@@ -504,7 +487,7 @@ class SubjectsScreen extends StatelessWidget {
               'Основной язык обучения — жесты. Этот курс можно проходить дополнительно, он не влияет на твой прогресс.',
               style: TextStyle(
                 fontSize: 12,
-                color: DesignColors.textDim,
+                color: AppColors.textTertiary,
                 fontWeight: FontWeight.w700,
                 height: 1.45,
               ),
@@ -546,7 +529,7 @@ class _SubjectCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(26),
           boxShadow: [
             BoxShadow(
-              color: DesignColors.textDark.withValues(alpha: 0.15),
+              color: AppColors.textPrimary.withValues(alpha: 0.15),
               blurRadius: 26,
               offset: const Offset(0, 12),
             ),
@@ -565,14 +548,14 @@ class _SubjectCard extends StatelessWidget {
                     style: const TextStyle(
                       fontWeight: FontWeight.w800,
                       fontSize: 17,
-                      color: DesignColors.textDark,
+                      color: AppColors.textPrimary,
                     ),
                   ),
                   Text(
                     subtitle,
                     style: TextStyle(
                       fontSize: 13,
-                      color: DesignColors.textMuted,
+                      color: AppColors.textSecondary,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -623,7 +606,7 @@ class AlphabetMapScreen extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [DesignColors.purpleMap, DesignColors.bg],
+          colors: [AppColors.grey100, AppColors.background],
           stops: [0, 0.4],
         ),
       ),
@@ -640,10 +623,10 @@ class AlphabetMapScreen extends StatelessWidget {
                   Expanded(
                     child: Text(
                       'Алфавит жестами',
-                      style: AppTheme.baloo(fontSize: 20, fontWeight: FontWeight.w700, height: 1),
+                      style: AppTextStyles.style(fontSize: 20, fontWeight: FontWeight.w700, height: 1),
                     ),
                   ),
-                  const StreakBadge(compact: true),
+                  const AppStreakBadge(compact: true),
                 ],
               ),
             ),
@@ -656,7 +639,7 @@ class AlphabetMapScreen extends StatelessWidget {
                   borderRadius: BorderRadius.circular(24),
                   boxShadow: [
                     BoxShadow(
-                      color: DesignColors.textDark.withValues(alpha: 0.15),
+                      color: AppColors.textPrimary.withValues(alpha: 0.15),
                       blurRadius: 26,
                       offset: const Offset(0, 12),
                     ),
@@ -675,7 +658,7 @@ class AlphabetMapScreen extends StatelessWidget {
                             style: TextStyle(
                               fontWeight: FontWeight.w800,
                               fontSize: 15,
-                              color: DesignColors.textDark,
+                              color: AppColors.textPrimary,
                             ),
                           ),
                           const SizedBox(height: 7),
@@ -684,8 +667,8 @@ class AlphabetMapScreen extends StatelessWidget {
                             child: LinearProgressIndicator(
                               value: 0.35,
                               minHeight: 9,
-                              backgroundColor: DesignColors.progressBg,
-                              color: DesignColors.purple,
+                              backgroundColor: AppColors.grey200,
+                              color: AppColors.primary,
                             ),
                           ),
                           const SizedBox(height: 5),
@@ -693,7 +676,7 @@ class AlphabetMapScreen extends StatelessWidget {
                             'Ещё 2 буквы до нового уровня',
                             style: TextStyle(
                               fontSize: 12,
-                              color: DesignColors.textMuted,
+                              color: AppColors.textSecondary,
                               fontWeight: FontWeight.w700,
                             ),
                           ),
@@ -749,11 +732,11 @@ class AlphabetMapScreen extends StatelessWidget {
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(26),
                               gradient: const LinearGradient(
-                                colors: [DesignColors.purple, DesignColors.purpleLight],
+                                colors: [AppColors.primary, AppColors.primaryLight],
                               ),
                               boxShadow: [
                                 BoxShadow(
-                                  color: DesignColors.purple.withValues(alpha: 0.7),
+                                  color: AppColors.primary.withValues(alpha: 0.7),
                                   blurRadius: 28,
                                   offset: const Offset(0, 14),
                                 ),
@@ -783,7 +766,7 @@ class AlphabetMapScreen extends StatelessWidget {
                           style: TextStyle(
                             fontWeight: FontWeight.w800,
                             fontSize: 13,
-                            color: DesignColors.purple,
+                            color: AppColors.primary,
                           ),
                         ),
                       ],
@@ -887,7 +870,7 @@ class _ContinueBubbleState extends State<_ContinueBubble>
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
             decoration: BoxDecoration(
-              color: DesignColors.textDark,
+              color: AppColors.textPrimary,
               borderRadius: BorderRadius.circular(14),
             ),
             child: const Text(
@@ -904,7 +887,7 @@ class _ContinueBubbleState extends State<_ContinueBubble>
             child: Container(
               width: 10,
               height: 10,
-              color: DesignColors.textDark,
+              color: AppColors.textPrimary,
             ),
           ),
         ],

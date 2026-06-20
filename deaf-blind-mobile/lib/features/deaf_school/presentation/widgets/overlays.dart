@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/haptics/haptic_service.dart';
-import '../../../../core/theme/app_theme.dart';
-import '../../../../core/theme/design_colors.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_text_styles.dart';
 import '../../../ai_translator/presentation/screens/ai_translator_screen.dart';
 import '../models/music_note.dart';
 
@@ -61,9 +61,9 @@ class _NoteOverlayState extends State<NoteOverlay> {
                         alignment: Alignment.center,
                         child: Text(
                           note.name,
-                          style: AppTheme.baloo(
+                          style: AppTextStyles.h1.copyWith(
                             fontSize: 52,
-                            fontWeight: FontWeight.w800,
+                            fontWeight: FontWeight.w600,
                             color: note.color,
                           ),
                         ),
@@ -75,9 +75,9 @@ class _NoteOverlayState extends State<NoteOverlay> {
               const SizedBox(height: 26),
               Text(
                 'Нота «${note.name}»',
-                style: AppTheme.baloo(
+                style: AppTextStyles.h2.copyWith(
                   fontSize: 26,
-                  fontWeight: FontWeight.w700,
+                  fontWeight: FontWeight.w600,
                   color: Colors.white,
                 ),
               ),
@@ -227,12 +227,7 @@ class TranslatorOverlay extends StatelessWidget {
                       height: 42,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(14),
-                        gradient: const LinearGradient(
-                          colors: [
-                            DesignColors.fabGradientStart,
-                            DesignColors.fabGradientEnd,
-                          ],
-                        ),
+                        color: AppColors.primary,
                       ),
                       child: const Icon(
                         Icons.translate_rounded,
@@ -247,17 +242,14 @@ class TranslatorOverlay extends StatelessWidget {
                         children: [
                           Text(
                             'ИИ-переводчик',
-                            style: AppTheme.baloo(
-                              fontSize: 19,
-                              fontWeight: FontWeight.w700,
-                            ),
+                            style: AppTextStyles.h3.copyWith(fontSize: 19),
                           ),
                           Text(
                             'Жесты ↔ речь ↔ текст',
                             style: TextStyle(
                               fontSize: 12,
-                              color: DesignColors.textMuted,
-                              fontWeight: FontWeight.w700,
+                              color: AppColors.textSecondary,
+                              fontWeight: FontWeight.w500,
                             ),
                           ),
                         ],
@@ -283,9 +275,9 @@ class TranslatorOverlay extends StatelessWidget {
                 ),
                 const SizedBox(height: 18),
                 _TranslatorOption(
-                  bg: const Color(0xFFF6F4FF),
-                  border: const Color(0xFFE7E2FF),
-                  iconBg: DesignColors.purple,
+                  bg: AppColors.grey100,
+                  border: AppColors.grey200,
+                  iconBg: AppColors.primary,
                   icon: Icons.mic_rounded,
                   title: 'Голос → жесты',
                   subtitle: 'Говорите — аватар покажет жесты',
@@ -301,9 +293,9 @@ class TranslatorOverlay extends StatelessWidget {
                 ),
                 const SizedBox(height: 10),
                 _TranslatorOption(
-                  bg: const Color(0xFFFFF4EE),
-                  border: const Color(0xFFFFE2D2),
-                  iconBg: DesignColors.orange,
+                  bg: AppColors.grey100,
+                  border: AppColors.grey200,
+                  iconBg: AppColors.grey700,
                   icon: Icons.videocam_rounded,
                   title: 'Жесты → текст',
                   subtitle: 'Камера распознаёт ваши жесты',
@@ -311,9 +303,9 @@ class TranslatorOverlay extends StatelessWidget {
                 ),
                 const SizedBox(height: 10),
                 _TranslatorOption(
-                  bg: const Color(0xFFEEFBF4),
-                  border: const Color(0xFFD2F2E0),
-                  iconBg: DesignColors.green,
+                  bg: AppColors.grey100,
+                  border: AppColors.grey200,
+                  iconBg: AppColors.success,
                   icon: Icons.text_fields_rounded,
                   title: 'Ввести текст',
                   subtitle: 'Напечатайте — переведём в жесты',
@@ -385,17 +377,17 @@ class _TranslatorOption extends StatelessWidget {
                 Text(
                   title,
                   style: const TextStyle(
-                    fontWeight: FontWeight.w800,
+                    fontWeight: FontWeight.w600,
                     fontSize: 15,
-                    color: DesignColors.textDark,
+                    color: AppColors.textPrimary,
                   ),
                 ),
                 Text(
                   subtitle,
                   style: TextStyle(
                     fontSize: 12,
-                    color: DesignColors.textMuted,
-                    fontWeight: FontWeight.w700,
+                    color: AppColors.textSecondary,
+                    fontWeight: FontWeight.w400,
                   ),
                 ),
               ],

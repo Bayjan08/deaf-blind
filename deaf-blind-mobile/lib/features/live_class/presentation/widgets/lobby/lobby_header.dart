@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../../core/theme/design_colors.dart';
+import '../../../../../core/theme/app_colors.dart';
 
 class LobbyHeader extends StatelessWidget {
   const LobbyHeader({super.key});
@@ -15,7 +15,7 @@ class LobbyHeader extends StatelessWidget {
           style: TextStyle(
             fontSize: 28,
             fontWeight: FontWeight.w800,
-            color: DesignColors.textDark,
+            color: AppColors.textPrimary,
           ),
         ),
         SizedBox(height: 6),
@@ -24,7 +24,7 @@ class LobbyHeader extends StatelessWidget {
           style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
-            color: DesignColors.textMuted,
+            color: AppColors.textSecondary,
           ),
         ),
       ],

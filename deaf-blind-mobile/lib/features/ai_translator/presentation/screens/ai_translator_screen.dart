@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:record/record.dart';
 import 'package:path_provider/path_provider.dart';
-import '../../../../core/theme/design_colors.dart';
-import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/translation/sign_avatar_player.dart';
 import '../providers/ai_translator_provider.dart';
 
@@ -94,19 +94,19 @@ class _AiTranslatorScreenState extends ConsumerState<AiTranslatorScreen> with Si
     final state = ref.watch(aiTranslatorProvider);
 
     return Scaffold(
-      backgroundColor: DesignColors.bg,
+      backgroundColor: AppColors.background,
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
         title: Text(
           'ИИ-переводчик',
-          style: AppTheme.baloo(fontSize: 22, fontWeight: FontWeight.w800),
+          style: AppTextStyles.style(fontSize: 22, fontWeight: FontWeight.w800),
         ),
         bottom: TabBar(
           controller: _tabController,
-          labelColor: DesignColors.purple,
-          unselectedLabelColor: DesignColors.textMuted,
-          indicatorColor: DesignColors.purple,
+          labelColor: AppColors.primary,
+          unselectedLabelColor: AppColors.textSecondary,
+          indicatorColor: AppColors.primary,
           indicatorWeight: 3,
           labelStyle: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
           tabs: const [
@@ -151,10 +151,10 @@ class _AiTranslatorScreenState extends ConsumerState<AiTranslatorScreen> with Si
                     height: 100,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: _isRecording ? DesignColors.redLive : DesignColors.purple,
+                      color: _isRecording ? AppColors.error : AppColors.primary,
                       boxShadow: [
                         BoxShadow(
-                          color: (_isRecording ? DesignColors.redLive : DesignColors.purple).withValues(alpha: 0.35),
+                          color: (_isRecording ? AppColors.error : AppColors.primary).withValues(alpha: 0.35),
                           blurRadius: _isRecording ? 24 : 12,
                           spreadRadius: _isRecording ? 4 : 0,
                         ),
@@ -173,14 +173,14 @@ class _AiTranslatorScreenState extends ConsumerState<AiTranslatorScreen> with Si
                   style: TextStyle(
                     fontWeight: FontWeight.w800,
                     fontSize: 15,
-                    color: _isRecording ? DesignColors.redLive : DesignColors.textDark,
+                    color: _isRecording ? AppColors.error : AppColors.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   'Отпустите, чтобы перевести в жесты',
                   style: TextStyle(
-                    color: DesignColors.textMuted,
+                    color: AppColors.textSecondary,
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
                   ),
@@ -196,7 +196,7 @@ class _AiTranslatorScreenState extends ConsumerState<AiTranslatorScreen> with Si
             if (state.resultText.isNotEmpty) ...[
               Text(
                 'Распознанный текст:',
-                style: AppTheme.baloo(fontSize: 16, color: DesignColors.textDark),
+                style: AppTextStyles.style(fontSize: 16, color: AppColors.textPrimary),
               ),
               const SizedBox(height: 8),
               Container(
@@ -207,7 +207,7 @@ class _AiTranslatorScreenState extends ConsumerState<AiTranslatorScreen> with Si
                 ),
                 child: Text(
                   state.resultText,
-                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: DesignColors.textDark),
+                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
                 ),
               ),
               const SizedBox(height: 24),
@@ -215,7 +215,7 @@ class _AiTranslatorScreenState extends ConsumerState<AiTranslatorScreen> with Si
             if (state.animationIds.isNotEmpty) ...[
               Text(
                 'Показ аватаром:',
-                style: AppTheme.baloo(fontSize: 16, color: DesignColors.textDark),
+                style: AppTextStyles.style(fontSize: 16, color: AppColors.textPrimary),
               ),
               const SizedBox(height: 8),
               SignAvatarPlayer(animationIds: state.animationIds),
@@ -246,11 +246,11 @@ class _AiTranslatorScreenState extends ConsumerState<AiTranslatorScreen> with Si
                   style: const TextStyle(fontWeight: FontWeight.w700),
                   decoration: InputDecoration(
                     labelText: 'Введите жесты через запятую',
-                    labelStyle: const TextStyle(color: DesignColors.textMuted, fontWeight: FontWeight.w700),
+                    labelStyle: const TextStyle(color: AppColors.textSecondary, fontWeight: FontWeight.w700),
                     hintText: 'я, хотеть, кушать',
-                    hintStyle: TextStyle(color: DesignColors.textDim.withValues(alpha: 0.6)),
+                    hintStyle: TextStyle(color: AppColors.textTertiary.withValues(alpha: 0.6)),
                     filled: true,
-                    fillColor: DesignColors.bg,
+                    fillColor: AppColors.background,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(16),
                       borderSide: BorderSide.none,
@@ -261,7 +261,7 @@ class _AiTranslatorScreenState extends ConsumerState<AiTranslatorScreen> with Si
                 ElevatedButton(
                   onPressed: state.isLoading ? null : _translateGestures,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: DesignColors.purple,
+                    backgroundColor: AppColors.primary,
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
@@ -271,7 +271,7 @@ class _AiTranslatorScreenState extends ConsumerState<AiTranslatorScreen> with Si
                   ),
                   child: Text(
                     'Перевести жесты в текст',
-                    style: AppTheme.nunito(fontSize: 16, color: Colors.white, fontWeight: FontWeight.w800),
+                    style: AppTextStyles.style(fontSize: 16, color: Colors.white, fontWeight: FontWeight.w800),
                   ),
                 ),
               ],
@@ -283,7 +283,7 @@ class _AiTranslatorScreenState extends ConsumerState<AiTranslatorScreen> with Si
           else if (state.resultText.isNotEmpty) ...[
             Text(
               'Связное предложение:',
-              style: AppTheme.baloo(fontSize: 16, color: DesignColors.textDark),
+              style: AppTextStyles.style(fontSize: 16, color: AppColors.textPrimary),
             ),
             const SizedBox(height: 8),
             Container(
@@ -291,11 +291,11 @@ class _AiTranslatorScreenState extends ConsumerState<AiTranslatorScreen> with Si
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: DesignColors.purple.withValues(alpha: 0.1), width: 2),
+                border: Border.all(color: AppColors.primary.withValues(alpha: 0.1), width: 2),
               ),
               child: Text(
                 state.resultText,
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: DesignColors.purple),
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.primary),
               ),
             ),
           ],
@@ -324,11 +324,11 @@ class _AiTranslatorScreenState extends ConsumerState<AiTranslatorScreen> with Si
                   style: const TextStyle(fontWeight: FontWeight.w700),
                   decoration: InputDecoration(
                     labelText: 'Введите предложение на русском',
-                    labelStyle: const TextStyle(color: DesignColors.textMuted, fontWeight: FontWeight.w700),
+                    labelStyle: const TextStyle(color: AppColors.textSecondary, fontWeight: FontWeight.w700),
                     hintText: 'Я хочу кушать',
-                    hintStyle: TextStyle(color: DesignColors.textDim.withValues(alpha: 0.6)),
+                    hintStyle: TextStyle(color: AppColors.textTertiary.withValues(alpha: 0.6)),
                     filled: true,
-                    fillColor: DesignColors.bg,
+                    fillColor: AppColors.background,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(16),
                       borderSide: BorderSide.none,
@@ -339,7 +339,7 @@ class _AiTranslatorScreenState extends ConsumerState<AiTranslatorScreen> with Si
                 ElevatedButton(
                   onPressed: state.isLoading ? null : _translateText,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: DesignColors.purple,
+                    backgroundColor: AppColors.primary,
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
@@ -349,7 +349,7 @@ class _AiTranslatorScreenState extends ConsumerState<AiTranslatorScreen> with Si
                   ),
                   child: Text(
                     'Перевести в жесты',
-                    style: AppTheme.nunito(fontSize: 16, color: Colors.white, fontWeight: FontWeight.w800),
+                    style: AppTextStyles.style(fontSize: 16, color: Colors.white, fontWeight: FontWeight.w800),
                   ),
                 ),
               ],
@@ -361,7 +361,7 @@ class _AiTranslatorScreenState extends ConsumerState<AiTranslatorScreen> with Si
           else if (state.animationIds.isNotEmpty) ...[
             Text(
               'Показ аватаром:',
-              style: AppTheme.baloo(fontSize: 16, color: DesignColors.textDark),
+              style: AppTextStyles.style(fontSize: 16, color: AppColors.textPrimary),
             ),
             const SizedBox(height: 8),
             SignAvatarPlayer(animationIds: state.animationIds),

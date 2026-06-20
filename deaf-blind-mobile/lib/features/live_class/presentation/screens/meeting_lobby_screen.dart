@@ -5,9 +5,8 @@ import '../../../../core/theme/design_colors.dart';
 import '../../data/mappers/meeting_error_mapper.dart';
 import '../../domain/models/meeting.dart';
 import '../providers/meeting_providers.dart';
-import '../widgets/lobby/lobby_actions.dart';
 import '../widgets/lobby/lobby_header.dart';
-import '../widgets/lobby/lobby_join_card.dart';
+import '../widgets/lobby/lobby_scheduled_lesson_card.dart';
 import '../widgets/lobby/recent_meetings_list.dart';
 
 /// Lobby for the «Класс» tab — create or join without auto-starting video.
@@ -21,7 +20,6 @@ class MeetingLobbyScreen extends ConsumerStatefulWidget {
 }
 
 class _MeetingLobbyScreenState extends ConsumerState<MeetingLobbyScreen> {
-  final _codeController = TextEditingController();
   bool _loading = false;
   String? _error;
   List<Meeting> _recent = const [];
@@ -30,12 +28,6 @@ class _MeetingLobbyScreenState extends ConsumerState<MeetingLobbyScreen> {
   void initState() {
     super.initState();
     _bootstrap();
-  }
-
-  @override
-  void dispose() {
-    _codeController.dispose();
-    super.dispose();
   }
 
   Future<void> _bootstrap() async {
@@ -50,18 +42,6 @@ class _MeetingLobbyScreenState extends ConsumerState<MeetingLobbyScreen> {
     await _run(() async {
       final connection =
           await ref.read(meetingRepositoryProvider).createMeeting(title: 'Урок · Класс');
-      if (mounted) widget.onEnterMeeting(connection);
-    });
-  }
-
-  Future<void> _joinByCode() async {
-    final code = _codeController.text.trim().toUpperCase();
-    if (code.length < 4) {
-      setState(() => _error = 'Введите код встречи');
-      return;
-    }
-    await _run(() async {
-      final connection = await ref.read(meetingRepositoryProvider).joinMeeting(code: code);
       if (mounted) widget.onEnterMeeting(connection);
     });
   }
@@ -107,15 +87,8 @@ class _MeetingLobbyScreenState extends ConsumerState<MeetingLobbyScreen> {
         children: [
           const LobbyHeader(),
           const SizedBox(height: 24),
-          LobbyPrimaryButton(
-            label: 'Начать урок',
-            icon: Icons.videocam_rounded,
-            onTap: _loading ? null : _createMeeting,
-          ),
-          const SizedBox(height: 14),
-          LobbyJoinCard(
-            controller: _codeController,
-            onJoin: _joinByCode,
+          LobbyScheduledLessonCard(
+            onJoin: _createMeeting,
             loading: _loading,
           ),
           if (_error != null) ...[

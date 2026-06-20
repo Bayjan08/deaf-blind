@@ -6,6 +6,7 @@ pydantic-settings==2.7.1
 sqlalchemy==2.0.36
 asyncpg==0.30.0
 alembic==1.14.0
+greenlet==3.1.1  # required by SQLAlchemy async
 
 # Cloud SQL connector (used on Cloud Run instead of raw TCP)
 cloud-sql-python-connector[asyncpg]==1.13.0

@@ -346,11 +346,13 @@ class SubjectsScreen extends StatelessWidget {
   const SubjectsScreen({
     super.key,
     required this.onAlphabetMap,
+    required this.onMathMap,
     required this.onMusicNotes,
     required this.onPronunciation,
   });
 
   final VoidCallback onAlphabetMap;
+  final VoidCallback onMathMap;
   final VoidCallback onMusicNotes;
   final VoidCallback onPronunciation;
 
@@ -394,6 +396,42 @@ class SubjectsScreen extends StatelessWidget {
             badge: 'Уровень 1 · 3/5',
             badgeBg: DesignColors.greenSoft,
             badgeColor: DesignColors.green,
+          ),
+          const SizedBox(height: 14),
+          _SubjectCard(
+            onTap: onMathMap,
+            icon: Container(
+              width: 64,
+              height: 64,
+              decoration: BoxDecoration(
+                color: const Color(0xFFFF8A4C),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              alignment: Alignment.center,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  Text(
+                    '5',
+                    style: AppTheme.baloo(
+                      fontSize: 32,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.white,
+                    ),
+                  ),
+                  Positioned(
+                    bottom: 8,
+                    right: 8,
+                    child: Text('🧱', style: TextStyle(fontSize: 14)),
+                  ),
+                ],
+              ),
+            ),
+            title: 'Математика',
+            subtitle: 'Числа · счёт · задачи · 5 уровней',
+            badge: '36 тем',
+            badgeBg: const Color(0xFFFFF1E6),
+            badgeColor: const Color(0xFFFF8A4C),
           ),
           const SizedBox(height: 14),
           _SubjectCard(

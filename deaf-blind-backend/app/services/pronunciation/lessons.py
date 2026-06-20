@@ -1,5 +1,10 @@
-"""§4 Optional pronunciation lessons: articulation animation per target sound."""
+"""§4 Lesson content for the camera mouth-shape feature.
+
+Thin wrapper over `visemes` so the endpoint layer stays declarative.
+"""
+from app.services.pronunciation import visemes
 
 
-async def get_lesson(phoneme: str) -> dict:
-    raise NotImplementedError
+def get_lesson(key: str) -> dict:
+    """Return the lesson payload (ranges, copy, haptic stress cue) for `key`."""
+    return visemes.lesson(key)

@@ -10,6 +10,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.v1.api_router import api_router
+from app.api.v1.endpoints import health
 from app.core.config import API_V1_PREFIX, VERSION, settings
 from app.core.lifespan import lifespan
 from app.core.logging import setup_logging
@@ -32,6 +33,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Liveness probe — no /api/v1 prefix (Docker, load balancers, README)
+app.include_router(health.router)
 
 # All other REST endpoints live under /api/v1
 app.include_router(api_router, prefix=API_V1_PREFIX)

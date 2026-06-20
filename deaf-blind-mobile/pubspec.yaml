@@ -50,6 +50,8 @@ dependencies:
 
   # In-app WebView — hosts MediaPipe JS hand tracking (21 finger joints, like the screenshot)
   flutter_inappwebview: ^6.1.5
+  # On-device TTS — speaks translated text aloud
+  flutter_tts: ^4.2.2
   device_info_plus: ^12.4.0
 
 dev_dependencies:

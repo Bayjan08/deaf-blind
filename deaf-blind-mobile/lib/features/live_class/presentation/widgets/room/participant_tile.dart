@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:livekit_client/livekit_client.dart';
 
-import '../../../../../core/theme/design_colors.dart';
+import '../../../../../core/theme/app_colors.dart';
 import 'participant_video_utils.dart';
 
 /// Renders a participant camera track or a placeholder avatar.
@@ -23,7 +23,7 @@ class ParticipantTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final track = cameraTrackFor(participant);
     final borderColor =
-        highlighted ? DesignColors.green : Colors.white.withValues(alpha: 0.15);
+        highlighted ? AppColors.success : Colors.white.withValues(alpha: 0.15);
 
     return Container(
       decoration: BoxDecoration(

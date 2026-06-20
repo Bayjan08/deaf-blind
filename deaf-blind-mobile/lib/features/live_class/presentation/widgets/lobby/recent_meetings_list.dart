@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../../core/theme/design_colors.dart';
+import '../../../../../core/theme/app_colors.dart';
 import '../../../domain/models/meeting.dart';
 import 'recent_meeting_tile.dart';
 
@@ -19,11 +19,11 @@ class RecentMeetingsList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (loading && meetings.isEmpty) {
-      return const Center(child: CircularProgressIndicator(color: DesignColors.purple));
+      return const Center(child: CircularProgressIndicator(color: AppColors.primary));
     }
     if (meetings.isEmpty) {
       return const Center(
-        child: Text('Пока нет недавних встреч', style: TextStyle(color: DesignColors.textMuted)),
+        child: Text('Пока нет недавних встреч', style: TextStyle(color: AppColors.textSecondary)),
       );
     }
     return ListView.separated(

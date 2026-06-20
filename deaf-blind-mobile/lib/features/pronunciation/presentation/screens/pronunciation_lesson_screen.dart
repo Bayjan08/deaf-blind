@@ -6,8 +6,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import '../../../../core/ml/mouth_metrics.dart';
-import '../../../../core/theme/app_theme.dart';
-import '../../../../core/theme/design_colors.dart';
+import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/theme/app_colors.dart';
 import '../../domain/models/lesson_phase.dart';
 import '../providers/pronunciation_provider.dart';
 import '../widgets/mouth_compare.dart';
@@ -87,7 +87,7 @@ class _PronunciationLessonScreenState
   Widget build(BuildContext context) {
     final c = ref.watch(pronunciationControllerProvider);
     return Scaffold(
-      backgroundColor: DesignColors.bg,
+      backgroundColor: AppColors.background,
       body: SafeArea(
         child: Column(
           children: [
@@ -112,19 +112,19 @@ class _PronunciationLessonScreenState
         child: ClipRRect(
           borderRadius: BorderRadius.circular(24),
           child: Container(
-            color: DesignColors.bg,
+            color: AppColors.background,
             alignment: Alignment.center,
             child: Padding(
               padding: const EdgeInsets.all(20),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.videocam_off_rounded, size: 32, color: DesignColors.textMuted),
+                  const Icon(Icons.videocam_off_rounded, size: 32, color: AppColors.textSecondary),
                   const SizedBox(height: 8),
                   Text(
                     'Camera permission is required for pronunciation practice.',
                     textAlign: TextAlign.center,
-                    style: TextStyle(color: DesignColors.textMuted),
+                    style: TextStyle(color: AppColors.textSecondary),
                   ),
                   const SizedBox(height: 8),
                   TextButton(
@@ -204,17 +204,17 @@ class _Header extends StatelessWidget {
         children: [
           IconButton(
             onPressed: onBack,
-            icon: const Icon(Icons.arrow_back_rounded, color: DesignColors.textDark),
+            icon: const Icon(Icons.arrow_back_rounded, color: AppColors.textPrimary),
           ),
           Expanded(
             child: Text(
               'Pronunciation',
-              style: AppTheme.baloo(fontSize: 20, fontWeight: FontWeight.w700),
+              style: AppTextStyles.style(fontSize: 20, fontWeight: FontWeight.w700),
             ),
           ),
           IconButton(
             onPressed: onFlip,
-            icon: const Icon(Icons.flip_camera_ios_rounded, color: DesignColors.textMuted),
+            icon: const Icon(Icons.flip_camera_ios_rounded, color: AppColors.textSecondary),
             tooltip: 'Switch camera',
           ),
         ],
@@ -232,12 +232,12 @@ class _DisclaimerBanner extends StatelessWidget {
       margin: const EdgeInsets.fromLTRB(20, 0, 20, 4),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
       decoration: BoxDecoration(
-        color: DesignColors.orangeSoft,
+        color: AppColors.grey100,
         borderRadius: BorderRadius.circular(14),
       ),
       child: Row(
         children: [
-          const Icon(Icons.visibility_outlined, size: 16, color: DesignColors.orange),
+          const Icon(Icons.visibility_outlined, size: 16, color: AppColors.primary),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
@@ -245,7 +245,7 @@ class _DisclaimerBanner extends StatelessWidget {
               'The rhythm buzz works without sight.',
               style: TextStyle(
                 fontSize: 11,
-                color: DesignColors.textMuted,
+                color: AppColors.textSecondary,
                 fontWeight: FontWeight.w700,
                 height: 1.3,
               ),
@@ -286,16 +286,16 @@ class _LetterStrip extends StatelessWidget {
               width: 40,
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                color: active ? DesignColors.purple : Colors.white,
+                color: active ? AppColors.primary : Colors.white,
                 borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: DesignColors.purpleSoft),
+                border: Border.all(color: AppColors.grey100),
               ),
               child: Text(
                 letter,
-                style: AppTheme.baloo(
+                style: AppTextStyles.style(
                   fontSize: 18,
                   fontWeight: FontWeight.w800,
-                  color: active ? Colors.white : DesignColors.textDark,
+                  color: active ? Colors.white : AppColors.textPrimary,
                 ),
               ),
             ),
@@ -323,25 +323,25 @@ class _PracticeView extends StatelessWidget {
         children: [
           Text(
             'Say "${lesson.word}"  ${lesson.phoneme}',
-            style: AppTheme.baloo(fontSize: 22, fontWeight: FontWeight.w700),
+            style: AppTextStyles.style(fontSize: 22, fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: 2),
           Text(
             lesson.instructions,
             style: TextStyle(
               fontSize: 13,
-              color: DesignColors.textMuted,
+              color: AppColors.textSecondary,
               fontWeight: FontWeight.w600,
             ),
           ),
           const SizedBox(height: 10),
           // Live, on-screen directional cues while the user speaks.
           if (!controller.faceDetected)
-            _LiveHint(text: 'Center your face in the camera', color: DesignColors.textMuted)
+            _LiveHint(text: 'Center your face in the camera', color: AppColors.textSecondary)
           else if (liveCues.isEmpty)
-            _LiveHint(text: '✓ Great shape — hold it!', color: DesignColors.green)
+            _LiveHint(text: '✓ Great shape — hold it!', color: AppColors.success)
           else
-            ...liveCues.map((cue) => _LiveHint(text: cue, color: DesignColors.purple)),
+            ...liveCues.map((cue) => _LiveHint(text: cue, color: AppColors.primary)),
           const SizedBox(height: 12),
           OutlinedButton.icon(
             onPressed: recording ? null : controller.playCue,
@@ -350,7 +350,7 @@ class _PracticeView extends StatelessWidget {
                 ? 'Feel the rhythm…'
                 : 'Feel the rhythm'),
             style: OutlinedButton.styleFrom(
-              foregroundColor: DesignColors.purple,
+              foregroundColor: AppColors.primary,
               padding: const EdgeInsets.symmetric(vertical: 12),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
             ),
@@ -359,7 +359,7 @@ class _PracticeView extends StatelessWidget {
           FilledButton(
             onPressed: recording ? controller.finishAttempt : controller.startRecording,
             style: FilledButton.styleFrom(
-              backgroundColor: recording ? DesignColors.redLive : DesignColors.purple,
+              backgroundColor: recording ? AppColors.error : AppColors.primary,
               padding: const EdgeInsets.symmetric(vertical: 16),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
             ),
@@ -427,31 +427,31 @@ class _ResultView extends StatelessWidget {
           const SizedBox(height: 16),
           Text(
             feedbackText,
-            style: AppTheme.baloo(fontSize: 18, fontWeight: FontWeight.w700),
+            style: AppTextStyles.style(fontSize: 18, fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: 8),
           ...cues.map(
-            (cue) => _LiveHint(text: cue, color: DesignColors.purple),
+            (cue) => _LiveHint(text: cue, color: AppColors.primary),
           ),
           if (aiFeedback != null && aiFeedback.isNotEmpty) ...[
             const SizedBox(height: 12),
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: DesignColors.purpleSoft,
+                color: AppColors.grey100,
                 borderRadius: BorderRadius.circular(14),
               ),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Icon(Icons.graphic_eq_rounded, size: 18, color: DesignColors.purple),
+                  const Icon(Icons.graphic_eq_rounded, size: 18, color: AppColors.primary),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       aiFeedback,
                       style: TextStyle(
                         fontSize: 13,
-                        color: DesignColors.textDark,
+                        color: AppColors.textPrimary,
                         fontWeight: FontWeight.w600,
                         height: 1.3,
                       ),
@@ -465,7 +465,7 @@ class _ResultView extends StatelessWidget {
           FilledButton(
             onPressed: controller.tryAgain,
             style: FilledButton.styleFrom(
-              backgroundColor: DesignColors.purple,
+              backgroundColor: AppColors.primary,
               padding: const EdgeInsets.symmetric(vertical: 16),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
             ),
@@ -493,21 +493,21 @@ class _ErrorView extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.error_outline_rounded, size: 36, color: DesignColors.orange),
+            const Icon(Icons.error_outline_rounded, size: 36, color: AppColors.primary),
             const SizedBox(height: 10),
             Text(
               message,
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 13,
-                color: DesignColors.textMuted,
+                color: AppColors.textSecondary,
                 fontWeight: FontWeight.w600,
               ),
             ),
             const SizedBox(height: 12),
             FilledButton(
               onPressed: onRetry,
-              style: FilledButton.styleFrom(backgroundColor: DesignColors.purple),
+              style: FilledButton.styleFrom(backgroundColor: AppColors.primary),
               child: const Text('Retry'),
             ),
           ],

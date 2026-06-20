@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../../core/theme/design_colors.dart';
+import '../../../../../core/theme/app_colors.dart';
 import '../../../data/livekit/meeting_room_controller.dart';
 
 /// Bottom control bar for an active video meeting.
@@ -30,7 +30,7 @@ class MeetingControlsBar extends StatelessWidget {
             icon: controller.micEnabled ? Icons.mic_rounded : Icons.mic_off_rounded,
             color: controller.micEnabled
                 ? Colors.white.withValues(alpha: 0.18)
-                : DesignColors.redLive.withValues(alpha: 0.85),
+                : AppColors.error.withValues(alpha: 0.85),
             onTap: controller.toggleMicrophone,
           ),
           const SizedBox(width: 10),
@@ -38,7 +38,7 @@ class MeetingControlsBar extends StatelessWidget {
             icon: controller.cameraEnabled ? Icons.videocam_rounded : Icons.videocam_off_rounded,
             color: controller.cameraEnabled
                 ? Colors.white.withValues(alpha: 0.18)
-                : DesignColors.redLive.withValues(alpha: 0.85),
+                : AppColors.error.withValues(alpha: 0.85),
             onTap: controller.toggleCamera,
           ),
           const SizedBox(width: 10),
@@ -59,14 +59,14 @@ class MeetingControlsBar extends StatelessWidget {
               icon: controller.screenShareEnabled
                   ? Icons.stop_screen_share_rounded
                   : Icons.screen_share_rounded,
-              color: DesignColors.purple.withValues(alpha: 0.9),
+              color: AppColors.primary.withValues(alpha: 0.9),
               onTap: controller.toggleScreenShare,
             ),
           ],
           const SizedBox(width: 14),
           _ControlButton(
             icon: Icons.call_end_rounded,
-            color: DesignColors.redLive,
+            color: AppColors.error,
             size: 64,
             onTap: onLeave,
           ),

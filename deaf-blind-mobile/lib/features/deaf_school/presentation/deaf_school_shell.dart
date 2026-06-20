@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/theme/design_colors.dart';
+import '../../../core/theme/app_colors.dart';
 import '../../ai_translator/presentation/screens/gesture_camera_screen.dart';
 import '../../live_class/live_class.dart';
 import '../../pronunciation/pronunciation.dart';
@@ -75,7 +75,7 @@ class _DeafSchoolShellState extends State<DeafSchoolShell> {
     final showFab = showAiFab(_screen);
 
     return Scaffold(
-      backgroundColor: DesignColors.bg,
+      backgroundColor: AppColors.background,
       body: SafeArea(
         bottom: false,
         child: Stack(

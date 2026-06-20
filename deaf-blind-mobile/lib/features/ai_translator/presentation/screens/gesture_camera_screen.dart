@@ -4,8 +4,8 @@ import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import '../../../../core/network/api_client.dart';
-import '../../../../core/theme/app_theme.dart';
-import '../../../../core/theme/design_colors.dart';
+import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/theme/app_colors.dart';
 import '../../../../core/translation/translation_client.dart';
 
 // Gesture label → Russian meaning (must match backend vocabulary.py)
@@ -123,7 +123,7 @@ class _GestureCameraScreenState extends State<GestureCameraScreen> {
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
         title: Text('Распознавание жестов',
-            style: AppTheme.baloo(color: Colors.white, fontSize: 17)),
+            style: AppTextStyles.style(color: Colors.white, fontSize: 17)),
         actions: [
           IconButton(
             icon: const Icon(Icons.flip_camera_ios_rounded),
@@ -227,7 +227,7 @@ class _GestureCameraScreenState extends State<GestureCameraScreen> {
 
   Widget _buildControls() {
     return Container(
-      color: DesignColors.bg,
+      color: AppColors.background,
       padding: const EdgeInsets.fromLTRB(16, 10, 16, 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -237,8 +237,8 @@ class _GestureCameraScreenState extends State<GestureCameraScreen> {
             _lastGestureKey != null
                 ? '✅  Захвачено: ${_kMeaning[_lastGestureKey] ?? _lastGestureKey}'
                 : '📡  Удерживайте жест — он добавится автоматически',
-            style: AppTheme.nunito(
-                fontSize: 11, color: DesignColors.textMuted),
+            style: AppTextStyles.style(
+                fontSize: 11, color: AppColors.textSecondary),
             overflow: TextOverflow.ellipsis,
           ),
           const SizedBox(height: 8),
@@ -257,8 +257,8 @@ class _GestureCameraScreenState extends State<GestureCameraScreen> {
                           style: const TextStyle(
                               fontSize: 11, fontWeight: FontWeight.w700)),
                       onDeleted: () => _removeLabel(e.key),
-                      backgroundColor: DesignColors.purpleSoft,
-                      deleteIconColor: DesignColors.purple,
+                      backgroundColor: AppColors.grey100,
+                      deleteIconColor: AppColors.primary,
                       materialTapTargetSize:
                           MaterialTapTargetSize.shrinkWrap,
                     ),
@@ -275,9 +275,9 @@ class _GestureCameraScreenState extends State<GestureCameraScreen> {
                   ? null
                   : _translate,
               style: ElevatedButton.styleFrom(
-                backgroundColor: DesignColors.purple,
+                backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
-                disabledBackgroundColor: DesignColors.purpleSoft,
+                disabledBackgroundColor: AppColors.grey100,
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16)),
@@ -292,7 +292,7 @@ class _GestureCameraScreenState extends State<GestureCameraScreen> {
                       'Перевести'
                       '${_capturedLabels.isNotEmpty ? " (${_capturedLabels.length})" : ""}',
                       style:
-                          AppTheme.baloo(color: Colors.white, fontSize: 15)),
+                          AppTextStyles.style(color: Colors.white, fontSize: 15)),
             ),
           ),
           // Translation result
@@ -302,13 +302,13 @@ class _GestureCameraScreenState extends State<GestureCameraScreen> {
               width: double.infinity,
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: DesignColors.purpleSoft,
+                color: AppColors.grey100,
                 borderRadius: BorderRadius.circular(14),
               ),
               child: Text(
                 _translatedText!,
-                style: AppTheme.baloo(
-                    fontSize: 20, color: DesignColors.purple),
+                style: AppTextStyles.style(
+                    fontSize: 20, color: AppColors.primary),
                 textAlign: TextAlign.center,
               ),
             ),

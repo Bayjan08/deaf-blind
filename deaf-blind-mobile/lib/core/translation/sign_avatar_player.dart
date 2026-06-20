@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import '../theme/design_colors.dart';
-import '../theme/app_theme.dart';
+import '../theme/app_colors.dart';
+import '../theme/app_text_styles.dart';
 
 class SignAvatarPlayer extends StatefulWidget {
   const SignAvatarPlayer({super.key, required this.animationIds});
@@ -110,11 +110,11 @@ class _SignAvatarPlayerState extends State<SignAvatarPlayer> {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: activeWord != null
-                      ? DesignColors.purpleSoft
-                      : DesignColors.bg,
+                      ? AppColors.grey100
+                      : AppColors.background,
                   border: Border.all(
                     color: activeWord != null
-                        ? DesignColors.purple.withValues(alpha: 0.2)
+                        ? AppColors.primary.withValues(alpha: 0.2)
                         : Colors.transparent,
                     width: 3,
                   ),
@@ -142,14 +142,14 @@ class _SignAvatarPlayerState extends State<SignAvatarPlayer> {
                     decoration: BoxDecoration(
                       gradient: const LinearGradient(
                         colors: [
-                          DesignColors.purple,
-                          DesignColors.purpleLight,
+                          AppColors.primary,
+                          AppColors.primaryLight,
                         ],
                       ),
                       borderRadius: BorderRadius.circular(30),
                       boxShadow: [
                         BoxShadow(
-                          color: DesignColors.purple.withValues(alpha: 0.3),
+                          color: AppColors.primary.withValues(alpha: 0.3),
                           blurRadius: 10,
                           offset: const Offset(0, 4),
                         ),
@@ -157,7 +157,7 @@ class _SignAvatarPlayerState extends State<SignAvatarPlayer> {
                     ),
                     child: Text(
                       activeWord.toUpperCase(),
-                      style: AppTheme.baloo(
+                      style: AppTextStyles.style(
                         fontSize: 18,
                         color: Colors.white,
                         fontWeight: FontWeight.w800,
@@ -171,7 +171,7 @@ class _SignAvatarPlayerState extends State<SignAvatarPlayer> {
                     key: ValueKey(widget.animationIds.isEmpty ? "empty" : "done"),
                     style: TextStyle(
                       fontSize: 14,
-                      color: DesignColors.textMuted,
+                      color: AppColors.textSecondary,
                       fontWeight: FontWeight.w600,
                     ),
                   ),

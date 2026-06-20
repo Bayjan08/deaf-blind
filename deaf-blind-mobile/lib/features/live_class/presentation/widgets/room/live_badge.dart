@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:livekit_client/livekit_client.dart';
 
-import '../../../../../core/theme/design_colors.dart';
+import '../../../../../core/theme/app_colors.dart';
 
 class LiveBadge extends StatelessWidget {
   const LiveBadge({super.key, required this.quality});
@@ -11,15 +11,15 @@ class LiveBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = switch (quality) {
-      ConnectionQuality.excellent || ConnectionQuality.good => DesignColors.green,
+      ConnectionQuality.excellent || ConnectionQuality.good => AppColors.success,
       ConnectionQuality.poor => Colors.orange,
-      _ => DesignColors.redLive,
+      _ => AppColors.error,
     };
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 6),
       decoration: BoxDecoration(
-        color: DesignColors.redLive.withValues(alpha: 0.9),
+        color: AppColors.error.withValues(alpha: 0.9),
         borderRadius: BorderRadius.circular(14),
       ),
       child: Row(

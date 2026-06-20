@@ -2,8 +2,8 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_theme.dart';
-import '../../../../core/theme/design_colors.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_text_styles.dart';
 import '../models/math_content.dart';
 import '../widgets/design_widgets.dart';
 
@@ -37,7 +37,7 @@ class MathMapScreen extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [MathColors.map, DesignColors.bg],
+          colors: [MathColors.map, AppColors.background],
           stops: [0, 0.35],
         ),
       ),
@@ -55,10 +55,10 @@ class MathMapScreen extends StatelessWidget {
                   Expanded(
                     child: Text(
                       'Математика',
-                      style: AppTheme.baloo(fontSize: 20, fontWeight: FontWeight.w700, height: 1),
+                      style: AppTextStyles.style(fontSize: 20, fontWeight: FontWeight.w700, height: 1),
                     ),
                   ),
-                  const StreakBadge(compact: true),
+                  const AppStreakBadge(compact: true),
                 ],
               ),
             ),
@@ -71,7 +71,7 @@ class MathMapScreen extends StatelessWidget {
                   borderRadius: BorderRadius.circular(24),
                   boxShadow: [
                     BoxShadow(
-                      color: DesignColors.textDark.withValues(alpha: 0.12),
+                      color: AppColors.textPrimary.withValues(alpha: 0.12),
                       blurRadius: 26,
                       offset: const Offset(0, 12),
                     ),
@@ -90,7 +90,7 @@ class MathMapScreen extends StatelessWidget {
                             style: TextStyle(
                               fontWeight: FontWeight.w800,
                               fontSize: 15,
-                              color: DesignColors.textDark,
+                              color: AppColors.textPrimary,
                             ),
                           ),
                           const SizedBox(height: 7),
@@ -99,7 +99,7 @@ class MathMapScreen extends StatelessWidget {
                             child: LinearProgressIndicator(
                               value: progress,
                               minHeight: 9,
-                              backgroundColor: DesignColors.progressBg,
+                              backgroundColor: AppColors.grey200,
                               color: MathColors.primary,
                             ),
                           ),
@@ -108,7 +108,7 @@ class MathMapScreen extends StatelessWidget {
                             '$completed из $total тем пройдено',
                             style: TextStyle(
                               fontSize: 12,
-                              color: DesignColors.textMuted,
+                              color: AppColors.textSecondary,
                               fontWeight: FontWeight.w700,
                             ),
                           ),
@@ -128,7 +128,7 @@ class MathMapScreen extends StatelessWidget {
                   children: [
                     Text(
                       'Уровень ${level.level} · ${level.title}',
-                      style: AppTheme.baloo(
+                      style: AppTextStyles.style(
                         fontSize: 17,
                         fontWeight: FontWeight.w700,
                         color: MathColors.primary,
@@ -138,7 +138,7 @@ class MathMapScreen extends StatelessWidget {
                       level.subtitle,
                       style: TextStyle(
                         fontSize: 12,
-                        color: DesignColors.textMuted,
+                        color: AppColors.textSecondary,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
@@ -216,7 +216,7 @@ class _MathNodeChip extends StatelessWidget {
           boxShadow: isUnlocked
               ? [
                   BoxShadow(
-                    color: DesignColors.textDark.withValues(alpha: 0.1),
+                    color: AppColors.textPrimary.withValues(alpha: 0.1),
                     blurRadius: 16,
                     offset: const Offset(0, 8),
                   ),
@@ -231,7 +231,7 @@ class _MathNodeChip extends StatelessWidget {
                 Text(node.emoji, style: const TextStyle(fontSize: 22)),
                 const Spacer(),
                 if (!isUnlocked)
-                  Icon(Icons.lock_outline_rounded, size: 16, color: DesignColors.textDim)
+                  Icon(Icons.lock_outline_rounded, size: 16, color: AppColors.textTertiary)
                 else if (isCompleted)
                   Icon(Icons.check_circle_rounded, size: 18, color: MathColors.teal)
                 else if (isCurrent)
@@ -244,7 +244,7 @@ class _MathNodeChip extends StatelessWidget {
               style: TextStyle(
                 fontWeight: FontWeight.w800,
                 fontSize: 14,
-                color: isCurrent ? Colors.white : DesignColors.textDark,
+                color: isCurrent ? Colors.white : AppColors.textPrimary,
               ),
             ),
             Text(
@@ -252,7 +252,7 @@ class _MathNodeChip extends StatelessWidget {
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w700,
-                color: isCurrent ? Colors.white.withValues(alpha: 0.85) : DesignColors.textMuted,
+                color: isCurrent ? Colors.white.withValues(alpha: 0.85) : AppColors.textSecondary,
               ),
             ),
           ],
@@ -370,18 +370,18 @@ class _MathIntroScreenState extends State<MathIntroScreen> {
             'Изучаем',
             style: TextStyle(
               fontSize: 13,
-              color: DesignColors.textMuted,
+              color: AppColors.textSecondary,
               fontWeight: FontWeight.w800,
             ),
           ),
           Text(
             widget.node.title,
-            style: AppTheme.baloo(fontSize: 22, fontWeight: FontWeight.w700),
+            style: AppTextStyles.style(fontSize: 22, fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: 16),
           Text(
             _step.headline,
-            style: AppTheme.baloo(
+            style: AppTextStyles.style(
               fontSize: 88,
               fontWeight: FontWeight.w800,
               color: MathColors.primary,
@@ -397,7 +397,7 @@ class _MathIntroScreenState extends State<MathIntroScreen> {
               borderRadius: BorderRadius.circular(26),
               boxShadow: [
                 BoxShadow(
-                  color: DesignColors.textDark.withValues(alpha: 0.12),
+                  color: AppColors.textPrimary.withValues(alpha: 0.12),
                   blurRadius: 26,
                   offset: const Offset(0, 12),
                 ),
@@ -415,7 +415,7 @@ class _MathIntroScreenState extends State<MathIntroScreen> {
                 Text(
                   _step.caption,
                   textAlign: TextAlign.center,
-                  style: AppTheme.baloo(
+                  style: AppTextStyles.style(
                     fontSize: 20,
                     fontWeight: FontWeight.w700,
                     color: MathColors.primary,
@@ -471,7 +471,7 @@ class _MathIntroScreenState extends State<MathIntroScreen> {
                         style: TextStyle(
                           fontWeight: FontWeight.w800,
                           fontSize: 15,
-                          color: DesignColors.textDark,
+                          color: AppColors.textPrimary,
                         ),
                       ),
                       Text(
@@ -544,7 +544,7 @@ class MathCountVisual extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w800,
-                  color: DesignColors.textMuted,
+                  color: AppColors.textSecondary,
                 ),
               ),
             const SizedBox(height: 10),
@@ -657,7 +657,7 @@ class _MathPracticeScreenState extends State<MathPracticeScreen> {
                   child: LinearProgressIndicator(
                     value: (_taskIndex + 1) / total,
                     minHeight: 10,
-                    backgroundColor: DesignColors.progressBg,
+                    backgroundColor: AppColors.grey200,
                     color: MathColors.primary,
                   ),
                 ),
@@ -676,7 +676,7 @@ class _MathPracticeScreenState extends State<MathPracticeScreen> {
           const SizedBox(height: 20),
           Text(
             _task.prompt,
-            style: AppTheme.baloo(fontSize: 22, fontWeight: FontWeight.w700),
+            style: AppTextStyles.style(fontSize: 22, fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: 16),
           _TaskVisual(task: _task, feedback: _feedback),
@@ -704,7 +704,7 @@ class _MathPracticeScreenState extends State<MathPracticeScreen> {
             const Center(
               child: Text(
                 'Проверяем…',
-                style: TextStyle(fontWeight: FontWeight.w800, color: DesignColors.textMuted),
+                style: TextStyle(fontWeight: FontWeight.w800, color: AppColors.textSecondary),
               ),
             ),
           ],
@@ -714,20 +714,20 @@ class _MathPracticeScreenState extends State<MathPracticeScreen> {
               width: double.infinity,
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: DesignColors.greenSoft,
+                color: AppColors.grey100,
                 borderRadius: BorderRadius.circular(18),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.check_circle_rounded, color: DesignColors.green),
+                  Icon(Icons.check_circle_rounded, color: AppColors.success),
                   const SizedBox(width: 8),
                   Text(
                     'Верно!',
                     style: TextStyle(
                       fontWeight: FontWeight.w800,
                       fontSize: 16,
-                      color: DesignColors.green,
+                      color: AppColors.success,
                     ),
                   ),
                 ],
@@ -784,7 +784,7 @@ class _TaskVisual extends StatelessWidget {
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: DesignColors.textDark.withValues(alpha: 0.1),
+            color: AppColors.textPrimary.withValues(alpha: 0.1),
             blurRadius: 24,
             offset: const Offset(0, 10),
           ),
@@ -869,7 +869,7 @@ class _GroupBox extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 6),
-        Text('$count', style: AppTheme.baloo(fontSize: 28, fontWeight: FontWeight.w800)),
+        Text('$count', style: AppTextStyles.style(fontSize: 28, fontWeight: FontWeight.w800)),
       ],
     );
   }
@@ -891,7 +891,7 @@ class _NumberBox extends StatelessWidget {
       ),
       child: Text(
         '$n',
-        style: AppTheme.baloo(fontSize: 36, fontWeight: FontWeight.w800, color: MathColors.primary),
+        style: AppTextStyles.style(fontSize: 36, fontWeight: FontWeight.w800, color: MathColors.primary),
       ),
     );
   }
@@ -916,7 +916,7 @@ class _SignVisual extends StatelessWidget {
             borderRadius: BorderRadius.circular(12),
           ),
           alignment: Alignment.center,
-          child: Text('?', style: AppTheme.baloo(fontSize: 24, color: MathColors.primary)),
+          child: Text('?', style: AppTextStyles.style(fontSize: 24, color: MathColors.primary)),
         ),
         _NumberBox(n: task.right ?? 0),
       ],
@@ -949,7 +949,7 @@ class _ShapeIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final size = large ? 56.0 : 44.0;
-    final color = large ? MathColors.primary : DesignColors.textMuted;
+    final color = large ? MathColors.primary : AppColors.textSecondary;
     return switch (shape) {
       MathShape.circle => Container(
           width: size,
@@ -1023,7 +1023,7 @@ class _EquationVisual extends StatelessWidget {
     final op = parts[0] - parts[1] == parts[2] ? '−' : '+';
     return Text(
       '_ $op _ = ${parts[2]}',
-      style: AppTheme.baloo(fontSize: 36, fontWeight: FontWeight.w800, color: MathColors.primary),
+      style: AppTextStyles.style(fontSize: 36, fontWeight: FontWeight.w800, color: MathColors.primary),
     );
   }
 }
@@ -1051,12 +1051,12 @@ class _MoneyVisual extends StatelessWidget {
         const SizedBox(height: 8),
         Text(
           '15 ₽',
-          style: AppTheme.baloo(fontSize: 32, fontWeight: FontWeight.w800, color: MathColors.primary),
+          style: AppTextStyles.style(fontSize: 32, fontWeight: FontWeight.w800, color: MathColors.primary),
         ),
         const SizedBox(height: 8),
         Text(
           'У тебя: 10 ₽',
-          style: TextStyle(fontWeight: FontWeight.w800, color: DesignColors.textMuted),
+          style: TextStyle(fontWeight: FontWeight.w800, color: AppColors.textSecondary),
         ),
       ],
     );
@@ -1213,7 +1213,7 @@ class _TaskInputState extends State<_TaskInput> {
         PrimaryButton(
           label: 'Проверить',
           onTap: _canSubmit ? _trySubmit : () {},
-          color: _canSubmit ? MathColors.primary : DesignColors.textDim,
+          color: _canSubmit ? MathColors.primary : AppColors.textTertiary,
         ),
       ],
     );
@@ -1250,16 +1250,16 @@ class _DigitPicker extends StatelessWidget {
             alignment: Alignment.center,
             decoration: BoxDecoration(
               color: isHint
-                  ? DesignColors.greenSoft
+                  ? AppColors.grey100
                   : isSelected
                       ? MathColors.primary
                       : MathColors.soft,
               borderRadius: BorderRadius.circular(18),
-              border: isHint ? Border.all(color: DesignColors.green, width: 2) : null,
+              border: isHint ? Border.all(color: AppColors.success, width: 2) : null,
             ),
             child: Text(
               '$d',
-              style: AppTheme.baloo(
+              style: AppTextStyles.style(
                 fontSize: 32,
                 fontWeight: FontWeight.w800,
                 color: isSelected ? Colors.white : MathColors.primary,
@@ -1313,11 +1313,11 @@ class _TapCounter extends StatelessWidget {
                 duration: const Duration(milliseconds: 200),
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: done ? DesignColors.greenSoft : MathColors.soft,
+                  color: done ? AppColors.grey100 : MathColors.soft,
                   borderRadius: BorderRadius.circular(16),
-                  border: done ? Border.all(color: DesignColors.green) : null,
+                  border: done ? Border.all(color: AppColors.success) : null,
                 ),
-                child: Text(emoji, style: TextStyle(fontSize: 32, color: done ? DesignColors.green : null)),
+                child: Text(emoji, style: TextStyle(fontSize: 32, color: done ? AppColors.success : null)),
               ),
             );
           }),
@@ -1388,16 +1388,16 @@ class _PickTile extends StatelessWidget {
         alignment: Alignment.center,
         decoration: BoxDecoration(
           color: hint
-              ? DesignColors.greenSoft
+              ? AppColors.grey100
               : selected
                   ? MathColors.primary
                   : MathColors.soft,
           borderRadius: BorderRadius.circular(18),
-          border: hint ? Border.all(color: DesignColors.green, width: 2) : null,
+          border: hint ? Border.all(color: AppColors.success, width: 2) : null,
         ),
         child: Text(
           label,
-          style: AppTheme.baloo(
+          style: AppTextStyles.style(
             fontSize: 36,
             fontWeight: FontWeight.w800,
             color: selected ? Colors.white : MathColors.primary,
@@ -1431,16 +1431,16 @@ class _SignPicker extends StatelessWidget {
             alignment: Alignment.center,
             decoration: BoxDecoration(
               color: isHint
-                  ? DesignColors.greenSoft
+                  ? AppColors.grey100
                   : isSelected
                       ? MathColors.primary
                       : MathColors.soft,
               borderRadius: BorderRadius.circular(16),
-              border: isHint ? Border.all(color: DesignColors.green, width: 2) : null,
+              border: isHint ? Border.all(color: AppColors.success, width: 2) : null,
             ),
             child: Text(
               s,
-              style: AppTheme.baloo(
+              style: AppTextStyles.style(
                 fontSize: 28,
                 fontWeight: FontWeight.w800,
                 color: isSelected ? Colors.white : MathColors.primary,
@@ -1475,14 +1475,14 @@ class _ShapePicker extends StatelessWidget {
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: isHint
-                  ? DesignColors.greenSoft
+                  ? AppColors.grey100
                   : isSelected
                       ? MathColors.soft
                       : Colors.transparent,
               borderRadius: BorderRadius.circular(14),
               border: Border.all(
                 color: isHint
-                    ? DesignColors.green
+                    ? AppColors.success
                     : isSelected
                         ? MathColors.primary
                         : Colors.transparent,
@@ -1527,7 +1527,7 @@ class _PatternPicker extends StatelessWidget {
               alignment: Alignment.center,
               decoration: BoxDecoration(
                 color: isHint
-                    ? DesignColors.greenSoft
+                    ? AppColors.grey100
                     : isSelected
                         ? MathColors.primary
                         : MathColors.soft,
@@ -1569,17 +1569,17 @@ class _EquationBuilder extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             if (op == '−') ...[
-              Text('${parts[0]}', style: AppTheme.baloo(fontSize: 28, color: MathColors.primary)),
-              Text(' $op ', style: AppTheme.baloo(fontSize: 24)),
+              Text('${parts[0]}', style: AppTextStyles.style(fontSize: 28, color: MathColors.primary)),
+              Text(' $op ', style: AppTextStyles.style(fontSize: 24)),
               _EqSlot(value: slots[1]),
-              Text(' = ', style: AppTheme.baloo(fontSize: 24)),
-              Text('${parts[2]}', style: AppTheme.baloo(fontSize: 28, color: MathColors.primary)),
+              Text(' = ', style: AppTextStyles.style(fontSize: 24)),
+              Text('${parts[2]}', style: AppTextStyles.style(fontSize: 28, color: MathColors.primary)),
             ] else ...[
               _EqSlot(value: slots[0]),
-              Text(' $op ', style: AppTheme.baloo(fontSize: 24)),
+              Text(' $op ', style: AppTextStyles.style(fontSize: 24)),
               _EqSlot(value: slots[1]),
-              Text(' = ', style: AppTheme.baloo(fontSize: 24)),
-              Text('${parts[2]}', style: AppTheme.baloo(fontSize: 28, color: MathColors.primary)),
+              Text(' = ', style: AppTextStyles.style(fontSize: 24)),
+              Text('${parts[2]}', style: AppTextStyles.style(fontSize: 28, color: MathColors.primary)),
             ],
           ],
         ),
@@ -1602,10 +1602,10 @@ class _EquationBuilder extends StatelessWidget {
                 height: 52,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  color: hint && parts.contains(n) ? DesignColors.greenSoft : MathColors.soft,
+                  color: hint && parts.contains(n) ? AppColors.grey100 : MathColors.soft,
                   borderRadius: BorderRadius.circular(14),
                 ),
-                child: Text('$n', style: AppTheme.baloo(fontSize: 24, color: MathColors.primary)),
+                child: Text('$n', style: AppTextStyles.style(fontSize: 24, color: MathColors.primary)),
               ),
             );
           }).toList(),
@@ -1631,7 +1631,7 @@ class _EqSlot extends StatelessWidget {
       ),
       child: Text(
         value?.toString() ?? '?',
-        style: AppTheme.baloo(fontSize: 24, color: MathColors.primary),
+        style: AppTextStyles.style(fontSize: 24, color: MathColors.primary),
       ),
     );
   }
@@ -1726,7 +1726,7 @@ class _OrderBuilder extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: hint ? DesignColors.greenSoft : MathColors.soft,
+                    color: hint ? AppColors.grey100 : MathColors.soft,
                     borderRadius: BorderRadius.circular(14),
                   ),
                   child: Text(e, style: const TextStyle(fontSize: 28)),
@@ -1780,7 +1780,7 @@ class MathSuccessScreen extends StatelessWidget {
             const SizedBox(height: 16),
             Text(
               'Тема пройдена!',
-              style: AppTheme.baloo(fontSize: 30, fontWeight: FontWeight.w800, color: Colors.white),
+              style: AppTextStyles.style(fontSize: 30, fontWeight: FontWeight.w800, color: Colors.white),
             ),
             const SizedBox(height: 8),
             Text(

@@ -3,8 +3,8 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../../../../core/haptics/haptic_service.dart';
-import '../../../../core/theme/app_theme.dart';
-import '../../../../core/theme/design_colors.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_text_styles.dart';
 import '../models/music_note.dart';
 import '../widgets/design_widgets.dart';
 
@@ -36,7 +36,7 @@ class MusicNotesScreen extends StatelessWidget {
               Expanded(
                 child: Text(
                   'Музыка через вибрацию',
-                  style: AppTheme.baloo(fontSize: 22, fontWeight: FontWeight.w700, height: 1),
+                  style: AppTextStyles.style(fontSize: 22, fontWeight: FontWeight.w700, height: 1),
                 ),
               ),
             ],
@@ -46,7 +46,7 @@ class MusicNotesScreen extends StatelessWidget {
             'Каждая нота — это свой цвет и своя вибрация. Нажми на ноту, чтобы почувствовать её.',
             style: TextStyle(
               fontSize: 14,
-              color: DesignColors.textMuted,
+              color: AppColors.textSecondary,
               fontWeight: FontWeight.w700,
               height: 1.45,
             ),
@@ -97,7 +97,7 @@ class MusicNotesScreen extends StatelessWidget {
                           children: [
                             Text(
                               note.name,
-                              style: AppTheme.baloo(
+                              style: AppTextStyles.style(
                                 fontSize: 22,
                                 fontWeight: FontWeight.w800,
                               ),
@@ -108,7 +108,7 @@ class MusicNotesScreen extends StatelessWidget {
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
                                 fontSize: 11,
-                                color: DesignColors.textMuted,
+                                color: AppColors.textSecondary,
                                 fontWeight: FontWeight.w700,
                               ),
                             ),
@@ -128,7 +128,7 @@ class MusicNotesScreen extends StatelessWidget {
               width: double.infinity,
               padding: const EdgeInsets.symmetric(vertical: 17),
               decoration: BoxDecoration(
-                color: DesignColors.textDark,
+                color: AppColors.textPrimary,
                 borderRadius: BorderRadius.circular(20),
               ),
               child: const Row(
@@ -256,7 +256,7 @@ class _MusicGameScreenState extends State<MusicGameScreen> {
     }
 
     final solved = _feedback == _GameFeedback.correct;
-    final bg = solved ? const Color(0xFFEAF8F1) : DesignColors.bg;
+    final bg = solved ? const Color(0xFFEAF8F1) : AppColors.background;
     final ring = solved
         ? const Color(0x803DD68C)
         : const Color(0x66969DB9);
@@ -278,7 +278,7 @@ class _MusicGameScreenState extends State<MusicGameScreen> {
                 Expanded(
                   child: Text(
                     'Угадай ноту',
-                    style: AppTheme.baloo(fontSize: 20, fontWeight: FontWeight.w700),
+                    style: AppTextStyles.style(fontSize: 20, fontWeight: FontWeight.w700),
                   ),
                 ),
                 Container(
@@ -292,7 +292,7 @@ class _MusicGameScreenState extends State<MusicGameScreen> {
                     style: const TextStyle(
                       fontWeight: FontWeight.w800,
                       fontSize: 13,
-                      color: DesignColors.purple,
+                      color: AppColors.primary,
                     ),
                   ),
                 ),
@@ -343,7 +343,7 @@ class _MusicGameScreenState extends State<MusicGameScreen> {
                 final n = noteById(id)!;
                 final picked = _picked == id;
                 final border = picked
-                    ? (_feedback == _GameFeedback.correct ? DesignColors.green : const Color(0xFFFF7A66))
+                    ? (_feedback == _GameFeedback.correct ? AppColors.success : const Color(0xFFFF7A66))
                     : const Color(0xFFF1F2F8);
                 return GestureDetector(
                   onTap: () => _pick(id),
@@ -355,7 +355,7 @@ class _MusicGameScreenState extends State<MusicGameScreen> {
                       border: Border.all(color: border, width: 3),
                       boxShadow: [
                         BoxShadow(
-                          color: DesignColors.textDark.withValues(alpha: 0.12),
+                          color: AppColors.textPrimary.withValues(alpha: 0.12),
                           blurRadius: 22,
                           offset: const Offset(0, 10),
                         ),
@@ -375,11 +375,11 @@ class _MusicGameScreenState extends State<MusicGameScreen> {
                         Expanded(
                           child: Text(
                             n.name,
-                            style: AppTheme.baloo(fontSize: 20, fontWeight: FontWeight.w800),
+                            style: AppTextStyles.style(fontSize: 20, fontWeight: FontWeight.w800),
                           ),
                         ),
                         if (picked && _feedback == _GameFeedback.correct)
-                          const Icon(Icons.check_rounded, color: DesignColors.green, size: 22),
+                          const Icon(Icons.check_rounded, color: AppColors.success, size: 22),
                       ],
                     ),
                   ),
@@ -391,10 +391,10 @@ class _MusicGameScreenState extends State<MusicGameScreen> {
               Center(
                 child: Text(
                   'Верно — это «${targetNote.name}»!',
-                  style: AppTheme.baloo(
+                  style: AppTextStyles.style(
                     fontSize: 22,
                     fontWeight: FontWeight.w800,
-                    color: DesignColors.green,
+                    color: AppColors.success,
                   ),
                 ),
               ),
@@ -403,7 +403,7 @@ class _MusicGameScreenState extends State<MusicGameScreen> {
               Center(
                 child: Text(
                   'Не совсем — попробуй ещё',
-                  style: AppTheme.baloo(
+                  style: AppTextStyles.style(
                     fontSize: 16,
                     fontWeight: FontWeight.w800,
                     color: const Color(0xFFFF7A66),
@@ -445,7 +445,7 @@ class _MusicGameFinishView extends StatelessWidget {
               Expanded(
                 child: Text(
                   'Угадай ноту',
-                  style: AppTheme.baloo(fontSize: 20, fontWeight: FontWeight.w700),
+                  style: AppTextStyles.style(fontSize: 20, fontWeight: FontWeight.w700),
                 ),
               ),
             ],
@@ -454,13 +454,13 @@ class _MusicGameFinishView extends StatelessWidget {
           const Center(child: Text('🎉', style: TextStyle(fontSize: 56))),
           const SizedBox(height: 12),
           Center(
-            child: Text('Готово!', style: AppTheme.baloo(fontSize: 26, fontWeight: FontWeight.w800)),
+            child: Text('Готово!', style: AppTextStyles.style(fontSize: 26, fontWeight: FontWeight.w800)),
           ),
           const SizedBox(height: 8),
           Center(
             child: Text(
               '$score из $total правильно',
-              style: TextStyle(fontSize: 15, color: DesignColors.textMuted, fontWeight: FontWeight.w700),
+              style: TextStyle(fontSize: 15, color: AppColors.textSecondary, fontWeight: FontWeight.w700),
             ),
           ),
           const SizedBox(height: 26),
@@ -469,7 +469,7 @@ class _MusicGameFinishView extends StatelessWidget {
             child: Container(
               width: double.infinity,
               padding: const EdgeInsets.symmetric(vertical: 17),
-              decoration: BoxDecoration(color: DesignColors.purple, borderRadius: BorderRadius.circular(20)),
+              decoration: BoxDecoration(color: AppColors.primary, borderRadius: BorderRadius.circular(20)),
               child: const Center(
                 child: Text(
                   'Играть снова',
@@ -484,7 +484,7 @@ class _MusicGameFinishView extends StatelessWidget {
             child: Container(
               width: double.infinity,
               padding: const EdgeInsets.symmetric(vertical: 17),
-              decoration: BoxDecoration(color: DesignColors.textDark, borderRadius: BorderRadius.circular(20)),
+              decoration: BoxDecoration(color: AppColors.textPrimary, borderRadius: BorderRadius.circular(20)),
               child: const Center(
                 child: Text(
                   'Назад к нотам',
@@ -523,7 +523,7 @@ class _VibrationCircle extends StatelessWidget {
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
-                  color: DesignColors.textDark.withValues(alpha: 0.4),
+                  color: AppColors.textPrimary.withValues(alpha: 0.4),
                   blurRadius: 30,
                   offset: const Offset(0, 14),
                 ),
@@ -612,7 +612,7 @@ class PronunciationScreen extends StatelessWidget {
               Expanded(
                 child: Text(
                   'Произношение',
-                  style: AppTheme.baloo(fontSize: 22, fontWeight: FontWeight.w700),
+                  style: AppTextStyles.style(fontSize: 22, fontWeight: FontWeight.w700),
                 ),
               ),
             ],
@@ -640,10 +640,10 @@ class PronunciationScreen extends StatelessWidget {
               children: [
                 Text(
                   'Аа',
-                  style: AppTheme.baloo(
+                  style: AppTextStyles.style(
                     fontSize: 64,
                     fontWeight: FontWeight.w800,
-                    color: DesignColors.orange,
+                    color: AppColors.primary,
                     height: 1,
                   ),
                 ),
@@ -651,7 +651,7 @@ class PronunciationScreen extends StatelessWidget {
                   'Звук «А»',
                   style: TextStyle(
                     fontSize: 14,
-                    color: DesignColors.textMuted,
+                    color: AppColors.textSecondary,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -662,7 +662,7 @@ class PronunciationScreen extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: DesignColors.darkBg,
+              color: AppColors.textPrimary,
               borderRadius: BorderRadius.circular(26),
             ),
             child: Container(
@@ -703,7 +703,7 @@ class PronunciationScreen extends StatelessWidget {
               borderRadius: BorderRadius.circular(22),
               boxShadow: [
                 BoxShadow(
-                  color: DesignColors.textDark.withValues(alpha: 0.12),
+                  color: AppColors.textPrimary.withValues(alpha: 0.12),
                   blurRadius: 26,
                   offset: const Offset(0, 12),
                 ),
@@ -717,7 +717,7 @@ class PronunciationScreen extends StatelessWidget {
                   style: TextStyle(
                     fontWeight: FontWeight.w800,
                     fontSize: 14,
-                    color: DesignColors.textDark,
+                    color: AppColors.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 10),
@@ -755,7 +755,7 @@ class PronunciationScreen extends StatelessWidget {
             width: double.infinity,
             padding: const EdgeInsets.symmetric(vertical: 17),
             decoration: BoxDecoration(
-              color: DesignColors.orange,
+              color: AppColors.primary,
               borderRadius: BorderRadius.circular(20),
             ),
             child: const Row(
@@ -796,7 +796,7 @@ class _Bar extends StatelessWidget {
           alignment: Alignment.bottomCenter,
           child: Container(
             decoration: BoxDecoration(
-              color: sample ? DesignColors.green : const Color(0xFFE6E8F1),
+              color: sample ? AppColors.success : const Color(0xFFE6E8F1),
               borderRadius: BorderRadius.circular(3),
             ),
           ),
@@ -823,7 +823,7 @@ class LiveClassScreen extends StatelessWidget {
             gradient: RadialGradient(
               center: Alignment(0, -0.5),
               radius: 1.2,
-              colors: [Color(0xFF2E2B4D), DesignColors.liveBg],
+              colors: [Color(0xFF2A2A2A), Color(0xFF0E0E0E)],
             ),
           ),
         ),
@@ -871,7 +871,7 @@ class LiveClassScreen extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 6),
                 decoration: BoxDecoration(
-                  color: DesignColors.redLive.withValues(alpha: 0.9),
+                  color: AppColors.error.withValues(alpha: 0.9),
                   borderRadius: BorderRadius.circular(14),
                 ),
                 child: const Row(
@@ -899,7 +899,7 @@ class LiveClassScreen extends StatelessWidget {
             width: 130,
             height: 170,
             decoration: BoxDecoration(
-              color: DesignColors.purple.withValues(alpha: 0.92),
+              color: AppColors.primary.withValues(alpha: 0.92),
               borderRadius: BorderRadius.circular(20),
               boxShadow: [
                 BoxShadow(
@@ -988,7 +988,7 @@ class LiveClassScreen extends StatelessWidget {
                   'СУБТИТРЫ · речь учителя',
                   style: TextStyle(
                     fontSize: 11,
-                    color: DesignColors.purpleLight,
+                    color: AppColors.primaryLight,
                     fontWeight: FontWeight.w800,
                   ),
                 ),
@@ -1021,14 +1021,14 @@ class LiveClassScreen extends StatelessWidget {
               const SizedBox(width: 16),
               _ControlButton(
                 size: 64,
-                color: DesignColors.redLive,
+                color: AppColors.error,
                 icon: Icons.call_end_rounded,
                 iconColor: Colors.white,
               ),
               const SizedBox(width: 16),
               _ControlButton(
                 size: 52,
-                color: DesignColors.purple.withValues(alpha: 0.9),
+                color: AppColors.primary.withValues(alpha: 0.9),
                 icon: Icons.mic_rounded,
               ),
             ],
@@ -1102,10 +1102,10 @@ class _ControlButton extends StatelessWidget {
       decoration: BoxDecoration(
         color: color,
         shape: BoxShape.circle,
-        boxShadow: color == DesignColors.redLive
+        boxShadow: color == AppColors.error
             ? [
                 BoxShadow(
-                  color: DesignColors.redLive.withValues(alpha: 0.7),
+                  color: AppColors.error.withValues(alpha: 0.7),
                   blurRadius: 24,
                   offset: const Offset(0, 12),
                 ),
@@ -1137,13 +1137,13 @@ class ProfileScreen extends StatelessWidget {
           const SizedBox(height: 12),
           Text(
             'Артём, 11 лет',
-            style: AppTheme.baloo(fontSize: 24, fontWeight: FontWeight.w700),
+            style: AppTextStyles.style(fontSize: 24, fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: 6),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
             decoration: BoxDecoration(
-              color: DesignColors.purpleSoft,
+              color: AppColors.grey100,
               borderRadius: BorderRadius.circular(14),
             ),
             child: const Text(
@@ -1151,18 +1151,18 @@ class ProfileScreen extends StatelessWidget {
               style: TextStyle(
                 fontWeight: FontWeight.w800,
                 fontSize: 13,
-                color: DesignColors.purple,
+                color: AppColors.primary,
               ),
             ),
           ),
           const SizedBox(height: 22),
           Row(
             children: [
-              Expanded(child: _ProfileStat('12', 'дней подряд', DesignColors.orange)),
+              Expanded(child: _ProfileStat('12', 'дней подряд', AppColors.primary)),
               const SizedBox(width: 10),
-              Expanded(child: _ProfileStat('47', 'жестов', DesignColors.purple)),
+              Expanded(child: _ProfileStat('47', 'жестов', AppColors.primary)),
               const SizedBox(width: 10),
-              Expanded(child: _ProfileStat('8', 'наград', DesignColors.green)),
+              Expanded(child: _ProfileStat('8', 'наград', AppColors.success)),
             ],
           ),
           const SizedBox(height: 22),
@@ -1170,7 +1170,7 @@ class ProfileScreen extends StatelessWidget {
             alignment: Alignment.centerLeft,
             child: Text(
               'Аналитика от ИИ',
-              style: AppTheme.baloo(fontSize: 18, fontWeight: FontWeight.w700),
+              style: AppTextStyles.style(fontSize: 18, fontWeight: FontWeight.w700),
             ),
           ),
           const SizedBox(height: 12),
@@ -1181,7 +1181,7 @@ class ProfileScreen extends StatelessWidget {
               borderRadius: BorderRadius.circular(22),
               boxShadow: [
                 BoxShadow(
-                  color: DesignColors.textDark.withValues(alpha: 0.12),
+                  color: AppColors.textPrimary.withValues(alpha: 0.12),
                   blurRadius: 26,
                   offset: const Offset(0, 12),
                 ),
@@ -1196,7 +1196,7 @@ class ProfileScreen extends StatelessWidget {
                       width: 28,
                       height: 28,
                       decoration: BoxDecoration(
-                        color: DesignColors.purple,
+                        color: AppColors.primary,
                         borderRadius: BorderRadius.circular(9),
                       ),
                       child: const Icon(Icons.auto_awesome, color: Colors.white, size: 14),
@@ -1207,7 +1207,7 @@ class ProfileScreen extends StatelessWidget {
                       style: TextStyle(
                         fontWeight: FontWeight.w800,
                         fontSize: 14,
-                        color: DesignColors.textDark,
+                        color: AppColors.textPrimary,
                       ),
                     ),
                   ],
@@ -1217,7 +1217,7 @@ class ProfileScreen extends StatelessWidget {
                 const SizedBox(height: 10),
                 _WeakLetter('Буква П', 0.62, const Color(0xFFFFB23E), const Color(0xFFFFF2DF)),
                 const SizedBox(height: 10),
-                _WeakLetter('Буква М', 0.92, DesignColors.green, const Color(0xFFE2F6EC)),
+                _WeakLetter('Буква М', 0.92, AppColors.success, const Color(0xFFE2F6EC)),
                 const SizedBox(height: 16),
                 GestureDetector(
                   onTap: onAlphabetMap,
@@ -1225,7 +1225,7 @@ class ProfileScreen extends StatelessWidget {
                     width: double.infinity,
                     padding: const EdgeInsets.symmetric(vertical: 13),
                     decoration: BoxDecoration(
-                      color: DesignColors.purpleSoft,
+                      color: AppColors.grey100,
                       borderRadius: BorderRadius.circular(14),
                     ),
                     alignment: Alignment.center,
@@ -1234,7 +1234,7 @@ class ProfileScreen extends StatelessWidget {
                       style: TextStyle(
                         fontWeight: FontWeight.w800,
                         fontSize: 14,
-                        color: DesignColors.purple,
+                        color: AppColors.primary,
                       ),
                     ),
                   ),
@@ -1250,7 +1250,7 @@ class ProfileScreen extends StatelessWidget {
               borderRadius: BorderRadius.circular(22),
               boxShadow: [
                 BoxShadow(
-                  color: DesignColors.textDark.withValues(alpha: 0.12),
+                  color: AppColors.textPrimary.withValues(alpha: 0.12),
                   blurRadius: 26,
                   offset: const Offset(0, 12),
                 ),
@@ -1259,16 +1259,16 @@ class ProfileScreen extends StatelessWidget {
             child: Column(
               children: [
                 _SettingsRow(
-                  iconBg: DesignColors.purpleSoft,
+                  iconBg: AppColors.grey100,
                   icon: Icons.pets_rounded,
-                  iconColor: DesignColors.purple,
+                  iconColor: AppColors.primary,
                   label: 'Питомец и награды',
                 ),
                 Divider(height: 1, color: const Color(0xFFF1F2F8), indent: 14, endIndent: 14),
                 _SettingsRow(
-                  iconBg: DesignColors.orangeSoft,
+                  iconBg: AppColors.grey100,
                   icon: Icons.star_outline_rounded,
-                  iconColor: DesignColors.orange,
+                  iconColor: AppColors.primary,
                   label: 'Доступность и вибрация',
                 ),
               ],
@@ -1296,7 +1296,7 @@ class _ProfileStat extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: DesignColors.textDark.withValues(alpha: 0.1),
+            color: AppColors.textPrimary.withValues(alpha: 0.1),
             blurRadius: 22,
             offset: const Offset(0, 10),
           ),
@@ -1306,14 +1306,14 @@ class _ProfileStat extends StatelessWidget {
         children: [
           Text(
             value,
-            style: AppTheme.baloo(fontSize: 22, fontWeight: FontWeight.w800, color: color),
+            style: AppTextStyles.style(fontSize: 22, fontWeight: FontWeight.w800, color: color),
           ),
           Text(
             label,
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 11,
-              color: DesignColors.textMuted,
+              color: AppColors.textSecondary,
               fontWeight: FontWeight.w800,
             ),
           ),
@@ -1342,7 +1342,7 @@ class _WeakLetter extends StatelessWidget {
             style: const TextStyle(
               fontWeight: FontWeight.w800,
               fontSize: 14,
-              color: DesignColors.textDark,
+              color: AppColors.textPrimary,
             ),
           ),
         ),
@@ -1406,11 +1406,11 @@ class _SettingsRow extends StatelessWidget {
               style: const TextStyle(
                 fontWeight: FontWeight.w800,
                 fontSize: 15,
-                color: DesignColors.textDark,
+                color: AppColors.textPrimary,
               ),
             ),
           ),
-          Icon(Icons.chevron_right_rounded, color: DesignColors.textDim, size: 20),
+          Icon(Icons.chevron_right_rounded, color: AppColors.textTertiary, size: 20),
         ],
       ),
     );

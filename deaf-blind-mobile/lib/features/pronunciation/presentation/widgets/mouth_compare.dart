@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/ml/mouth_metrics.dart';
-import '../../../../core/theme/design_colors.dart';
+import '../../../../core/theme/app_colors.dart';
 
 /// §4.4 Side-by-side stylized mouths: the target shape vs the learner's best
 /// attempt. Both are drawn the same way (from normalized metrics) so they're
@@ -23,7 +23,7 @@ class MouthCompare extends StatelessWidget {
             label: 'Target',
             lipGap: target['lipGap'] ?? 0.1,
             mouthWidth: target['mouthWidth'] ?? 0.45,
-            accent: DesignColors.green,
+            accent: AppColors.success,
           ),
         ),
         const SizedBox(width: 14),
@@ -32,7 +32,7 @@ class MouthCompare extends StatelessWidget {
             label: 'You',
             lipGap: attempt?.lipGap ?? 0.1,
             mouthWidth: attempt?.mouthWidth ?? 0.45,
-            accent: DesignColors.purple,
+            accent: AppColors.primary,
             empty: attempt == null,
           ),
         ),
@@ -73,7 +73,7 @@ class _MouthCard extends StatelessWidget {
                     child: Text(
                       '—',
                       style: TextStyle(
-                        color: DesignColors.textDim,
+                        color: AppColors.textTertiary,
                         fontSize: 28,
                         fontWeight: FontWeight.w800,
                       ),

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/design_colors.dart';
+import '../../../../core/theme/app_colors.dart';
 import '../app_screen.dart';
 
 class DesignBottomNav extends StatelessWidget {
@@ -19,16 +19,16 @@ class DesignBottomNav extends StatelessWidget {
   final VoidCallback onClass;
   final VoidCallback onProfile;
 
-  static const _on = DesignColors.purple;
-  static const _off = DesignColors.navOff;
+  static const _on = AppColors.primary;
+  static const _off = AppColors.textTertiary;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       height: 84,
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.92),
-        border: const Border(top: BorderSide(color: DesignColors.navBorder)),
+        color: AppColors.white.withValues(alpha: 0.96),
+        border: Border(top: BorderSide(color: AppColors.grey200)),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -102,7 +102,7 @@ class _NavItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = active ? DesignColors.purple : DesignColors.navOff;
+    final color = active ? AppColors.primary : AppColors.textTertiary;
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
@@ -117,7 +117,7 @@ class _NavItem extends StatelessWidget {
               label,
               style: TextStyle(
                 fontSize: 11,
-                fontWeight: FontWeight.w800,
+                fontWeight: FontWeight.w600,
                 color: color,
               ),
             ),
@@ -141,22 +141,9 @@ class AiTranslatorFab extends StatelessWidget {
         width: 60,
         height: 60,
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(22),
-          gradient: const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              DesignColors.fabGradientStart,
-              DesignColors.fabGradientEnd,
-            ],
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: DesignColors.fabGradientEnd.withValues(alpha: 0.7),
-              blurRadius: 26,
-              offset: const Offset(0, 14),
-            ),
-          ],
+          borderRadius: BorderRadius.circular(18),
+          color: AppColors.primary,
+          boxShadow: AppShadows.heavy,
         ),
         child: const Icon(
           Icons.translate_rounded,

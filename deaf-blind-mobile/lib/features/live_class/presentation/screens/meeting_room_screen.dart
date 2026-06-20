@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/theme/design_colors.dart';
 import '../../domain/models/meeting.dart';
 import '../../domain/models/meeting_room_phase.dart';
 import '../providers/meeting_providers.dart';
@@ -109,7 +108,7 @@ class _MeetingRoomScreenState extends ConsumerState<MeetingRoomScreen> {
             gradient: RadialGradient(
               center: Alignment(0, -0.5),
               radius: 1.2,
-              colors: [Color(0xFF2E2B4D), DesignColors.liveBg],
+              colors: [Color(0xFF2E2B4D), Color(0xFF0E0E0E)],
             ),
           ),
         ),

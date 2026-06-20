@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/design_colors.dart';
 
 class DesignBackButton extends StatelessWidget {
@@ -22,26 +23,91 @@ class DesignBackButton extends StatelessWidget {
         decoration: BoxDecoration(
           color: light
               ? Colors.white.withValues(alpha: 0.16)
-              : Colors.white,
+              : AppColors.white,
           borderRadius: BorderRadius.circular(13),
-          boxShadow: light
-              ? null
-              : [
-                  BoxShadow(
-                    color: DesignColors.textDark.withValues(alpha: 0.08),
-                    blurRadius: 14,
-                    offset: const Offset(0, 6),
-                  ),
-                ],
+          boxShadow: light ? null : AppShadows.light,
         ),
         child: Transform.scale(
           scaleX: -1,
           child: Icon(
             Icons.arrow_back_ios_new_rounded,
             size: 16,
-            color: light ? Colors.white : DesignColors.textDark,
+            color: light ? Colors.white : AppColors.textPrimary,
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// Unaa-style streak badge for screens other than the Deaf School home tab
+/// (which keeps the original orange [StreakBadge]).
+class AppStreakBadge extends StatelessWidget {
+  const AppStreakBadge({super.key, this.compact = false});
+
+  final bool compact;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+      decoration: BoxDecoration(
+        color: compact ? AppColors.white : AppColors.grey100,
+        borderRadius: BorderRadius.circular(compact ? 16 : 20),
+        boxShadow: compact ? AppShadows.light : null,
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            Icons.local_fire_department_rounded,
+            size: compact ? 14 : 15,
+            color: AppColors.primary,
+          ),
+          const SizedBox(width: 5),
+          Text(
+            '12',
+            style: TextStyle(
+              fontWeight: FontWeight.w600,
+              color: AppColors.textPrimary,
+              fontSize: compact ? 14 : 15,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Unaa-style avatar for screens other than the Deaf School home tab (which
+/// keeps the original [AvatarImage]).
+class AppAvatarImage extends StatelessWidget {
+  const AppAvatarImage({
+    super.key,
+    required this.size,
+    this.borderWidth = 0,
+  });
+
+  final double size;
+  final double borderWidth;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: AppColors.grey200,
+        boxShadow: AppShadows.medium,
+        border: borderWidth > 0
+            ? Border.all(color: AppColors.white, width: borderWidth)
+            : null,
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Image.asset(
+        'assets/images/avatar.png',
+        fit: BoxFit.cover,
       ),
     );
   }
@@ -152,15 +218,9 @@ class CardShadow extends StatelessWidget {
     return Container(
       padding: padding,
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(22),
-        boxShadow: [
-          BoxShadow(
-            color: DesignColors.textDark.withValues(alpha: 0.12),
-            blurRadius: 26,
-            offset: const Offset(0, 12),
-          ),
-        ],
+        color: AppColors.cardBackground,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: AppShadows.medium,
       ),
       child: child,
     );
@@ -172,7 +232,7 @@ class PrimaryButton extends StatelessWidget {
     super.key,
     required this.label,
     required this.onTap,
-    this.color = DesignColors.purple,
+    this.color = AppColors.primary,
     this.textColor = Colors.white,
   });
 
@@ -187,24 +247,18 @@ class PrimaryButton extends StatelessWidget {
       onTap: onTap,
       child: Container(
         width: double.infinity,
-        padding: const EdgeInsets.symmetric(vertical: 17),
+        padding: const EdgeInsets.symmetric(vertical: 16),
         decoration: BoxDecoration(
           color: color,
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: color.withValues(alpha: 0.5),
-              blurRadius: 24,
-              offset: const Offset(0, 14),
-            ),
-          ],
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: AppShadows.medium,
         ),
         alignment: Alignment.center,
         child: Text(
           label,
           style: TextStyle(
-            fontWeight: FontWeight.w800,
-            fontSize: 17,
+            fontWeight: FontWeight.w600,
+            fontSize: 16,
             color: textColor,
           ),
         ),
@@ -232,8 +286,8 @@ class LockedLevelNode extends StatelessWidget {
           width: large ? 92 : 74,
           height: large ? 78 : 70,
           decoration: BoxDecoration(
-            color: const Color(0xFFE7E9F1),
-            borderRadius: BorderRadius.circular(large ? 22 : 20),
+            color: AppColors.grey100,
+            borderRadius: BorderRadius.circular(large ? 18 : 16),
           ),
           child: Stack(
             alignment: Alignment.center,
@@ -254,7 +308,7 @@ class LockedLevelNode extends StatelessWidget {
               Icon(
                 Icons.lock_outline_rounded,
                 size: 20,
-                color: DesignColors.textDim,
+                color: AppColors.textTertiary,
               ),
             ],
           ),
@@ -262,10 +316,10 @@ class LockedLevelNode extends StatelessWidget {
         const SizedBox(height: 6),
         Text(
           label,
-          style: const TextStyle(
-            fontWeight: FontWeight.w800,
+          style: TextStyle(
+            fontWeight: FontWeight.w600,
             fontSize: 12,
-            color: DesignColors.textDim,
+            color: AppColors.textTertiary,
           ),
           textAlign: TextAlign.center,
         ),
@@ -277,7 +331,7 @@ class LockedLevelNode extends StatelessWidget {
         width: 14,
         height: h,
         decoration: BoxDecoration(
-          color: const Color(0xFFCFD3E2),
+          color: AppColors.grey300,
           borderRadius: BorderRadius.circular(3),
         ),
       );

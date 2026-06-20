@@ -1,0 +1,48 @@
+# Cloud Build pipeline: build image -> push to Artifact Registry -> deploy to Cloud Run.
+#
+# Two triggers use this same file with different substitutions:
+#   dev  trigger -> _SERVICE=deaf-blind-api-dev,  _ENV=dev
+#   main trigger -> _SERVICE=deaf-blind-api-prod, _ENV=prod
+#
+# Image is tagged with the commit SHA so every deploy is traceable.
+
+substitutions:
+  _SERVICE: deaf-blind-api-dev   # overridden per trigger
+  _ENV: dev                      # overridden per trigger
+  _REGION: europe-west1
+  _REPO: deaf-blind              # Artifact Registry repo name
+
+steps:
+  # 1. Build the Docker image (context = the backend folder).
+  - name: gcr.io/cloud-builders/docker
+    dir: deaf-blind-backend
+    args:
+      - build
+      - -t
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/${_SERVICE}:$SHORT_SHA
+      - .
+
+  # 2. Push it to Artifact Registry.
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - push
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/${_SERVICE}:$SHORT_SHA
+
+  # 3. Deploy to Cloud Run.
+  - name: gcr.io/google.com/cloudsdktool/cloud-sdk
+    entrypoint: gcloud
+    args:
+      - run
+      - deploy
+      - ${_SERVICE}
+      - --image=${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/${_SERVICE}:$SHORT_SHA
+      - --region=${_REGION}
+      - --platform=managed
+      - --allow-unauthenticated
+      - --set-env-vars=ENV=${_ENV}
+
+images:
+  - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/${_SERVICE}:$SHORT_SHA
+
+options:
+  logging: CLOUD_LOGGING_ONLY

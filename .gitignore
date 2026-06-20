@@ -13,7 +13,6 @@ env/
 # OS / editor
 .DS_Store
 .idea/
-.vscode/
 
 # Mobile (adjust to your stack)
 node_modules/

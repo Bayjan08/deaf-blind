@@ -1,0 +1,32 @@
+services:
+  backend:
+    build:
+      context: ./deaf-blind-backend
+      dockerfile: Dockerfile
+    ports:
+      - "9000:9000"
+    # Load DB credentials + config from the backend .env file.
+    env_file:
+      - ./deaf-blind-backend/.env
+    # Live-reload: mount source, exclude the host .venv so it doesn't mask the image.
+    volumes:
+      - ./deaf-blind-backend:/app
+      - /app/.venv
+    command: uvicorn main:app --host 0.0.0.0 --port 9000 --reload
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:9000/health')"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 8s
+
+  # Uncomment when the mobile app is ready
+  # mobile:
+  #   build:
+  #     context: ./deaf-blind-mobile
+  #   ports:
+  #     - "8081:8081"
+  #   environment:
+  #     BACKEND_URL: http://backend:9000
+  #   volumes:
+  #     - ./deaf-blind-mobile:/app

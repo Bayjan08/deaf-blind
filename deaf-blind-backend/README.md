@@ -9,12 +9,12 @@ cd deaf-blind-backend
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 cp .env.example .env          # then edit values
-uvicorn main:app --reload --port 8080
+uvicorn main:app --reload --port 9000
 ```
 
-- API:  http://localhost:8080
-- Docs: http://localhost:8080/docs  (dev only)
-- Health: http://localhost:8080/health
+- API:  http://localhost:9000
+- Docs: http://localhost:9000/docs  (dev only)
+- Health: http://localhost:9000/health
 
 ## Environments
 

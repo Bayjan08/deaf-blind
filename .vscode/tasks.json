@@ -1,0 +1,45 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Run Backend",
+      "type": "shell",
+      "command": "docker compose up --build backend",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new",
+        "label": "Backend (Docker) :9000"
+      },
+      "isBackground": true,
+      "problemMatcher": {
+        "pattern": { "regexp": "^$" },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "Building|Started",
+          "endsPattern": "Application startup complete"
+        }
+      }
+    },
+    {
+      "label": "Run Mobile",
+      "type": "shell",
+      "command": "echo 'Add your mobile run command here (Flutter: flutter run, React Native: npx react-native start)'",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new",
+        "label": "Mobile"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Run Both",
+      "dependsOn": ["Run Backend", "Run Mobile"],
+      "dependsOrder": "parallel",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    }
+  ]
+}

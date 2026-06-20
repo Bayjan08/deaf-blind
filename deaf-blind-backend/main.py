@@ -33,10 +33,6 @@ def health():
     return {"status": "healthy", "env": settings.ENV}
 
 
-@app.get("/test")
-def test():
-    """Test endpoint — shows the deployment is working."""
-    return {"message": "Backend deployed and running!", "env": settings.ENV, "version": "0.1.0"}
 
 
 # ---- Add your real routes below ----

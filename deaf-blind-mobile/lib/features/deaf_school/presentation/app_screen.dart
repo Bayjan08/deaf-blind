@@ -13,6 +13,7 @@ enum AppScreen {
   mathIntro,
   mathPractice,
   mathSuccess,
+  flashcards,
   classLobby,
   liveclass,
   profile,
@@ -36,6 +37,7 @@ NavTab navTabForScreen(AppScreen screen) {
     AppScreen.mathIntro,
     AppScreen.mathPractice,
     AppScreen.mathSuccess,
+    AppScreen.flashcards,
   };
   return switch (screen) {
     AppScreen.home => NavTab.home,

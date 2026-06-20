@@ -1,5 +1,6 @@
 .venv/
 __pycache__/
 *.pyc
-.envthird_party/slovo/.git
+.env
+third_party/slovo/.git
 third_party/sign-language/.git

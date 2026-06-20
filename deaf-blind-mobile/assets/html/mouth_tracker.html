@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; background: #000; overflow: hidden; }
+    #container { position: relative; width: 100vw; height: 100vh; }
+    #video { display: none; }
+    #canvas {
+      position: absolute; top: 0; left: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+    }
+    #pill {
+      position: absolute; bottom: 18px; left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.72);
+      color: #00E5FF;
+      padding: 10px 28px;
+      border-radius: 24px;
+      font: 700 16px/1 'Arial', sans-serif;
+      border: 2px solid #00E5FF;
+      white-space: nowrap;
+      z-index: 10;
+    }
+  </style>
+</head>
+<body>
+<div id="container">
+  <video id="video" autoplay playsinline muted></video>
+  <canvas id="canvas"></canvas>
+  <div id="pill">Загрузка...</div>
+</div>
+
+<!-- MediaPipe Face Mesh CDN (classic, no ES modules — works in WebView, iOS + Android) -->
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils@0.3/drawing_utils.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh@0.4/face_mesh.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils@0.3/camera_utils.js" crossorigin="anonymous"></script>
+
+<script>
+// ─── Face Mesh landmark indices (canonical 468-point model) ───────────────────
+const EYE_L = 33, EYE_R = 263;       // outer eye corners (interocular scale)
+const LIP_TOP = 13, LIP_BOTTOM = 14; // inner lip centre (vertical opening)
+const CORNER_L = 61, CORNER_R = 291; // mouth corners (width)
+const CHIN = 152;                    // jaw
+
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+const pill = document.getElementById('pill');
+
+function dist(a, b, w, h) {
+  const dx = (a.x - b.x) * w;
+  const dy = (a.y - b.y) * h;
+  return Math.sqrt(dx * dx + dy * dy);
+}
+
+// Same metrics as the backend `visemes` ranges (interocular-normalized).
+function computeMetrics(lm, w, h) {
+  const interocular = dist(lm[EYE_L], lm[EYE_R], w, h);
+  if (interocular < 1) return null;
+  const lipGap = dist(lm[LIP_TOP], lm[LIP_BOTTOM], w, h) / interocular;
+  const mouthWidth = dist(lm[CORNER_L], lm[CORNER_R], w, h) / interocular;
+  const jawOpen = dist(lm[LIP_TOP], lm[CHIN], w, h) / interocular;
+  const rounding = mouthWidth / Math.max(lipGap, 0.02);
+  const lipClosure = Math.min(Math.max(1 - lipGap / 0.12, 0), 1);
+  return { lipGap, mouthWidth, jawOpen, rounding, lipClosure };
+}
+
+function postToFlutter(payload) {
+  try {
+    if (window.flutter_inappwebview) {
+      window.flutter_inappwebview.callHandler('MouthChannel', JSON.stringify(payload));
+    }
+  } catch (e) { console.error('post error', e); }
+}
+
+function onResults(results) {
+  if (!results.image) return;
+  canvas.width = results.image.width;
+  canvas.height = results.image.height;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.drawImage(results.image, 0, 0, canvas.width, canvas.height);
+
+  const faces = results.multiFaceLandmarks;
+  if (faces && faces.length > 0) {
+    const lm = faces[0];
+    // Draw the lip outline so the user sees their mouth being tracked.
+    if (window.FACEMESH_LIPS) {
+      drawConnectors(ctx, lm, FACEMESH_LIPS, { color: '#00FF88', lineWidth: 2 });
+    }
+    const metrics = computeMetrics(lm, canvas.width, canvas.height);
+    if (metrics) {
+      postToFlutter({ face: true, metrics });
+      pill.textContent = '🙂 Лицо найдено';
+      pill.style.borderColor = '#00FF88';
+      return;
+    }
+  }
+  postToFlutter({ face: false });
+  pill.textContent = '🙂 Покажите лицо';
+  pill.style.borderColor = '#555';
+}
+
+// ─── Face Mesh setup ──────────────────────────────────────────────────────────
+const faceMesh = new FaceMesh({
+  locateFile: (f) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh@0.4/${f}`,
+});
+faceMesh.setOptions({
+  maxNumFaces: 1,
+  refineLandmarks: true,
+  minDetectionConfidence: 0.5,
+  minTrackingConfidence: 0.5,
+});
+faceMesh.onResults(onResults);
+
+// ─── Camera bootstrap (mirrors hand_tracker.html) ─────────────────────────────
+const video = document.getElementById('video');
+let currentFacingMode = 'user';
+let activeStream = null;
+let activeCamera = null;
+let isMirrored = true;
+
+function updateMirroring() {
+  canvas.style.transform = isMirrored ? 'scaleX(-1)' : 'scaleX(1)';
+}
+function toggleMirror() { isMirrored = !isMirrored; updateMirroring(); return isMirrored; }
+
+function startCamera() {
+  if (activeCamera) activeCamera.stop();
+  if (activeStream) activeStream.getTracks().forEach((t) => t.stop());
+  updateMirroring();
+  navigator.mediaDevices.getUserMedia({
+    video: { facingMode: currentFacingMode, width: { ideal: 640 }, height: { ideal: 480 } },
+    audio: false,
+  }).then((stream) => {
+    activeStream = stream;
+    video.srcObject = stream;
+    video.style.display = 'block';
+    activeCamera = new Camera(video, {
+      onFrame: async () => { await faceMesh.send({ image: video }); },
+      width: 640, height: 480,
+    });
+    activeCamera.start();
+    pill.textContent = '🙂 Покажите лицо';
+  }).catch((err) => {
+    pill.textContent = '❌ ' + err.message;
+    pill.style.borderColor = '#f44';
+    console.error('Camera error:', err);
+  });
+}
+
+function switchCamera() {
+  currentFacingMode = (currentFacingMode === 'user') ? 'environment' : 'user';
+  startCamera();
+  return currentFacingMode;
+}
+
+startCamera();
+</script>
+</body>
+</html>

@@ -31,7 +31,7 @@ class Env {
     }
     // If not injected, automatically switch default based on device type
     if (isPhysicalDevice) {
-      _resolvedBaseUrl = 'http://127.0.0.1:9000';
+      _resolvedBaseUrl = 'http://192.168.0.158:9000';
     } else {
       _resolvedBaseUrl = 'http://10.0.2.2:9000';
     }

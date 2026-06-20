@@ -1,6 +1,6 @@
 import 'dart:math' as math;
 
-import 'face_landmark_models.dart';
+import 'mouth_metrics.dart';
 
 /// Result of comparing a mouth shape to a target viseme.
 class MouthComparison {

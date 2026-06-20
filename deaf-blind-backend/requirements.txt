@@ -1,5 +1,7 @@
 fastapi==0.115.6
 uvicorn[standard]==0.34.0
+# Multipart form parsing (pronunciation audio-clip uploads, §4)
+python-multipart==0.0.20
 pydantic-settings==2.7.1
 
 # Database

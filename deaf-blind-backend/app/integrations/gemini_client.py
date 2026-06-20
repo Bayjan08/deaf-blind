@@ -44,6 +44,22 @@ class GeminiClient:
 
     async def generate(self, prompt: str, system_instruction: Optional[str] = None) -> str:
         """Send a prompt to Gemini and return the text response."""
+        return await self._generate([prompt], system_instruction)
+
+    async def generate_with_audio(
+        self,
+        prompt: str,
+        audio_bytes: bytes,
+        mime_type: str,
+        system_instruction: Optional[str] = None,
+    ) -> str:
+        """Send a prompt plus an inline audio clip to Gemini and return the text response."""
+        from vertexai.generative_models import Part
+
+        audio_part = Part.from_data(data=audio_bytes, mime_type=mime_type)
+        return await self._generate([prompt, audio_part], system_instruction)
+
+    async def _generate(self, parts: list, system_instruction: Optional[str] = None) -> str:
         from vertexai.generative_models import GenerationConfig, GenerativeModel
 
         model = (
@@ -53,7 +69,7 @@ class GeminiClient:
         )
         response = await asyncio.to_thread(
             model.generate_content,
-            prompt,
+            parts,
             generation_config=GenerationConfig(temperature=0.3),
         )
         try:

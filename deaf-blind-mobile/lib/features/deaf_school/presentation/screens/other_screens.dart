@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../../../../core/haptics/haptic_service.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/design_colors.dart';
 import '../models/music_note.dart';
@@ -155,29 +156,112 @@ class MusicNotesScreen extends StatelessWidget {
 
 // ─── MUSIC GAME ──────────────────────────────────────────────────────────────
 
-class MusicGameScreen extends StatelessWidget {
-  const MusicGameScreen({
-    super.key,
-    required this.onBack,
-    required this.gamePick,
-    required this.onPick,
-  });
+enum _GameFeedback { none, wrong, correct }
+
+class MusicGameScreen extends StatefulWidget {
+  const MusicGameScreen({super.key, required this.onBack});
 
   final VoidCallback onBack;
-  final String? gamePick;
-  final ValueChanged<String> onPick;
 
-  bool get gameSolved => gamePick == 'fa';
+  @override
+  State<MusicGameScreen> createState() => _MusicGameScreenState();
+}
+
+class _MusicGameScreenState extends State<MusicGameScreen> {
+  static const _totalRounds = 5;
+
+  final HapticService _haptics = const VibrationHapticService();
+  final math.Random _random = math.Random();
+
+  late List<String> _targets;
+  late List<String> _options;
+  int _round = 0;
+  String? _picked;
+  _GameFeedback _feedback = _GameFeedback.none;
+  int _score = 0;
+  bool _finished = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _startGame();
+  }
+
+  void _startGame() {
+    _targets = List.generate(_totalRounds, (_) => musicNotes[_random.nextInt(musicNotes.length)].id);
+    _round = 0;
+    _score = 0;
+    _finished = false;
+    _newOptions();
+    _playTarget();
+  }
+
+  void _newOptions() {
+    final target = _targets[_round];
+    final others = musicNotes.map((n) => n.id).where((id) => id != target).toList()..shuffle(_random);
+    _options = [target, ...others.take(3)]..shuffle(_random);
+    _picked = null;
+    _feedback = _GameFeedback.none;
+  }
+
+  void _playTarget() {
+    final target = noteById(_targets[_round]);
+    if (target != null) _haptics.playPattern(target.pattern);
+  }
+
+  void _pick(String id) {
+    if (_feedback == _GameFeedback.correct) return;
+    if (id == _targets[_round]) {
+      setState(() {
+        _picked = id;
+        _feedback = _GameFeedback.correct;
+        _score++;
+      });
+      Future.delayed(const Duration(milliseconds: 1100), () {
+        if (!mounted) return;
+        if (_round < _totalRounds - 1) {
+          setState(() {
+            _round++;
+            _newOptions();
+          });
+          _playTarget();
+        } else {
+          setState(() => _finished = true);
+        }
+      });
+    } else {
+      setState(() {
+        _picked = id;
+        _feedback = _GameFeedback.wrong;
+      });
+      Future.delayed(const Duration(milliseconds: 700), () {
+        if (!mounted) return;
+        setState(() {
+          _picked = null;
+          _feedback = _GameFeedback.none;
+        });
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final bg = gameSolved ? const Color(0xFFEAF8F1) : DesignColors.bg;
-    final ring = gameSolved
+    if (_finished) {
+      return _MusicGameFinishView(
+        score: _score,
+        total: _totalRounds,
+        onPlayAgain: () => setState(_startGame),
+        onBack: widget.onBack,
+      );
+    }
+
+    final solved = _feedback == _GameFeedback.correct;
+    final bg = solved ? const Color(0xFFEAF8F1) : DesignColors.bg;
+    final ring = solved
         ? const Color(0x803DD68C)
         : const Color(0x66969DB9);
-    final center = gameSolved ? const Color(0xFF3DD68C) : const Color(0xFFAEB4CC);
-
-    const options = ['fa', 're', 'la', 'mi'];
+    final center = solved ? const Color(0xFF3DD68C) : const Color(0xFFAEB4CC);
+    final targetNote = noteById(_targets[_round])!;
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 400),
@@ -189,7 +273,7 @@ class MusicGameScreen extends StatelessWidget {
           children: [
             Row(
               children: [
-                DesignBackButton(onTap: onBack),
+                DesignBackButton(onTap: widget.onBack),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
@@ -203,9 +287,9 @@ class MusicGameScreen extends StatelessWidget {
                     color: Colors.white.withValues(alpha: 0.7),
                     borderRadius: BorderRadius.circular(14),
                   ),
-                  child: const Text(
-                    '3/5',
-                    style: TextStyle(
+                  child: Text(
+                    '${_round + 1}/$_totalRounds',
+                    style: const TextStyle(
                       fontWeight: FontWeight.w800,
                       fontSize: 13,
                       color: DesignColors.purple,
@@ -226,7 +310,12 @@ class MusicGameScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 18),
-            Center(child: _VibrationCircle(ring: ring, center: center)),
+            Center(
+              child: GestureDetector(
+                onTap: _playTarget,
+                child: _VibrationCircle(ring: ring, center: center),
+              ),
+            ),
             const SizedBox(height: 18),
             const Center(
               child: Text(
@@ -248,16 +337,16 @@ class MusicGameScreen extends StatelessWidget {
                 mainAxisSpacing: 12,
                 childAspectRatio: 1.8,
               ),
-              itemCount: options.length,
+              itemCount: _options.length,
               itemBuilder: (_, i) {
-                final id = options[i];
+                final id = _options[i];
                 final n = noteById(id)!;
-                final picked = gamePick == id;
+                final picked = _picked == id;
                 final border = picked
-                    ? (id == 'fa' ? DesignColors.green : const Color(0xFFFF7A66))
+                    ? (_feedback == _GameFeedback.correct ? DesignColors.green : const Color(0xFFFF7A66))
                     : const Color(0xFFF1F2F8);
                 return GestureDetector(
-                  onTap: () => onPick(id),
+                  onTap: () => _pick(id),
                   child: Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
@@ -289,7 +378,7 @@ class MusicGameScreen extends StatelessWidget {
                             style: AppTheme.baloo(fontSize: 20, fontWeight: FontWeight.w800),
                           ),
                         ),
-                        if (gameSolved && id == 'fa')
+                        if (picked && _feedback == _GameFeedback.correct)
                           const Icon(Icons.check_rounded, color: DesignColors.green, size: 22),
                       ],
                     ),
@@ -297,11 +386,11 @@ class MusicGameScreen extends StatelessWidget {
                 );
               },
             ),
-            if (gameSolved) ...[
+            if (solved) ...[
               const SizedBox(height: 18),
               Center(
                 child: Text(
-                  'Верно — это «Фа»!',
+                  'Верно — это «${targetNote.name}»!',
                   style: AppTheme.baloo(
                     fontSize: 22,
                     fontWeight: FontWeight.w800,
@@ -309,9 +398,102 @@ class MusicGameScreen extends StatelessWidget {
                   ),
                 ),
               ),
+            ] else if (_feedback == _GameFeedback.wrong) ...[
+              const SizedBox(height: 18),
+              Center(
+                child: Text(
+                  'Не совсем — попробуй ещё',
+                  style: AppTheme.baloo(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w800,
+                    color: const Color(0xFFFF7A66),
+                  ),
+                ),
+              ),
             ],
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _MusicGameFinishView extends StatelessWidget {
+  const _MusicGameFinishView({
+    required this.score,
+    required this.total,
+    required this.onPlayAgain,
+    required this.onBack,
+  });
+
+  final int score;
+  final int total;
+  final VoidCallback onPlayAgain;
+  final VoidCallback onBack;
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(20, 56, 20, 130),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              DesignBackButton(onTap: onBack),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'Угадай ноту',
+                  style: AppTheme.baloo(fontSize: 20, fontWeight: FontWeight.w700),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 40),
+          const Center(child: Text('🎉', style: TextStyle(fontSize: 56))),
+          const SizedBox(height: 12),
+          Center(
+            child: Text('Готово!', style: AppTheme.baloo(fontSize: 26, fontWeight: FontWeight.w800)),
+          ),
+          const SizedBox(height: 8),
+          Center(
+            child: Text(
+              '$score из $total правильно',
+              style: TextStyle(fontSize: 15, color: DesignColors.textMuted, fontWeight: FontWeight.w700),
+            ),
+          ),
+          const SizedBox(height: 26),
+          GestureDetector(
+            onTap: onPlayAgain,
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 17),
+              decoration: BoxDecoration(color: DesignColors.purple, borderRadius: BorderRadius.circular(20)),
+              child: const Center(
+                child: Text(
+                  'Играть снова',
+                  style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16, color: Colors.white),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          GestureDetector(
+            onTap: onBack,
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 17),
+              decoration: BoxDecoration(color: DesignColors.textDark, borderRadius: BorderRadius.circular(20)),
+              child: const Center(
+                child: Text(
+                  'Назад к нотам',
+                  style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16, color: Colors.white),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

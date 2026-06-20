@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import '../../../../core/network/api_client.dart';
 import '../../../../core/theme/app_theme.dart';
@@ -44,6 +45,23 @@ class _GestureCameraScreenState extends State<GestureCameraScreen> {
   // ── WebView ─────────────────────────────────────────────────────────────
   // ignore: unused_field — kept for future JS calls (e.g. reset gesture state)
   InAppWebViewController? _webController;
+  bool _cameraGranted = false;
+  bool _cameraDenied = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _requestCameraPermission();
+  }
+
+  Future<void> _requestCameraPermission() async {
+    final status = await Permission.camera.request();
+    if (!mounted) return;
+    setState(() {
+      _cameraGranted = status.isGranted;
+      _cameraDenied = !status.isGranted;
+    });
+  }
 
   // ── JS → Flutter: gesture received ──────────────────────────────────────
   void _onGestureDetected(String key) {
@@ -141,6 +159,35 @@ class _GestureCameraScreenState extends State<GestureCameraScreen> {
   }
 
   Widget _buildWebView() {
+    if (_cameraDenied) {
+      return Container(
+        color: Colors.black,
+        alignment: Alignment.center,
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.videocam_off_rounded, size: 32, color: Colors.white70),
+              const SizedBox(height: 8),
+              const Text(
+                'Camera permission is required for gesture recognition.',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Colors.white70),
+              ),
+              const SizedBox(height: 8),
+              TextButton(
+                onPressed: openAppSettings,
+                child: const Text('Open settings'),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+    if (!_cameraGranted) {
+      return const Center(child: CircularProgressIndicator());
+    }
     return InAppWebView(
       initialFile: 'assets/html/hand_tracker.html',
       initialSettings: InAppWebViewSettings(

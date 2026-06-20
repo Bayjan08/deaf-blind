@@ -7,7 +7,7 @@ final GoRouter appRouter = GoRouter(
   routes: <RouteBase>[
     GoRoute(
       path: '/',
-      builder: (_, __) => const DeafSchoolShell(),
+      builder: (context, state) => const DeafSchoolShell(),
     ),
   ],
 );

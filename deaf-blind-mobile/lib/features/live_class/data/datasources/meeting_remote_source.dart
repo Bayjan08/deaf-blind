@@ -34,8 +34,8 @@ class MeetingRemoteSource {
     final res = await _api.post<Map<String, dynamic>>(
       '/meetings/join',
       data: {
-        if (meetingId != null) 'meeting_id': meetingId,
-        if (code != null) 'code': code,
+        'meeting_id':? meetingId,
+        'code':? code,
       },
     );
     return Map<String, dynamic>.from(res.data as Map);

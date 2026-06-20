@@ -240,7 +240,7 @@ class _RingBorderState extends State<_RingBorder>
   Widget build(BuildContext context) {
     return AnimatedBuilder(
       animation: _c,
-      builder: (_, __) {
+      builder: (context, child) {
         final t = _c.value;
         return Transform.scale(
           scale: 0.4 + t * 1.1,
@@ -552,7 +552,7 @@ class _WaveBarsState extends State<_WaveBars> with SingleTickerProviderStateMixi
         children: List.generate(4, (i) {
           return AnimatedBuilder(
             animation: _c,
-            builder: (_, __) {
+            builder: (context, child) {
               final phase = (_c.value + i * 0.15) % 1.0;
               final h = 0.35 + 0.65 * math.sin(phase * math.pi);
               return Container(

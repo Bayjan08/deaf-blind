@@ -49,6 +49,7 @@ dependencies:
 
   # In-app WebView — hosts MediaPipe JS hand tracking (21 finger joints, like the screenshot)
   flutter_inappwebview: ^6.1.5
+  device_info_plus: ^12.4.0
 
 dev_dependencies:
   flutter_test:

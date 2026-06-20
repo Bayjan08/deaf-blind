@@ -121,7 +121,7 @@ class _RingState extends State<_Ring> with SingleTickerProviderStateMixin {
   Widget build(BuildContext context) {
     return AnimatedBuilder(
       animation: _controller,
-      builder: (_, __) {
+      builder: (context, child) {
         final t = _controller.value;
         return Transform.scale(
           scale: 0.4 + t * 1.1,

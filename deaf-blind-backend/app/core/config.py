@@ -39,8 +39,16 @@ class Settings(BaseSettings):
     LIVEKIT_API_KEY: str = "devkey"
     LIVEKIT_API_SECRET: str = "secret"
 
-    # --- Integrations (stubs; fill when implementing) ---
-    GEMINI_API_KEY: str = ""           # §5 AI controller, translation assist
+    # --- Vertex AI / Gemini (same as cistech) ---
+    # Gemini model — us-central1 has the widest model availability
+    GEMINI_MODEL: str = "gemini-2.5-flash-lite"
+    GCP_PROJECT_ID: str = "deaf-blind-500005"
+    GCP_LOCATION: str = "us-central1"
+    # Local dev: path to service account JSON file
+    # On Cloud Run: leave empty — uses Application Default Credentials automatically
+    VERTEX_SERVICE_ACCOUNT: str = ""
+
+    # --- Other integrations ---
     GOOGLE_SPEECH_API_KEY: str = ""    # STT / TTS
     FIREBASE_CREDENTIALS_JSON: str = ""  # auth, storage, FCM
 

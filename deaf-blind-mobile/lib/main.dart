@@ -11,16 +11,31 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   bool isPhysicalDevice = false;
+  String deviceLabel = 'unknown';
+
   if (!kIsWeb && Platform.isAndroid) {
     try {
       final androidInfo = await DeviceInfoPlugin().androidInfo;
       isPhysicalDevice = androidInfo.isPhysicalDevice;
+      deviceLabel = 'Android ${isPhysicalDevice ? "physical" : "emulator"} — ${androidInfo.model}';
     } catch (e) {
-      debugPrint('Error getting device info: $e');
+      deviceLabel = 'Android (device info error: $e)';
+    }
+  } else if (!kIsWeb && Platform.isIOS) {
+    try {
+      final iosInfo = await DeviceInfoPlugin().iosInfo;
+      isPhysicalDevice = iosInfo.isPhysicalDevice;
+      deviceLabel = 'iOS ${isPhysicalDevice ? "physical" : "simulator"} — ${iosInfo.utsname.machine}';
+    } catch (e) {
+      deviceLabel = 'iOS (device info error: $e)';
     }
   }
 
   Env.init(isPhysicalDevice: isPhysicalDevice);
+
+  debugPrint('🌐 [ENV] device=$deviceLabel');
+  debugPrint('🌐 [ENV] isPhysicalDevice=$isPhysicalDevice');
+  debugPrint('🌐 [ENV] baseUrl=${Env.baseUrl}');
 
   runApp(const ProviderScope(child: DeafBlindApp()));
 }

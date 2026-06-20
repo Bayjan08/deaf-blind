@@ -29,11 +29,18 @@ class Env {
       _resolvedBaseUrl = injected;
       return;
     }
-    // If not injected, automatically switch default based on device type
+    // If not injected, automatically switch default based on device type + platform
     if (isPhysicalDevice) {
+      // Physical device — user must supply BACKEND_URL via --dart-define
       _resolvedBaseUrl = 'http://127.0.0.1:9000';
-    } else {
+    } else if (!kIsWeb && Platform.isAndroid) {
+      // Android emulator: host machine is reachable via 10.0.2.2
       _resolvedBaseUrl = 'http://10.0.2.2:9000';
+    } else {
+      // iOS Simulator (Xcode 14+ on Apple Silicon uses Virtualization.framework —
+      // its 127.0.0.1 is the VM's own loopback, not the Mac host).
+      // Use the Mac's LAN IP so the simulator can reach the host backend.
+      _resolvedBaseUrl = 'http://192.168.0.140:9000';
     }
   }
 

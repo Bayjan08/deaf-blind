@@ -1,29 +1,25 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 
 import '../../../../core/network/api_client.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/design_colors.dart';
-import '../../../../core/translation/translation_client.dart';
 
-// Gesture label → Russian meaning (must match backend vocabulary.py)
-const _kMeaning = {
-  'hello': 'Привет',
-  'yes'  : 'Да',
-  'no'   : 'Нет',
-  'stop' : 'Стоп',
-  'good' : 'Хорошо',
-  'bad'  : 'Плохо',
-  'help' : 'Помощь',
-  'thanks': 'Спасибо',
-};
 
-/// §7 Gesture camera screen.
-/// A WebView loads assets/html/hand_tracker.html which runs MediaPipe Hands
-/// (21 finger joints, cyan dots + skeleton) in JavaScript. When the user
-/// holds a gesture for ~1.5 s the JS sends a label through the
-/// [GestureChannel] JavaScript handler back to Flutter.
+/// §7 AI Gesture Camera Screen.
+///
+/// Supports two recognition modes from [hand_tracker.html]:
+///   1. Static quick-gesture (8 words): payload `{ type:"gesture", label, landmarks }`
+///      → POST /translation/ai/interpret-gesture (Gemini)
+///   2. Slovo RSL clip (1000 words): payload `{ type:"clip", frames:[32 base64 JPEGs] }`
+///      → POST /translation/ai/recognize-clip (ONNX MViTv2-small-32)
+///
+/// Both paths add the resulting word to the captured-chips row and speak it
+/// aloud via flutter_tts.
 class GestureCameraScreen extends StatefulWidget {
   const GestureCameraScreen({super.key});
 
@@ -32,71 +28,151 @@ class GestureCameraScreen extends StatefulWidget {
 }
 
 class _GestureCameraScreenState extends State<GestureCameraScreen> {
-  // ── captured gesture labels ─────────────────────────────────────────────
-  final List<String> _capturedLabels = [];
-  String? _lastGestureKey; // shows the most-recently detected label in the strip
+  // ── captured gestures ──────────────────────────────────────────────────────
+  final List<Map<String, dynamic>> _captured = [];
 
-  // ── translation state ───────────────────────────────────────────────────
-  String? _translatedText;
-  bool _isTranslating = false;
-  String? _translationError;
+  // ── UI state ───────────────────────────────────────────────────────────────
+  bool _isClipProcessing = false;
+  bool _isMakingSentence = false;
+  String? _sentenceText;
+  String? _error;
 
-  // ── WebView ─────────────────────────────────────────────────────────────
-  // ignore: unused_field — kept for future JS calls (e.g. reset gesture state)
+  // ── services ───────────────────────────────────────────────────────────────
+  final _api = ApiClient();
+  final _tts = FlutterTts();
+
   InAppWebViewController? _webController;
 
-  // ── JS → Flutter: gesture received ──────────────────────────────────────
-  void _onGestureDetected(String key) {
-    HapticFeedback.mediumImpact();
-    setState(() {
-      _lastGestureKey = key;
-      _capturedLabels.add(key);
-      _translatedText = null;
-      _translationError = null;
-    });
+  @override
+  void initState() {
+    super.initState();
+    _initTts();
   }
 
-  void _removeLabel(int i) => setState(() {
-        _capturedLabels.removeAt(i);
-        _translatedText = null;
-      });
+  Future<void> _initTts() async {
+    await _tts.setLanguage('ru-RU');
+    await _tts.setSpeechRate(0.5);
+    await _tts.setVolume(1.0);
+    await _tts.setPitch(1.0);
+  }
 
-  void _clear() => setState(() {
-        _capturedLabels.clear();
-        _translatedText = null;
-        _translationError = null;
-        _lastGestureKey = null;
-      });
+  Future<void> _speak(String text) async {
+    await _tts.stop();
+    await _tts.speak(text);
+  }
 
-  Future<void> _translate() async {
-    if (_capturedLabels.isEmpty) return;
-    setState(() {
-      _isTranslating = true;
-      _translationError = null;
-    });
+  @override
+  void dispose() {
+    _tts.stop();
+    super.dispose();
+  }
+
+  // ── Route incoming JS payload ──────────────────────────────────────────────
+  Future<void> _onGesturePayload(String jsonStr) async {
+    late Map<String, dynamic> payload;
     try {
-      final text =
-          await TranslationClient(ApiClient()).signToText(_capturedLabels);
-      if (mounted) setState(() => _translatedText = text);
+      payload = jsonDecode(jsonStr) as Map<String, dynamic>;
     } catch (_) {
-      if (mounted) {
-        setState(() => _translationError =
-            'Бэкенд недоступен. Запустите сервер.');
-      }
-    } finally {
-      if (mounted) setState(() => _isTranslating = false);
+      return;
+    }
+    if (payload['type'] == 'clip') {
+      final frames = (payload['frames'] as List?)?.cast<String>() ?? [];
+      if (frames.isNotEmpty) await _onClip(frames);
     }
   }
 
-  void _toggleCamera() {
-    _webController?.evaluateJavascript(source: 'switchCamera();');
+  // ── 32 JPEG frames → Slovo MViTv2 ONNX → Russian word ──────────────────────
+  Future<void> _onClip(List<String> frames) async {
+    HapticFeedback.heavyImpact();
+
+    setState(() {
+      _isClipProcessing = true;
+      _sentenceText = null;
+      _error = null;
+    });
+
+    try {
+      final res = await _api.dio.post<Map<String, dynamic>>(
+        '/translation/ai/recognize-clip',
+        data: {'frames': frames},
+      );
+      final word = (res.data?['text'] as String?)?.trim() ?? '';
+
+      if (mounted) {
+        if (word.isEmpty) {
+          setState(() {
+            _isClipProcessing = false;
+            _error = 'Жест не распознан — повторите';
+          });
+        } else {
+          setState(() {
+            _captured.add({'label': word, 'aiWord': word});
+            _isClipProcessing = false;
+          });
+          await _speak(word);
+          // Let the WebView show the result on its pill
+          _webController?.evaluateJavascript(
+            source: "window.clipDone && clipDone(${jsonEncode(word)})",
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isClipProcessing = false;
+          _error = 'Ошибка: ${e.toString().split('\n').first}';
+        });
+      }
+    }
   }
 
-  void _toggleMirror() {
-    _webController?.evaluateJavascript(source: 'toggleMirror();');
+  // ── Make sentence (Gemini) ─────────────────────────────────────────────────
+  Future<void> _makeSentence() async {
+    if (_captured.isEmpty) return;
+    final labels = _captured.map((e) => e['label'] as String).toList();
+
+    setState(() {
+      _isMakingSentence = true;
+      _sentenceText = null;
+      _error = null;
+    });
+
+    try {
+      final res = await _api.dio.post<Map<String, dynamic>>(
+        '/translation/ai/interpret-sequence',
+        data: {'labels': labels},
+      );
+      final sentence =
+          (res.data?['text'] as String?)?.trim() ?? labels.join(' ');
+      if (mounted) {
+        setState(() {
+          _sentenceText = sentence;
+          _isMakingSentence = false;
+        });
+        await _speak(sentence);
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _error = 'Gemini: ${e.toString().split('\n').first}';
+          _isMakingSentence = false;
+        });
+      }
+    }
   }
 
-  // ── Build ────────────────────────────────────────────────────────────────
+  void _removeCapture(int i) => setState(() {
+        _captured.removeAt(i);
+        _sentenceText = null;
+      });
+
+  void _clear() => setState(() {
+        _captured.clear();
+        _sentenceText = null;
+        _error = null;
+      });
+
+  // ── Build ──────────────────────────────────────────────────────────────────
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -104,20 +180,16 @@ class _GestureCameraScreenState extends State<GestureCameraScreen> {
       appBar: AppBar(
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
-        title: Text('Распознавание жестов',
+        title: Text('AI Переводчик жестов',
             style: AppTheme.baloo(color: Colors.white, fontSize: 17)),
         actions: [
           IconButton(
             icon: const Icon(Icons.flip_camera_ios_rounded),
-            onPressed: _toggleCamera,
-            tooltip: 'Переключить камеру',
+            onPressed: () =>
+                _webController?.evaluateJavascript(source: 'switchCamera()'),
+            tooltip: 'Сменить камеру',
           ),
-          IconButton(
-            icon: const Icon(Icons.swap_horiz_rounded),
-            onPressed: _toggleMirror,
-            tooltip: 'Отразить зеркально',
-          ),
-          if (_capturedLabels.isNotEmpty)
+          if (_captured.isNotEmpty)
             IconButton(
                 icon: const Icon(Icons.delete_outline_rounded),
                 onPressed: _clear),
@@ -125,16 +197,8 @@ class _GestureCameraScreenState extends State<GestureCameraScreen> {
       ),
       body: Column(
         children: [
-          // ── WebView (camera + MediaPipe overlay) ──────────────────────
-          Expanded(
-            flex: 6,
-            child: _buildWebView(),
-          ),
-          // ── Captured labels + translate UI ────────────────────────────
-          Expanded(
-            flex: 4,
-            child: _buildControls(),
-          ),
+          Expanded(flex: 6, child: _buildWebView()),
+          Expanded(flex: 4, child: _buildControls()),
         ],
       ),
     );
@@ -145,135 +209,176 @@ class _GestureCameraScreenState extends State<GestureCameraScreen> {
       initialFile: 'assets/html/hand_tracker.html',
       initialSettings: InAppWebViewSettings(
         javaScriptEnabled: true,
-        mediaPlaybackRequiresUserGesture: false,   // camera auto-starts
+        mediaPlaybackRequiresUserGesture: false,
         allowsInlineMediaPlayback: true,
-        transparentBackground: false,
-        useHybridComposition: true,                 // smoother Android rendering
-        useShouldOverrideUrlLoading: false,
+        useHybridComposition: true,
       ),
-      onWebViewCreated: (controller) {
-        _webController = controller;
-        // Register JS → Dart handler.
-        // HTML calls: window.flutter_inappwebview.callHandler('GestureChannel', key)
-        controller.addJavaScriptHandler(
+      onWebViewCreated: (ctrl) {
+        _webController = ctrl;
+        ctrl.addJavaScriptHandler(
           handlerName: 'GestureChannel',
           callback: (args) {
-            if (args.isNotEmpty && args[0] is String) {
-              _onGestureDetected(args[0] as String);
-            }
+            if (args.isNotEmpty) _onGesturePayload(args[0].toString());
           },
         );
       },
-      onPermissionRequest: (controller, request) async {
-        // Grant camera (and mic, if requested) automatically.
-        return PermissionResponse(
-          resources: request.resources,
-          action: PermissionResponseAction.GRANT,
-        );
-      },
-      onConsoleMessage: (_, msg) {
-        // Mirror JS console to Dart debug output so errors are visible.
-        debugPrint('[WebView] ${msg.message}');
-      },
+      onPermissionRequest: (_, request) async => PermissionResponse(
+        resources: request.resources,
+        action: PermissionResponseAction.GRANT,
+      ),
+      onConsoleMessage: (_, msg) => debugPrint('[WV] ${msg.message}'),
     );
   }
 
   Widget _buildControls() {
+    final busy = _isClipProcessing || _isMakingSentence;
+
     return Container(
       color: DesignColors.bg,
-      padding: const EdgeInsets.fromLTRB(16, 10, 16, 16),
+      padding: const EdgeInsets.fromLTRB(16, 10, 16, 14),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Status / last detected gesture
-          Text(
-            _lastGestureKey != null
-                ? '✅  Захвачено: ${_kMeaning[_lastGestureKey] ?? _lastGestureKey}'
-                : '📡  Удерживайте жест — он добавится автоматически',
-            style: AppTheme.nunito(
-                fontSize: 11, color: DesignColors.textMuted),
-            overflow: TextOverflow.ellipsis,
+          // Status line
+          Row(
+            children: [
+              if (_isClipProcessing) ...[
+                const SizedBox(
+                    width: 12,
+                    height: 12,
+                    child: CircularProgressIndicator(
+                        strokeWidth: 2, color: Color(0xFFFF9800))),
+                const SizedBox(width: 8),
+                Text('🧠 Распознаю жест РЖЯ...',
+                    style: AppTheme.nunito(
+                        fontSize: 11, color: const Color(0xFFFF9800))),
+              ] else
+                Text(
+                  _captured.isEmpty
+                      ? '✋ Покажите жест — запись начнётся автоматически'
+                      : '🎙 Слово добавлено и произнесено',
+                  style: AppTheme.nunito(
+                      fontSize: 11, color: DesignColors.textMuted),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+            ],
           ),
           const SizedBox(height: 8),
-          // Captured label chips (scrollable row)
-          if (_capturedLabels.isNotEmpty)
+
+          // Captured word chips
+          if (_captured.isNotEmpty)
             SizedBox(
               height: 36,
               child: ListView(
                 scrollDirection: Axis.horizontal,
-                children: _capturedLabels.asMap().entries.map((e) {
-                  final label = _kMeaning[e.value] ?? e.value;
+                children: _captured.asMap().entries.map((e) {
+                  final aiWord = e.value['aiWord'] as String;
                   return Padding(
                     padding: const EdgeInsets.only(right: 6),
                     child: InputChip(
-                      label: Text(label,
+                      label: Text(aiWord,
                           style: const TextStyle(
                               fontSize: 11, fontWeight: FontWeight.w700)),
-                      onDeleted: () => _removeLabel(e.key),
+                      onDeleted: () => _removeCapture(e.key),
+                      onPressed: () => _speak(aiWord),
                       backgroundColor: DesignColors.purpleSoft,
                       deleteIconColor: DesignColors.purple,
-                      materialTapTargetSize:
-                          MaterialTapTargetSize.shrinkWrap,
+                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     ),
                   );
                 }).toList(),
               ),
             ),
+
           const Spacer(),
-          // Translate button
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: (_capturedLabels.isEmpty || _isTranslating)
-                  ? null
-                  : _translate,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: DesignColors.purple,
-                foregroundColor: Colors.white,
-                disabledBackgroundColor: DesignColors.purpleSoft,
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16)),
+
+          // Action buttons
+          Row(
+            children: [
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: (_captured.length < 2 || busy) ? null : _makeSentence,
+                  icon: _isMakingSentence
+                      ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(
+                              color: Colors.white, strokeWidth: 2))
+                      : const Icon(Icons.auto_awesome_rounded, size: 18),
+                  label: Text('Составить фразу',
+                      style: AppTheme.baloo(color: Colors.white, fontSize: 13)),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF6C3AE8),
+                    foregroundColor: Colors.white,
+                    disabledBackgroundColor: DesignColors.purpleSoft,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14)),
+                  ),
+                ),
               ),
-              child: _isTranslating
-                  ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                          color: Colors.white, strokeWidth: 2))
-                  : Text(
-                      'Перевести'
-                      '${_capturedLabels.isNotEmpty ? " (${_capturedLabels.length})" : ""}',
-                      style:
-                          AppTheme.baloo(color: Colors.white, fontSize: 15)),
-            ),
+              const SizedBox(width: 10),
+              IconButton.filled(
+                onPressed: _sentenceText != null
+                    ? () => _speak(_sentenceText!)
+                    : (_captured.isNotEmpty
+                        ? () => _speak(_captured.last['aiWord'] as String)
+                        : null),
+                icon: const Icon(Icons.volume_up_rounded),
+                style: IconButton.styleFrom(
+                  backgroundColor: DesignColors.purpleSoft,
+                  foregroundColor: DesignColors.purple,
+                ),
+                tooltip: 'Повторить',
+              ),
+            ],
           ),
-          // Translation result
-          if (_translatedText != null) ...[
+
+          // AI sentence result
+          if (_sentenceText != null) ...[
             const SizedBox(height: 10),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: DesignColors.purpleSoft,
-                borderRadius: BorderRadius.circular(14),
-              ),
-              child: Text(
-                _translatedText!,
-                style: AppTheme.baloo(
-                    fontSize: 20, color: DesignColors.purple),
-                textAlign: TextAlign.center,
+            GestureDetector(
+              onTap: () => _speak(_sentenceText!),
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: DesignColors.purpleSoft,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                      color: DesignColors.purple.withValues(alpha: 0.3)),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.auto_awesome_rounded,
+                        size: 16, color: Color(0xFF6C3AE8)),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        _sentenceText!,
+                        style: AppTheme.baloo(
+                            fontSize: 18, color: DesignColors.purple),
+                      ),
+                    ),
+                    const Icon(Icons.volume_up_rounded,
+                        size: 16, color: Color(0xFF6C3AE8)),
+                  ],
+                ),
               ),
             ),
           ],
-          if (_translationError != null) ...[
-            const SizedBox(height: 8),
-            Text(_translationError!,
+
+          // Error
+          if (_error != null) ...[
+            const SizedBox(height: 6),
+            Text(_error!,
                 style: const TextStyle(
-                    color: Colors.red,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700),
-                textAlign: TextAlign.center),
+                    color: Colors.orange,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w600),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis),
           ],
         ],
       ),

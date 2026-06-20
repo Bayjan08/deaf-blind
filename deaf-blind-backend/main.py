@@ -1,18 +1,29 @@
 """Deaf-Blind app backend — FastAPI entry point."""
-from fastapi import FastAPI
+from contextlib import asynccontextmanager
+
+from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import text
 
 from config import settings
+from database import get_db
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    print(f"Starting up — env={settings.ENV}, port={settings.PORT}")
+    yield
+    print("Shutting down")
+
 
 app = FastAPI(
     title="Deaf-Blind API",
     version="0.1.0",
-    # Hide auto docs in production for safety; keep them on in dev.
+    lifespan=lifespan,
     docs_url="/docs" if settings.ENV != "prod" else None,
 )
 
-# Allow the mobile app to call this API from any origin.
-# Tighten allow_origins to your real app domains before a real launch.
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -28,14 +39,14 @@ def root():
 
 
 @app.get("/health")
-def health():
-    """Health check — Cloud Run and uptime monitors hit this."""
-    return {"status": "healthy", "env": settings.ENV}
-
+async def health(db: AsyncSession = Depends(get_db)):
+    """Health check — also verifies DB connection."""
+    try:
+        await db.execute(text("SELECT 1"))
+        db_status = "connected"
+    except Exception as e:
+        db_status = f"error: {e}"
+    return {"status": "healthy", "env": settings.ENV, "db": db_status}
 
 
 # ---- Add your real routes below ----
-# Example:
-# @app.post("/translate")
-# def translate(...):
-#     ...

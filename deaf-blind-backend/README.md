@@ -16,6 +16,10 @@ uvicorn main:app --reload --port 9000
 - Docs: http://localhost:9000/docs  (dev only)
 - Health: http://localhost:9000/health
 
+## Video meetings (LiveKit)
+
+See [../docs/VIDEO_MEETINGS.md](../docs/VIDEO_MEETINGS.md) for full setup, API reference, and two-device testing.
+
 ## Environments
 
 | Branch | Cloud Run service       | Purpose          |

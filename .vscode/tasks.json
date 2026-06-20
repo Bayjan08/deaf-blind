@@ -2,21 +2,17 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "Run Backend (local)",
+      "label": "Run Backend",
       "type": "shell",
       "command": "cd deaf-blind-backend && source .venv/bin/activate && uvicorn main:app --host 0.0.0.0 --port 9000 --reload",
-      "group": "build",
       "presentation": {
         "reveal": "always",
         "panel": "new",
-        "focus": true,
         "label": "Backend :9000"
       },
       "isBackground": true,
       "problemMatcher": {
-        "pattern": {
-          "regexp": "^$"
-        },
+        "pattern": { "regexp": "^$" },
         "background": {
           "activeOnStart": true,
           "beginsPattern": "Started reloader process",
@@ -25,51 +21,20 @@
       }
     },
     {
-      "label": "Run Backend (Docker)",
-      "type": "shell",
-      "command": "docker-compose up backend",
-      "group": "build",
-      "presentation": {
-        "reveal": "always",
-        "panel": "new",
-        "focus": true,
-        "label": "Backend Docker :9000"
-      },
-      "isBackground": true,
-      "problemMatcher": []
-    },
-    {
       "label": "Run Mobile",
       "type": "shell",
-      "command": "echo 'Mobile not set up yet — add your Flutter/React Native run command here'",
-      "group": "build",
+      "command": "echo 'Add your mobile run command here (Flutter: flutter run, React Native: npx react-native start)'",
       "presentation": {
         "reveal": "always",
         "panel": "new",
-        "focus": true,
         "label": "Mobile"
       },
       "problemMatcher": []
     },
     {
       "label": "Run Backend + Mobile",
-      "dependsOn": ["Run Backend (local)", "Run Mobile"],
+      "dependsOn": ["Run Backend", "Run Mobile"],
       "dependsOrder": "parallel",
-      "group": {
-        "kind": "build",
-        "isDefault": true
-      },
-      "presentation": {
-        "reveal": "always",
-        "panel": "shared"
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "Stop Docker",
-      "type": "shell",
-      "command": "docker-compose down",
-      "group": "build",
       "presentation": {
         "reveal": "always",
         "panel": "shared"

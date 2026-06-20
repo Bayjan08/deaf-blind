@@ -15,5 +15,6 @@ cloud-sql-python-connector[asyncpg]==1.13.0
 python-socketio==5.12.1
 
 # Integrations (stubs depend on these when implemented)
-google-genai
+google-generativeai
+python-multipart
 # google-cloud-speech, firebase-admin — add when wiring §4/§5

@@ -24,4 +24,10 @@ PyJWT==2.10.1
 # Cloud Run: uses Application Default Credentials automatically (no key needed)
 google-cloud-aiplatform==1.71.1
 
+# Slovo RSL recognition (hukenovs/slovo via third_party/slovo)
+onnxruntime==1.20.1
+opencv-python-headless==4.10.0.84
+omegaconf==2.3.0
+scikit-learn==1.5.2   # used by build_landmark_index.py for preprocessing
+
 # firebase-admin — add when wiring auth

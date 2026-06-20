@@ -12,8 +12,8 @@ class Settings(BaseSettings):
     # "dev" or "prod" — controls docs visibility and any env-specific behavior.
     ENV: str = os.getenv("ENV", "dev")
 
-    # Cloud Run injects PORT; default 8080 for local runs.
-    PORT: int = int(os.getenv("PORT", "8080"))
+    # Cloud Run injects PORT; default 9000 for local runs.
+    PORT: int = int(os.getenv("PORT", "9000"))
 
     # Add your own settings here, e.g.:
     # DATABASE_URL: str = ""

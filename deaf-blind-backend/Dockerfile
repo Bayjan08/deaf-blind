@@ -6,15 +6,19 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
-# Install deps first so Docker caches this layer when only code changes.
+# Install deps first so this layer is cached when only code changes.
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-# Cloud Run sends traffic to $PORT (default 9000). Bind to it.
+# Run as a non-root user (security best practice).
+RUN useradd --create-home appuser
+USER appuser
+
+# Cloud Run sends traffic to $PORT (default 9000).
 ENV PORT=9000
 EXPOSE 9000
 
-# Use shell form so $PORT expands at runtime.
+# Shell form so $PORT expands at runtime.
 CMD exec uvicorn main:app --host 0.0.0.0 --port ${PORT}

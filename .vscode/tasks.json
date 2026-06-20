@@ -4,18 +4,18 @@
     {
       "label": "Run Backend",
       "type": "shell",
-      "command": "cd deaf-blind-backend && source .venv/bin/activate && uvicorn main:app --host 0.0.0.0 --port 9000 --reload",
+      "command": "docker compose up --build backend",
       "presentation": {
         "reveal": "always",
         "panel": "new",
-        "label": "Backend :9000"
+        "label": "Backend (Docker) :9000"
       },
       "isBackground": true,
       "problemMatcher": {
         "pattern": { "regexp": "^$" },
         "background": {
           "activeOnStart": true,
-          "beginsPattern": "Started reloader process",
+          "beginsPattern": "Building|Started",
           "endsPattern": "Application startup complete"
         }
       }
@@ -32,7 +32,7 @@
       "problemMatcher": []
     },
     {
-      "label": "Run Backend + Mobile",
+      "label": "Run Both",
       "dependsOn": ["Run Backend", "Run Mobile"],
       "dependsOrder": "parallel",
       "presentation": {

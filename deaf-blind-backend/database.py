@@ -1,15 +1,19 @@
 """Database engine setup.
 
-Local dev: connects via DATABASE_URL (direct TCP to Cloud SQL public IP).
-Cloud Run: connects via Cloud SQL Python Connector (no public IP needed).
+- On Cloud Run (K_SERVICE is set): use the Cloud SQL Python Connector — no
+  public IP, IAM-secured, recommended by Google.
+- Locally: connect via TCP to the Cloud SQL public IP using DB_HOST.
+
+The engine is created lazily so the app can boot even if the DB is unreachable.
 """
+from sqlalchemy import URL
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase
 
 from config import settings
 
 _engine = None
-_SessionLocal = None
+_session_factory = None
 
 
 def get_engine():
@@ -20,17 +24,17 @@ def get_engine():
 
 
 def get_session_factory():
-    global _SessionLocal
-    if _SessionLocal is None:
-        _SessionLocal = async_sessionmaker(
+    global _session_factory
+    if _session_factory is None:
+        _session_factory = async_sessionmaker(
             get_engine(), class_=AsyncSession, expire_on_commit=False
         )
-    return _SessionLocal
+    return _session_factory
 
 
 def _make_engine():
-    if settings.CLOUD_SQL_CONNECTION_NAME:
-        # Running on Cloud Run — use the connector (no public IP required)
+    if settings.on_cloud_run:
+        # --- Cloud Run: Cloud SQL connector ---
         from google.cloud.sql.connector import AsyncConnector
 
         connector = AsyncConnector()
@@ -49,18 +53,29 @@ def _make_engine():
             async_creator=getconn,
             pool_size=5,
             max_overflow=2,
+            pool_pre_ping=True,
         )
-    else:
-        if not settings.DATABASE_URL:
-            raise RuntimeError(
-                "Set DATABASE_URL in .env for local dev.\n"
-                "Example: postgresql+asyncpg://postgres:pass@34.x.x.x:5432/deafblind"
-            )
-        return create_async_engine(settings.DATABASE_URL, pool_size=5, max_overflow=2)
+
+    # --- Local dev: direct TCP to Cloud SQL public IP ---
+    if not settings.DB_HOST:
+        raise RuntimeError(
+            "Set DB_HOST in deaf-blind-backend/.env to your Cloud SQL public IP "
+            "for local development."
+        )
+    # URL.create safely handles passwords with special characters.
+    url = URL.create(
+        "postgresql+asyncpg",
+        username=settings.DB_USER,
+        password=settings.DB_PASS,
+        host=settings.DB_HOST,
+        port=settings.DB_PORT,
+        database=settings.DB_NAME,
+    )
+    return create_async_engine(url, pool_size=5, max_overflow=2, pool_pre_ping=True)
 
 
 class Base(DeclarativeBase):
-    pass
+    """Base class for all ORM models."""
 
 
 async def get_db():

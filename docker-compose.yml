@@ -1,4 +1,30 @@
 services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: deaf_blind
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d deaf_blind"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  livekit:
+    image: livekit/livekit-server:latest
+    command: --dev --bind 0.0.0.0
+    ports:
+      - "7880:7880"
+      - "7881:7881"
+      - "7882:7882/udp"
+    restart: unless-stopped
+
   backend:
     build:
       context: ./deaf-blind-backend
@@ -8,10 +34,20 @@ services:
     # Load DB credentials + config from the backend .env file.
     env_file:
       - ./deaf-blind-backend/.env
+    environment:
+      # Backend container talks to the postgres service, not localhost.
+      DB_HOST: postgres
+      DB_PASS: postgres
+      DB_NAME: deaf_blind
     # Live-reload: mount source, exclude the host .venv so it doesn't mask the image.
     volumes:
       - ./deaf-blind-backend:/app
       - /app/.venv
+    depends_on:
+      postgres:
+        condition: service_healthy
+      livekit:
+        condition: service_started
     command: uvicorn main:app --host 0.0.0.0 --port 9000 --reload
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:9000/health')"]
@@ -30,3 +66,6 @@ services:
   #     BACKEND_URL: http://backend:9000
   #   volumes:
   #     - ./deaf-blind-mobile:/app
+
+volumes:
+  postgres_data:

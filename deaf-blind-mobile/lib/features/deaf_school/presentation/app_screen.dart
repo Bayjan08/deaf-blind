@@ -9,6 +9,7 @@ enum AppScreen {
   musicNotes,
   musicGame,
   pronunciation,
+  classLobby,
   liveclass,
   profile,
 }
@@ -30,6 +31,7 @@ NavTab navTabForScreen(AppScreen screen) {
   };
   return switch (screen) {
     AppScreen.home => NavTab.home,
+    AppScreen.classLobby => NavTab.class_,
     AppScreen.liveclass => NavTab.class_,
     AppScreen.profile => NavTab.profile,
     _ when subjectScreens.contains(screen) => NavTab.subjects,

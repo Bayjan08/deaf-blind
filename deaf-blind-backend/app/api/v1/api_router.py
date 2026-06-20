@@ -7,6 +7,7 @@ from app.api.v1.endpoints import (
     ai_translator,
     auth,
     live_class,
+    meetings,
     music,
     pronunciation,
     translation,
@@ -19,7 +20,8 @@ api_router = APIRouter()
 api_router.include_router(auth.router)
 api_router.include_router(users.router)
 api_router.include_router(translation.router)       # §1/§6/§7 shared engine
-api_router.include_router(live_class.router)        # §1
+api_router.include_router(live_class.router)        # §1 (legacy stubs)
+api_router.include_router(meetings.router)          # video meetings (LiveKit)
 api_router.include_router(academy.router)           # §2
 api_router.include_router(music.router)             # §3
 api_router.include_router(pronunciation.router)     # §4

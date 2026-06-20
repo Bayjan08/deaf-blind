@@ -2,8 +2,10 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>NSCameraUsageDescription</key>
+	<string>Камера нужна для видеоуроков в классе.</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>Need microphone access for speech to text translation.</string>
+	<string>Микрофон нужен для видеоуроков в классе и распознавания речи.</string>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>

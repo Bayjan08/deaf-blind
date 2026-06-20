@@ -1,4 +1,13 @@
-/// §1 Live class with real-time sign translation. Barrel.
+/// §1 Live class — LiveKit video meetings (feature barrel).
 library;
 
-export 'presentation/screens/live_class_screen.dart';
+// Domain
+export 'domain/models/meeting.dart';
+export 'domain/models/meeting_room_phase.dart';
+
+// Presentation — public entry points for other features
+export 'presentation/screens/meeting_lobby_screen.dart';
+export 'presentation/screens/meeting_room_screen.dart';
+
+// Providers (for shell / tests)
+export 'presentation/providers/meeting_providers.dart';

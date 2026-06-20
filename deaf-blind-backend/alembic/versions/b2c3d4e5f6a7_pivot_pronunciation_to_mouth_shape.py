@@ -21,6 +21,9 @@ depends_on: Union[str, Sequence[str], None] = None
 
 def upgrade() -> None:
     """Upgrade schema."""
+    # Original table was a bare `id`-only stub (initial migration) — replace it
+    # rather than alter, there's no data worth preserving.
+    op.drop_table("pronunciation_attempts", if_exists=True)
     op.create_table(
         "pronunciation_attempts",
         sa.Column("id", sa.Integer(), autoincrement=True, nullable=False),

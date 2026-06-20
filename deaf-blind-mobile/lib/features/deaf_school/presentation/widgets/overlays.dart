@@ -144,9 +144,14 @@ class _RingState extends State<_Ring> with SingleTickerProviderStateMixin {
 }
 
 class TranslatorOverlay extends StatelessWidget {
-  const TranslatorOverlay({super.key, required this.onClose});
+  const TranslatorOverlay({
+    super.key,
+    required this.onClose,
+    this.onGestureToText,
+  });
 
   final VoidCallback onClose;
+  final VoidCallback? onGestureToText;
 
   @override
   Widget build(BuildContext context) {
@@ -263,15 +268,7 @@ class TranslatorOverlay extends StatelessWidget {
                   icon: Icons.videocam_rounded,
                   title: 'Жесты → текст',
                   subtitle: 'Камера распознаёт ваши жесты',
-                  onTap: () {
-                    onClose();
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const AiTranslatorScreen(initialMode: 1),
-                      ),
-                    );
-                  },
+                  onTap: onGestureToText,
                 ),
                 const SizedBox(height: 10),
                 _TranslatorOption(
@@ -324,50 +321,50 @@ class _TranslatorOption extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: bg,
-          border: Border.all(color: border, width: 2),
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                color: iconBg,
-                borderRadius: BorderRadius.circular(14),
-              ),
-              child: Icon(icon, color: Colors.white, size: 22),
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w800,
-                      fontSize: 15,
-                      color: DesignColors.textDark,
-                    ),
-                  ),
-                  Text(
-                    subtitle,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: DesignColors.textMuted,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: bg,
+        border: Border.all(color: border, width: 2),
+        borderRadius: BorderRadius.circular(20),
       ),
+      child: Row(
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: iconBg,
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Icon(icon, color: Colors.white, size: 22),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 15,
+                    color: DesignColors.textDark,
+                  ),
+                ),
+                Text(
+                  subtitle,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: DesignColors.textMuted,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    ),
     );
   }
 }

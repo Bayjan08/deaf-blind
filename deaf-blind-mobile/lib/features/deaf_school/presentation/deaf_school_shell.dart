@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/design_colors.dart';
+import '../../ai_translator/presentation/screens/gesture_camera_screen.dart';
 import '../../live_class/live_class.dart';
 import 'models/music_note.dart';
 import 'app_screen.dart';
@@ -115,6 +116,14 @@ class _DeafSchoolShellState extends State<DeafSchoolShell> {
               Positioned.fill(
                 child: TranslatorOverlay(
                   onClose: () => setState(() => _showTranslator = false),
+                  onGestureToText: () {
+                    setState(() => _showTranslator = false);
+                    Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => const GestureCameraScreen(),
+                      ),
+                    );
+                  },
                 ),
               ),
           ],

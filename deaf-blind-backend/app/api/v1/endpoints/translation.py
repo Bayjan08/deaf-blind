@@ -6,14 +6,7 @@ from app.services.translation_engine import sign_to_text as sign_to_text_svc
 from app.services.translation_engine import vocabulary
 
 router = APIRouter(prefix="/translation", tags=["translation"])
-gemini_client = GeminiClient()
 
-class SignToTextRequest(BaseModel):
-    gestures: List[str]
-
-class TextToSignRequest(BaseModel):
-    text: str
-    language: str = "ru"
 
 @router.post("/sign-to-text", response_model=TextResponse)
 async def sign_to_text(body: SignToTextRequest):

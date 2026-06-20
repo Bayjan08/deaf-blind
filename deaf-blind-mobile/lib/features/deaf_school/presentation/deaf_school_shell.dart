@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/design_colors.dart';
 import '../../ai_translator/presentation/screens/gesture_camera_screen.dart';
 import '../../live_class/live_class.dart';
+import '../../pronunciation/pronunciation.dart';
 import 'models/music_note.dart';
 import 'app_screen.dart';
 import 'screens/alphabet_screens.dart';
@@ -173,7 +174,7 @@ class _DeafSchoolShellState extends State<DeafSchoolShell> {
           gamePick: _gamePick,
           onPick: (id) => setState(() => _gamePick = id),
         ),
-      AppScreen.pronunciation => PronunciationScreen(
+      AppScreen.pronunciation => PronunciationLessonScreen(
           onBack: () => _go(AppScreen.subjects),
         ),
       AppScreen.mathMap => MathMapScreen(

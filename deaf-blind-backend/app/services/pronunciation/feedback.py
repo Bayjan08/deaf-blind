@@ -1,6 +1,12 @@
-"""§4 Analyze a recorded attempt vs target phoneme; visual-first feedback (§4.4)."""
+"""§4 Score a camera mouth-shape attempt vs the target viseme (visual-first §4.4).
+
+Mirrors the academy `gesture_check.check(...)` keystone: the device sends
+*derived metrics/labels* (not raw media), and we return a small result. Scoring
+is geometric (see `visemes.score`) — no audio, no trained model.
+"""
+from app.services.pronunciation import visemes
 
 
-async def analyze(audio: bytes, target_phoneme: str) -> dict:
-    """Return {feedback_text, waveform/mouth-shape hints}. Stub."""
-    raise NotImplementedError
+def analyze(target_viseme: str, metrics: dict[str, float]) -> dict:
+    """Return {feedback_text, cues, coarse_score} for the attempt."""
+    return visemes.score(target_viseme, metrics)

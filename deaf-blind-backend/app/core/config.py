@@ -52,12 +52,6 @@ class Settings(BaseSettings):
     GOOGLE_SPEECH_API_KEY: str = ""    # STT / TTS
     FIREBASE_CREDENTIALS_JSON: str = ""  # auth, storage, FCM
 
-    # --- Vertex AI / GCP config ---
-    GCP_PROJECT_ID: str = "deaf-blind-500005"
-    GCP_LOCATION: str = "us-central1"
-    VERTEX_SERVICE_ACCOUNT: str = "./credentials/deaf-blind-500005-b61d0c613dbf.json"
-    GEMINI_MODEL: str = "gemini-2.5-flash"
-
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
     @property

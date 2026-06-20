@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:flutter_tts/flutter_tts.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import '../../../../core/network/api_client.dart';
 import '../../../../core/theme/app_theme.dart';
@@ -47,6 +49,7 @@ class _GestureCameraScreenState extends State<GestureCameraScreen> {
   @override
   void initState() {
     super.initState();
+    _initTts();
     _requestCameraPermission();
   }
 
@@ -57,12 +60,6 @@ class _GestureCameraScreenState extends State<GestureCameraScreen> {
       _cameraGranted = status.isGranted;
       _cameraDenied = !status.isGranted;
     });
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _initTts();
   }
 
   Future<void> _initTts() async {

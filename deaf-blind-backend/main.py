@@ -34,7 +34,6 @@ def health():
 
 
 
-
 # ---- Add your real routes below ----
 # Example:
 # @app.post("/translate")

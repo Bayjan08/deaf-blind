@@ -1,52 +1,45 @@
-"""Deaf-Blind app backend — FastAPI entry point."""
-from contextlib import asynccontextmanager
+"""Deaf / Hard-of-Hearing School API — FastAPI entry point.
 
-from fastapi import FastAPI, Depends
+Layered architecture (mirrors CarsBackend):
+  app/api      — routers
+  app/core     — config, lifespan, middleware, socket.io
+  app/db       — engine/session
+  app/integrations, app/models, app/schemas, app/services, app/tasks, app/utils
+"""
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import text
 
-from config import settings
-from database import get_db
+from app.api.v1.api_router import api_router
+from app.core.config import API_V1_PREFIX, VERSION, settings
+from app.core.lifespan import lifespan
+from app.core.logging import setup_logging
+from app.core.socket import sio_app
+from app.core import socket_events  # noqa: F401  (registers live-class handlers)
 
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    print(f"Starting up — env={settings.ENV}, port={settings.PORT}")
-    yield
-    print("Shutting down")
-
+setup_logging()
 
 app = FastAPI(
-    title="Deaf-Blind API",
-    version="0.1.0",
+    title="Deaf-Blind School API",
+    version=VERSION,
     lifespan=lifespan,
     docs_url="/docs" if settings.ENV != "prod" else None,
 )
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["*"],  # tighten before real launch
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+# All REST endpoints live under /api/v1
+app.include_router(api_router, prefix=API_V1_PREFIX)
+
+# Real-time live-class relay (§1)
+app.mount("/socket.io", sio_app)
+
 
 @app.get("/")
 def root():
-    return {"service": "deaf-blind-api", "env": settings.ENV, "status": "ok"}
-
-
-@app.get("/health")
-async def health(db: AsyncSession = Depends(get_db)):
-    """Health check — also verifies DB connection."""
-    try:
-        await db.execute(text("SELECT 1"))
-        db_status = "connected"
-    except Exception as e:
-        db_status = f"error: {e}"
-    return {"status": "healthy", "env": settings.ENV, "db": db_status}
-
-
-# ---- Add your real routes below ----
+    return {"service": "deaf-blind-school-api", "env": settings.ENV, "status": "ok"}

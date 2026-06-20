@@ -19,8 +19,9 @@ python-socketio==5.12.1
 livekit-api==0.8.2
 PyJWT==2.10.1
 
-# Integrations (stubs depend on these when implemented)
-google-genai
-google-auth
-python-multipart
-# google-cloud-speech, firebase-admin — add when wiring §4/§5
+# AI — Vertex AI / Gemini (same approach as cistech)
+# Local dev: needs credentials/vertex-service-account.json
+# Cloud Run: uses Application Default Credentials automatically (no key needed)
+google-cloud-aiplatform==1.71.1
+
+# firebase-admin — add when wiring auth

@@ -5,5 +5,7 @@ class AiTranslatorRepository {
   AiTranslatorRepository(this._remote);
   final AiTranslatorRemoteSource _remote;
 
-  Future<Map<String, dynamic>> translate(Map<String, dynamic> body) => _remote.translate(body);
+  Future<String> speechToText(String audioFilePath) => _remote.speechToText(audioFilePath);
+  Future<String> signToText(List<String> gestures) => _remote.signToText(gestures);
+  Future<List<int>> textToSign(String text) => _remote.textToSign(text);
 }

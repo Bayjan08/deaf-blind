@@ -19,4 +19,12 @@ class AiTranslatorRemoteSource {
     });
     return res.data['text'] as String;
   }
+
+  Future<List<int>> textToSign(String text) async {
+    final res = await _api.dio.post('/translation/text-to-sign', data: {
+      'text': text,
+      'language': 'ru',
+    });
+    return (res.data['avatar_animation_ids'] as List).cast<int>();
+  }
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/design_colors.dart';
+import '../../../ai_translator/presentation/screens/ai_translator_screen.dart';
 import '../models/music_note.dart';
 
 class NoteOverlay extends StatelessWidget {
@@ -244,6 +245,15 @@ class TranslatorOverlay extends StatelessWidget {
                   icon: Icons.mic_rounded,
                   title: 'Голос → жесты',
                   subtitle: 'Говорите — аватар покажет жесты',
+                  onTap: () {
+                    onClose();
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const AiTranslatorScreen(initialMode: 0),
+                      ),
+                    );
+                  },
                 ),
                 const SizedBox(height: 10),
                 _TranslatorOption(
@@ -253,6 +263,15 @@ class TranslatorOverlay extends StatelessWidget {
                   icon: Icons.videocam_rounded,
                   title: 'Жесты → текст',
                   subtitle: 'Камера распознаёт ваши жесты',
+                  onTap: () {
+                    onClose();
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const AiTranslatorScreen(initialMode: 1),
+                      ),
+                    );
+                  },
                 ),
                 const SizedBox(height: 10),
                 _TranslatorOption(
@@ -262,6 +281,15 @@ class TranslatorOverlay extends StatelessWidget {
                   icon: Icons.text_fields_rounded,
                   title: 'Ввести текст',
                   subtitle: 'Напечатайте — переведём в жесты',
+                  onTap: () {
+                    onClose();
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const AiTranslatorScreen(initialMode: 2),
+                      ),
+                    );
+                  },
                 ),
               ],
             ),
@@ -280,6 +308,7 @@ class _TranslatorOption extends StatelessWidget {
     required this.icon,
     required this.title,
     required this.subtitle,
+    this.onTap,
   });
 
   final Color bg;
@@ -288,52 +317,56 @@ class _TranslatorOption extends StatelessWidget {
   final IconData icon;
   final String title;
   final String subtitle;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: bg,
-        border: Border.all(color: border, width: 2),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(
-              color: iconBg,
-              borderRadius: BorderRadius.circular(14),
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: bg,
+          border: Border.all(color: border, width: 2),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: iconBg,
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Icon(icon, color: Colors.white, size: 22),
             ),
-            child: Icon(icon, color: Colors.white, size: 22),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w800,
-                    fontSize: 15,
-                    color: DesignColors.textDark,
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w800,
+                      fontSize: 15,
+                      color: DesignColors.textDark,
+                    ),
                   ),
-                ),
-                Text(
-                  subtitle,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: DesignColors.textMuted,
-                    fontWeight: FontWeight.w700,
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: DesignColors.textMuted,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

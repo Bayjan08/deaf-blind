@@ -402,13 +402,30 @@ class SubjectsScreen extends StatelessWidget {
               width: 64,
               height: 64,
               decoration: BoxDecoration(
-                color: DesignColors.purpleSoft,
                 borderRadius: BorderRadius.circular(20),
+                gradient: const SweepGradient(
+                  colors: [
+                    Color(0xFFFF6B6B),
+                    Color(0xFFFF9F45),
+                    Color(0xFFFFC93C),
+                    Color(0xFF3DD68C),
+                    Color(0xFF19BBD6),
+                    Color(0xFF4D8BFF),
+                    Color(0xFF9C6BFF),
+                    Color(0xFFFF6B6B),
+                  ],
+                ),
               ),
-              padding: const EdgeInsets.all(8),
-              child: Image.asset(
-                'assets/images/music_disc.png',
-                fit: BoxFit.contain,
+              child: Center(
+                child: Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: const Icon(Icons.music_note_rounded, color: DesignColors.textDark, size: 20),
+                ),
               ),
             ),
             title: 'Музыка через вибрацию',

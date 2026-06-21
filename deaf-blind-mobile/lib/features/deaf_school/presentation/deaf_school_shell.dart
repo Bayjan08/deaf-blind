@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../pet_selection_screen.dart';
+import '../../alphabet_game/presentation/screens/letter_intro_screen.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../ai_translator/presentation/screens/gesture_camera_screen.dart';
 import '../../flashcards/flashcards.dart';
@@ -7,7 +9,6 @@ import '../../live_class/live_class.dart';
 import '../../pronunciation/pronunciation.dart';
 import 'models/music_note.dart';
 import 'app_screen.dart';
-import 'screens/alphabet_screens.dart';
 import 'screens/home_subjects_map.dart';
 import 'screens/math_screens.dart';
 import 'screens/other_screens.dart';
@@ -25,7 +26,6 @@ class DeafSchoolShell extends StatefulWidget {
 
 class _DeafSchoolShellState extends State<DeafSchoolShell> {
   AppScreen _screen = AppScreen.home;
-  PracticeState _practice = PracticeState.ready;
   String? _activeNoteId;
   bool _showTranslator = false;
   MeetingConnection? _activeMeeting;
@@ -39,15 +39,7 @@ class _DeafSchoolShellState extends State<DeafSchoolShell> {
         _activeMeeting = null;
       }
       _screen = screen;
-      _practice = PracticeState.ready;
       _activeNoteId = null;
-    });
-  }
-
-  void _checkPractice() {
-    setState(() => _practice = PracticeState.checking);
-    Future.delayed(const Duration(milliseconds: 1600), () {
-      if (mounted) setState(() => _practice = PracticeState.success);
     });
   }
 
@@ -110,6 +102,11 @@ class _DeafSchoolShellState extends State<DeafSchoolShell> {
                 child: NoteOverlay(
                   note: activeNote,
                   onDismiss: () => setState(() => _activeNoteId = null),
+                  onNext: () {
+                    final idx = musicNotes.indexWhere((n) => n.id == _activeNoteId);
+                    if (idx == -1 || idx + 1 >= musicNotes.length) return;
+                    setState(() => _activeNoteId = musicNotes[idx + 1].id);
+                  },
                 ),
               ),
             if (_showTranslator)
@@ -136,33 +133,30 @@ class _DeafSchoolShellState extends State<DeafSchoolShell> {
     return switch (_screen) {
       AppScreen.home => HomeScreen(
           onProfile: () => _go(AppScreen.profile),
-          onAlphabetMap: () => _go(AppScreen.alphabetMap),
+          onAlphabetMap: () => Navigator.of(context).push(
+            MaterialPageRoute<void>(
+              builder: (_) => PetSelectionScreen(
+                onConfirmed: (pet) {
+                  Navigator.of(context).pushReplacement(
+                    MaterialPageRoute<void>(
+                      builder: (_) => LetterIntroScreen(
+                        letter: 'А',
+                        word: 'Арбуз',
+                        petAsset: pet.asset,
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
           onSubjects: () => _go(AppScreen.subjects),
         ),
       AppScreen.subjects => SubjectsScreen(
-          onAlphabetMap: () => _go(AppScreen.alphabetMap),
           onMathMap: () => _go(AppScreen.mathMap),
           onMusicNotes: () => _go(AppScreen.musicNotes),
           onPronunciation: () => _go(AppScreen.pronunciation),
           onFlashcards: () => _go(AppScreen.flashcards),
-        ),
-      AppScreen.alphabetMap => AlphabetMapScreen(
-          onBack: () => _go(AppScreen.subjects),
-          onIntro: () => _go(AppScreen.alphabetIntro),
-        ),
-      AppScreen.alphabetIntro => AlphabetIntroScreen(
-          onBack: () => _go(AppScreen.alphabetMap),
-          onPractice: () => _go(AppScreen.alphabetPractice),
-        ),
-      AppScreen.alphabetPractice => AlphabetPracticeScreen(
-          onBack: () => _go(AppScreen.alphabetIntro),
-          practiceState: _practice,
-          onCheck: _checkPractice,
-          onSuccess: () => _go(AppScreen.alphabetSuccess),
-        ),
-      AppScreen.alphabetSuccess => AlphabetSuccessScreen(
-          onMap: () => _go(AppScreen.alphabetMap),
-          onNextLetter: () => _go(AppScreen.alphabetIntro),
         ),
       AppScreen.musicNotes => MusicNotesScreen(
           onBack: () => _go(AppScreen.subjects),
@@ -223,9 +217,7 @@ class _DeafSchoolShellState extends State<DeafSchoolShell> {
             });
           },
         ),
-      AppScreen.profile => ProfileScreen(
-          onAlphabetMap: () => _go(AppScreen.alphabetMap),
-        ),
+      AppScreen.profile => const ProfileScreen(),
     };
   }
 }

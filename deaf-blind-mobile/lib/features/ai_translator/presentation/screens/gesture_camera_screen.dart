@@ -226,15 +226,6 @@ class _GestureCameraScreenState extends State<GestureCameraScreen> {
         _demoIndex = 0; // restart the scripted demo
       });
 
-  // Manually trigger a fixed-cadence 32-frame capture in the WebView. More
-  // reliable than waiting for the auto motion trigger, and works for signs held
-  // still (letters/numbers).
-  void _captureNow() {
-    if (_isClipProcessing) return;
-    setState(() => _error = null);
-    _webController?.evaluateJavascript(source: 'window.captureNow && captureNow()');
-  }
-
   // ── Build ──────────────────────────────────────────────────────────────────
   @override
   Widget build(BuildContext context) {

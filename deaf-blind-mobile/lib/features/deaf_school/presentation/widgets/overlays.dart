@@ -11,10 +11,12 @@ class NoteOverlay extends StatefulWidget {
     super.key,
     required this.note,
     required this.onDismiss,
+    this.onNext,
   });
 
   final MusicNote note;
   final VoidCallback onDismiss;
+  final VoidCallback? onNext;
 
   @override
   State<NoteOverlay> createState() => _NoteOverlayState();
@@ -34,14 +36,16 @@ class _NoteOverlayState extends State<NoteOverlay> {
   @override
   Widget build(BuildContext context) {
     final note = widget.note;
-    return GestureDetector(
-      onTap: widget.onDismiss,
-      child: Container(
-        color: note.color,
-        child: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
+    return Stack(
+      children: [
+        GestureDetector(
+          onTap: widget.onDismiss,
+          child: Container(
+            color: note.color,
+            child: Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
               GestureDetector(
                 onTap: _play,
                 child: SizedBox(
@@ -122,7 +126,30 @@ class _NoteOverlayState extends State<NoteOverlay> {
           ),
         ),
       ),
-    );
+    ),
+    if (widget.onNext != null)
+      Positioned(
+        right: 24,
+        bottom: 48,
+        child: GestureDetector(
+          onTap: widget.onNext,
+          child: Container(
+            width: 56,
+            height: 56,
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.28),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.arrow_forward_rounded,
+              color: Colors.white,
+              size: 30,
+            ),
+          ),
+        ),
+      ),
+  ],
+);
   }
 }
 

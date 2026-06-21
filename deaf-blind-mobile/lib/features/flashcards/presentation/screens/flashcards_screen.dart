@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/design_colors.dart';
 import '../../../deaf_school/presentation/widgets/design_widgets.dart';
 import '../providers/flashcards_provider.dart';
 import '../widgets/flip_flashcard.dart';
@@ -17,49 +17,65 @@ class FlashcardsScreen extends ConsumerWidget {
     final state = ref.watch(flashcardsProvider);
     final notifier = ref.read(flashcardsProvider.notifier);
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(20, 56, 20, 130),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              DesignBackButton(onTap: onBack),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  'Карточки жестов',
-                  style: AppTextStyles.style(fontSize: 20, fontWeight: FontWeight.w700, height: 1),
-                ),
-              ),
-              if (!state.isFinished)
-                GestureDetector(
-                  onTap: () => notifier.restart(shuffleDeck: true),
-                  child: Container(
-                    width: 38,
-                    height: 38,
-                    decoration: BoxDecoration(
-                      color: AppColors.white,
-                      borderRadius: BorderRadius.circular(13),
-                      boxShadow: AppShadows.light,
-                    ),
-                    alignment: Alignment.center,
-                    child: const Icon(Icons.shuffle_rounded, size: 18, color: AppColors.textPrimary),
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [DesignColors.purpleSoft, DesignColors.bg],
+          stops: [0, 0.35],
+        ),
+      ),
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(20, 56, 20, 130),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                DesignBackButton(onTap: onBack),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'Карточки жестов',
+                    style: AppTheme.baloo(fontSize: 20, fontWeight: FontWeight.w700, height: 1),
                   ),
                 ),
-            ],
-          ),
-          const SizedBox(height: 22),
-          if (state.isFinished)
-            _SummaryView(
-              knownCount: state.knownIds.length,
-              totalCount: state.deck.length,
-              onRestart: () => notifier.restart(),
-              onShuffleRestart: () => notifier.restart(shuffleDeck: true),
-            )
-          else
-            _DeckView(state: state, notifier: notifier),
-        ],
+                if (!state.isFinished)
+                  GestureDetector(
+                    onTap: () => notifier.restart(shuffleDeck: true),
+                    child: Container(
+                      width: 38,
+                      height: 38,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(13),
+                        boxShadow: [
+                          BoxShadow(
+                            color: DesignColors.purple.withValues(alpha: 0.18),
+                            blurRadius: 14,
+                            offset: const Offset(0, 6),
+                          ),
+                        ],
+                      ),
+                      alignment: Alignment.center,
+                      child: const Icon(Icons.shuffle_rounded, size: 18, color: DesignColors.purple),
+                    ),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 22),
+            if (state.isFinished)
+              _SummaryView(
+                knownCount: state.knownIds.length,
+                totalCount: state.deck.length,
+                onRestart: () => notifier.restart(),
+                onShuffleRestart: () => notifier.restart(shuffleDeck: true),
+              )
+            else
+              _DeckView(state: state, notifier: notifier),
+          ],
+        ),
       ),
     );
   }
@@ -83,19 +99,19 @@ class _DeckView extends StatelessWidget {
           children: [
             Expanded(
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(6),
+                borderRadius: BorderRadius.circular(8),
                 child: LinearProgressIndicator(
                   value: progress,
-                  minHeight: 10,
-                  backgroundColor: AppColors.grey200,
-                  color: AppColors.primary,
+                  minHeight: 12,
+                  backgroundColor: DesignColors.progressBg,
+                  color: DesignColors.purple,
                 ),
               ),
             ),
             const SizedBox(width: 12),
             Text(
               '${state.index + 1}/${state.deck.length}',
-              style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13, color: AppColors.primary),
+              style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13, color: DesignColors.purple),
             ),
           ],
         ),
@@ -113,8 +129,8 @@ class _DeckView extends StatelessWidget {
               child: _ActionButton(
                 label: 'Повторить',
                 icon: Icons.refresh_rounded,
-                color: AppColors.grey100,
-                textColor: AppColors.textPrimary,
+                color: DesignColors.orangeSoft,
+                textColor: DesignColors.orange,
                 onTap: notifier.markLearning,
               ),
             ),
@@ -123,7 +139,7 @@ class _DeckView extends StatelessWidget {
               child: _ActionButton(
                 label: 'Знаю',
                 icon: Icons.check_rounded,
-                color: AppColors.success,
+                color: DesignColors.green,
                 textColor: Colors.white,
                 onTap: notifier.markKnown,
               ),
@@ -158,8 +174,14 @@ class _ActionButton extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 16),
         decoration: BoxDecoration(
           color: color,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: AppShadows.medium,
+          borderRadius: BorderRadius.circular(18),
+          boxShadow: [
+            BoxShadow(
+              color: color.withValues(alpha: 0.45),
+              blurRadius: 16,
+              offset: const Offset(0, 8),
+            ),
+          ],
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -168,7 +190,7 @@ class _ActionButton extends StatelessWidget {
             const SizedBox(width: 8),
             Text(
               label,
-              style: TextStyle(fontWeight: FontWeight.w700, fontSize: 15, color: textColor),
+              style: AppTheme.nunito(fontSize: 15, color: textColor),
             ),
           ],
         ),
@@ -199,7 +221,7 @@ class _SummaryView extends StatelessWidget {
         borderRadius: BorderRadius.circular(28),
         boxShadow: [
           BoxShadow(
-            color: AppColors.textPrimary.withValues(alpha: 0.15),
+            color: DesignColors.textDark.withValues(alpha: 0.12),
             blurRadius: 26,
             offset: const Offset(0, 12),
           ),
@@ -208,29 +230,57 @@ class _SummaryView extends StatelessWidget {
       child: Column(
         children: [
           Container(
-            width: 90,
-            height: 90,
-            decoration: const BoxDecoration(color: AppColors.success, shape: BoxShape.circle),
-            child: const Icon(Icons.emoji_events_rounded, color: Colors.white, size: 44),
+            width: 96,
+            height: 96,
+            decoration: const BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [DesignColors.purple, DesignColors.purpleLight],
+              ),
+            ),
+            child: const Icon(Icons.emoji_events_rounded, color: Colors.white, size: 46),
           ),
           const SizedBox(height: 18),
           Text(
-            'Колода пройдена!',
-            style: AppTextStyles.style(fontSize: 22, fontWeight: FontWeight.w800),
+            'Колода пройдена! 🎉',
+            style: AppTheme.baloo(fontSize: 24, fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: 8),
           Text(
             'Ты знаешь $knownCount из $totalCount жестов',
-            style: TextStyle(fontSize: 15, color: AppColors.textSecondary, fontWeight: FontWeight.w700),
+            style: TextStyle(fontSize: 15, color: DesignColors.textMuted, fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: 22),
-          PrimaryButton(label: 'Пройти ещё раз', onTap: onRestart),
+          GestureDetector(
+            onTap: onRestart,
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(18),
+                gradient: const LinearGradient(
+                  colors: [DesignColors.purple, DesignColors.purpleLight],
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: DesignColors.purple.withValues(alpha: 0.45),
+                    blurRadius: 20,
+                    offset: const Offset(0, 10),
+                  ),
+                ],
+              ),
+              alignment: Alignment.center,
+              child: Text('Пройти ещё раз', style: AppTheme.nunito(fontSize: 16, color: Colors.white)),
+            ),
+          ),
           const SizedBox(height: 10),
           TextButton(
             onPressed: onShuffleRestart,
-            child: const Text(
+            child: Text(
               'Перемешать и повторить →',
-              style: TextStyle(fontWeight: FontWeight.w800, fontSize: 14, color: AppColors.primary),
+              style: AppTheme.nunito(fontSize: 14, color: DesignColors.purple),
             ),
           ),
         ],

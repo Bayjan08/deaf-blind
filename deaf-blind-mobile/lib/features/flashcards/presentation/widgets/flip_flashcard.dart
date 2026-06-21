@@ -2,8 +2,8 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/design_colors.dart';
 import '../../domain/models/gesture_card.dart';
 
 /// A tappable card that flips from the gesture's picture to its meaning.
@@ -59,13 +59,17 @@ class _CardFace extends StatelessWidget {
     return Container(
       width: double.infinity,
       height: 380,
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(28),
+        borderRadius: BorderRadius.circular(30),
+        border: Border.all(
+          color: isFront ? DesignColors.purpleSoft : DesignColors.greenSoft,
+          width: 3,
+        ),
         boxShadow: [
           BoxShadow(
-            color: AppColors.textPrimary.withValues(alpha: 0.15),
+            color: DesignColors.textDark.withValues(alpha: 0.14),
             blurRadius: 26,
             offset: const Offset(0, 12),
           ),
@@ -83,7 +87,7 @@ class _CardFace extends StatelessWidget {
           child: Container(
             width: double.infinity,
             decoration: BoxDecoration(
-              color: AppColors.grey100,
+              color: DesignColors.purpleSoft,
               borderRadius: BorderRadius.circular(24),
             ),
             padding: const EdgeInsets.all(12),
@@ -94,20 +98,19 @@ class _CardFace extends StatelessWidget {
         Text(
           'Как переводится этот жест?',
           textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: 14,
-            color: AppColors.textTertiary,
-            fontWeight: FontWeight.w700,
-          ),
+          style: AppTheme.nunito(fontSize: 14, color: DesignColors.textMuted),
         ),
         const SizedBox(height: 4),
-        Text(
-          'Нажми, чтобы узнать ответ',
-          style: TextStyle(
-            fontSize: 12,
-            color: AppColors.textTertiary,
-            fontWeight: FontWeight.w600,
-          ),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.touch_app_rounded, size: 14, color: DesignColors.purple),
+            const SizedBox(width: 4),
+            Text(
+              'Нажми, чтобы узнать ответ',
+              style: AppTheme.nunito(fontSize: 12, fontWeight: FontWeight.w700, color: DesignColors.purple),
+            ),
+          ],
         ),
       ],
     );
@@ -121,7 +124,7 @@ class _CardFace extends StatelessWidget {
           child: Container(
             width: double.infinity,
             decoration: BoxDecoration(
-              color: AppColors.grey100,
+              color: DesignColors.greenSoft,
               borderRadius: BorderRadius.circular(24),
             ),
             padding: const EdgeInsets.all(16),
@@ -132,7 +135,7 @@ class _CardFace extends StatelessWidget {
         Text(
           card.meaning,
           textAlign: TextAlign.center,
-          style: AppTextStyles.style(fontSize: 28, fontWeight: FontWeight.w800),
+          style: AppTheme.baloo(fontSize: 28, fontWeight: FontWeight.w700, color: DesignColors.green),
         ),
       ],
     );

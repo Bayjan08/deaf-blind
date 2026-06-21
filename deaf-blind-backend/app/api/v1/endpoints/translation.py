@@ -3,13 +3,20 @@ from __future__ import annotations
 
 from typing import Any
 
-from fastapi import APIRouter
+from fastapi import APIRouter, File, HTTPException, UploadFile
 from pydantic import BaseModel
 
-from app.schemas.translation import SignToTextRequest, TextResponse, TextToSignRequest, SignSequenceResponse
+from app.schemas.translation import (
+    SignToTextRequest,
+    TextResponse,
+    TextToSignRequest,
+    SignSequenceResponse,
+    VoiceToSignResponse,
+)
 from app.services.translation_engine import sign_to_text as sign_to_text_svc
 from app.services.translation_engine import vocabulary
 from app.services.translation_engine import ai_sign_to_text as ai_svc
+from app.services.translation_engine import ai_voice_to_sign
 import asyncio
 import logging
 
@@ -36,6 +43,43 @@ async def text_to_sign(body: TextToSignRequest):
         idx = await vocabulary.lookup_by_text(word, body.language)
         ids.append(idx if idx is not None else 0)
     return SignSequenceResponse(avatar_animation_ids=ids)
+
+
+# ── speech (Gemini multimodal — no separate STT key needed) ──────────────────
+
+@router.post("/speech-to-text", response_model=TextResponse)
+async def speech_to_text(audio: UploadFile = File(...)):
+    """Recorded speech → literal Russian transcript (Gemini audio input)."""
+    audio_bytes = await audio.read()
+    if not audio_bytes:
+        raise HTTPException(status_code=422, detail="audio is empty")
+    try:
+        text = await ai_voice_to_sign.transcribe(audio_bytes, audio.content_type or "audio/wav")
+    except Exception as exc:
+        logger.warning("speech_to_text failed: %s", exc)
+        raise HTTPException(status_code=502, detail=f"Speech recognition failed: {exc}")
+    return TextResponse(text=text)
+
+
+@router.post("/ai/voice-to-sign", response_model=VoiceToSignResponse)
+async def voice_to_sign(audio: UploadFile = File(...)):
+    """Recorded speech → (recognized text, ordered sign-gesture word sequence).
+
+    Single Gemini call: transcribes the whole sentence and glosses it into the
+    known sign-asset vocabulary in one pass, so the avatar can play a
+    meaningful gesture-by-gesture flow for the full sentence.
+    """
+    audio_bytes = await audio.read()
+    if not audio_bytes:
+        raise HTTPException(status_code=422, detail="audio is empty")
+    try:
+        text, words = await ai_voice_to_sign.transcribe_and_gloss(
+            audio_bytes, audio.content_type or "audio/wav"
+        )
+    except Exception as exc:
+        logger.warning("voice_to_sign failed: %s", exc)
+        raise HTTPException(status_code=502, detail=f"Voice-to-sign failed: {exc}")
+    return VoiceToSignResponse(text=text, words=words)
 
 
 # ── AI-powered (Gemini, no dictionary) ───────────────────────────────────────

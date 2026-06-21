@@ -1,216 +1,216 @@
-# Deaf-Blind School — Educational Platform
+# Школа для слепоглухих — Образовательная платформа
 
-An accessibility-first educational platform for deaf-blind students, combining live video classes, interactive learning games, haptic feedback, and AI-powered sign language translation.
-
----
-
-## What This App Does
-
-Deaf-Blind School addresses a critical gap in special education: most e-learning tools are built for sighted or hearing learners. This platform delivers structured lessons through **multiple sensory channels** — camera-based gesture recognition, vibration patterns, audio, and live video — so that students who are deaf, blind, or both can access interactive education.
-
-Teachers can host live video classes from any device. Students progress through game-like modules covering the alphabet (via sign language gestures), music (via haptic vibration patterns), math, and pronunciation. An AI layer recognises hand gestures in real time and translates between sign language and Russian text.
+Образовательная платформа с акцентом на доступность для слепоглухих учеников, объединяющая живые видеоуроки, интерактивные обучающие игры, тактильную обратную связь и AI-перевод жестового языка.
 
 ---
 
-## Features Implemented
+## Назначение приложения
 
-### 1. Live Class (Video Meetings)
-- Create a meeting room and share a 6-letter code with students
-- Join a meeting by code or from a recent-meetings list
-- Toggle camera and microphone independently
-- Host can end the session for all participants
-- Real-time participant list updated as people join/leave
-- Automatic reconnect on network interruption
-- Powered by **LiveKit** (WebRTC SFU)
+Школа для слепоглухих решает критическую проблему специального образования: большинство инструментов e-learning созданы для зрячих и слышащих учеников. Эта платформа доставляет структурированные уроки через **несколько сенсорных каналов** — распознавание жестов через камеру, вибрационные паттерны, звук и живое видео — чтобы ученики с потерей слуха, зрения или обоих могли получить доступ к интерактивному обучению.
 
-### 2. Alphabet Game (Sign Language Academy)
-- Step-by-step letter introduction screens (e.g. "Letter A")
-- Practice screen: student shows the letter with their hand in front of the camera
-- AI gesture matching gives pass/retry feedback in real time
-- Graded exam at the end of each level
-- Visual level map shows progress (locked → unlocked → completed nodes)
-- Companion pet selected during onboarding accompanies the learner
-
-### 3. Music Through Vibration
-- Each musical note is mapped to a unique haptic vibration pattern
-- Students feel the rhythm through the phone
-- Note-recognition game: device vibrates a pattern and the student identifies the note
-- Designed for learners who cannot hear audio feedback
-
-### 4. Pronunciation Module
-- Phoneme-based lessons with audio examples
-- Microphone recording of the student's attempt
-- Backend analyses the recording and returns feedback
-
-### 5. AI Gesture Translator (Sign ↔ Text)
-- Live camera screen with **MediaPipe Hands** running in a WebView
-- 21 hand-joint landmarks visualised as cyan dots + skeleton overlay
-- Hold a gesture for ~1.5 s → label is detected and sent to the backend
-- **Sign-to-text**: gesture label sequence → Russian sentence (via Gemini)
-- **Text-to-sign**: Russian input → avatar animation sequence played back on screen
-- Built-in vocabulary (hello→Привет, yes→Да, no→Нет, and more)
-
-### 6. Video Translation
-- Upload a pre-recorded video
-- Backend transcribes and translates the sign language content
-- Async job model: submit → poll for result
-
-### 7. AI Controller (Personalised Learning)
-- Tracks student performance across all modules
-- Generates personalised lesson recommendations via **Gemini 2.5 Flash Lite** (Vertex AI)
-- Analytics dashboard for teachers (in progress)
-
-### 8. User Profile & Auth
-- Development JWT flow for local testing
-- Firebase authentication (production, wired up but not yet enforced)
-- Profile screen shows user details and overall progress
+Учителя проводят живые видеоуроки с любого устройства. Ученики проходят игровые модули по алфавиту (через жесты жестового языка), музыке (через тактильные вибрации), математике и произношению. AI-слой распознаёт жесты рук в реальном времени и переводит между жестовым языком и русским текстом.
 
 ---
 
-## How It Looks & Works
+## Реализованные функции
 
-### Design System
-| Token | Value |
+### 1. Живой урок (Видеозвонки)
+- Создание комнаты для встречи и передача 6-буквенного кода ученикам
+- Вход по коду или из списка недавних встреч
+- Независимое переключение камеры и микрофона
+- Учитель может завершить сеанс для всех участников
+- Список участников обновляется в реальном времени
+- Автоматическое переподключение при потере сети
+- Работает на основе **LiveKit** (WebRTC SFU)
+
+### 2. Игра «Алфавит» (Академия жестового языка)
+- Пошаговые экраны знакомства с буквами (например, «Буква А»)
+- Экран практики: ученик показывает букву рукой перед камерой
+- AI-сопоставление жестов даёт обратную связь «пройдено / повторить» в реальном времени
+- Оцениваемый экзамен в конце каждого уровня
+- Визуальная карта уровней показывает прогресс (заблокировано → открыто → пройдено)
+- Питомец-компаньон, выбранный при первом запуске, сопровождает ученика
+
+### 3. Музыка через вибрацию
+- Каждая музыкальная нота сопоставлена с уникальным тактильным вибрационным паттерном
+- Ученики ощущают ритм через вибрацию телефона
+- Игра на распознавание: устройство вибрирует паттерн, ученик определяет ноту
+- Разработано для учеников, которые не могут слышать звуковую обратную связь
+
+### 4. Модуль произношения
+- Уроки на основе фонем с аудиопримерами
+- Запись попытки ученика через микрофон
+- Бэкенд анализирует запись и возвращает обратную связь
+
+### 5. AI-переводчик жестов (Жест ↔ Текст)
+- Экран с живой камерой и **MediaPipe Hands**, работающим в WebView
+- 21 ключевая точка суставов руки визуализируется голубыми точками и скелетом
+- Удержание жеста ~1.5 с → метка распознана и отправлена на бэкенд
+- **Жест → текст**: последовательность меток жестов → русское предложение (через Gemini)
+- **Текст → жест**: русский ввод → последовательность анимации аватара на экране
+- Встроенный словарь (hello→Привет, yes→Да, no→Нет и другие)
+
+### 6. Перевод видео
+- Загрузка заранее записанного видео
+- Бэкенд транскрибирует и переводит содержимое жестового языка
+- Асинхронная модель задач: отправить → опросить результат
+
+### 7. AI-контроллер (Персонализированное обучение)
+- Отслеживает успеваемость ученика по всем модулям
+- Генерирует персонализированные рекомендации по урокам через **Gemini 2.5 Flash Lite** (Vertex AI)
+- Аналитическая панель для учителей (в разработке)
+
+### 8. Профиль пользователя и авторизация
+- Поток JWT для разработки (локальное тестирование)
+- Firebase-аутентификация (продакшн, подключена, но ещё не применяется принудительно)
+- Экран профиля показывает данные пользователя и общий прогресс
+
+---
+
+## Как выглядит и работает приложение
+
+### Дизайн-система
+| Токен | Значение |
 |---|---|
-| Primary purple | `#6C5CE7` |
-| Accent orange | `#FF8A4C` |
-| Success green | `#34C77B` |
-| Dark background (live class) | `#0F0E1F` |
-| Light background | `#F4F5FB` |
-| Heading font | Baloo 2 (700) |
-| Body font | Nunito (800) |
+| Основной фиолетовый | `#6C5CE7` |
+| Акцентный оранжевый | `#FF8A4C` |
+| Зелёный (успех) | `#34C77B` |
+| Тёмный фон (живой урок) | `#0F0E1F` |
+| Светлый фон | `#F4F5FB` |
+| Шрифт заголовков | Baloo 2 (700) |
+| Шрифт текста | Nunito (800) |
 
-### Navigation Flow
+### Схема навигации
 ```
-App Launch
-  └── Auth Gate
-        ├── Dev token (local) / Firebase (prod)
-        └── Main Shell
-              ├── Home          → shortcuts to Subjects, Profile
-              ├── Subjects Map  → Alphabet · Math · Music · Pronunciation
-              │     ├── Alphabet  → Letter intro → Camera practice → Exam → Level map
-              │     ├── Math      → Level map → Math intro → Practice → Success
-              │     ├── Music     → Note list → Vibration recognition game
-              │     └── Pronunciation → Phoneme lesson → Record → Feedback
-              ├── Class         → Lobby (create / join) → Live video room
-              └── Profile       → User info & progress
-                    └── [FAB]   → Gesture Camera (sign ↔ text translator)
+Запуск приложения
+  └── Авторизация
+        ├── Dev-токен (локально) / Firebase (продакшн)
+        └── Главная оболочка
+              ├── Главная        → ярлыки на Предметы, Профиль
+              ├── Карта предметов → Алфавит · Математика · Музыка · Произношение
+              │     ├── Алфавит      → Знакомство → Практика с камерой → Экзамен → Карта уровней
+              │     ├── Математика   → Карта уровней → Введение → Практика → Успех
+              │     ├── Музыка       → Список нот → Игра на распознавание вибрации
+              │     └── Произношение → Урок по фонеме → Запись → Обратная связь
+              ├── Урок           → Лобби (создать / войти) → Видеокомната
+              └── Профиль        → Данные пользователя и прогресс
+                    └── [FAB]    → Камера жестов (переводчик жест ↔ текст)
 ```
 
-### Live Class Room
-The meeting room occupies the full screen with a dark background (`#0F0E1F`). Remote video tiles fill the centre. A bottom control bar provides: mute microphone, toggle camera, and (for the host) an "End for all" button in red (`#FF3B5A`).
+### Видеокомната живого урока
+Комната занимает весь экран с тёмным фоном (`#0F0E1F`). Видеоплитки участников заполняют центр. Нижняя панель управления содержит: отключить микрофон, переключить камеру, и (для учителя) кнопку «Завершить для всех» красного цвета (`#FF3B5A`).
 
-### Gesture Camera
-Opens as a full-screen camera feed. A JavaScript MediaPipe bundle runs inside a `flutter_inappwebview` and draws the hand skeleton live. When a sign is held steady, the recognised label appears at the top and is queued for translation. A text field at the bottom accepts typed Russian for text-to-sign playback.
+### Камера жестов
+Открывается как полноэкранная трансляция с камеры. JavaScript-пакет MediaPipe работает внутри `flutter_inappwebview` и рисует скелет руки в реальном времени. При удержании жеста распознанная метка появляется вверху и добавляется в очередь перевода. Текстовое поле внизу принимает русский текст для воспроизведения жест-анимации.
 
 ---
 
-## Tech Stack
+## Технологический стек
 
-### Mobile (Flutter)
-| Package | Purpose |
+### Мобильное приложение (Flutter)
+| Пакет | Назначение |
 |---|---|
-| Flutter 3.12 / Dart 3.12 | UI framework |
-| flutter_riverpod 3.3.2 | Reactive state management |
-| go_router 17.3.0 | Navigation & deep links |
-| livekit_client 2.4.1 | WebRTC video conferencing |
-| flutter_inappwebview 6.1.5 | MediaPipe hand tracking (JS in WebView) |
-| camera 0.12.0 | Camera feed for gestures |
-| vibration 3.2.0 | Haptic patterns for music |
-| audioplayers 6.7.1 | Note audio playback |
-| record 7.1.0 | Pronunciation recording |
-| dio 5.9.2 | HTTP client |
-| google_fonts 8.1.0 | Baloo 2 & Nunito |
-| shared_preferences 2.5.3 | Local persistence |
+| Flutter 3.12 / Dart 3.12 | UI-фреймворк |
+| flutter_riverpod 3.3.2 | Реактивное управление состоянием |
+| go_router 17.3.0 | Навигация и глубокие ссылки |
+| livekit_client 2.4.1 | WebRTC видеоконференции |
+| flutter_inappwebview 6.1.5 | Отслеживание рук MediaPipe (JS в WebView) |
+| camera 0.12.0 | Камера для жестов |
+| vibration 3.2.0 | Тактильные паттерны для музыки |
+| audioplayers 6.7.1 | Воспроизведение звука нот |
+| record 7.1.0 | Запись произношения |
+| dio 5.9.2 | HTTP-клиент |
+| google_fonts 8.1.0 | Baloo 2 и Nunito |
+| shared_preferences 2.5.3 | Локальное хранилище |
 
-### Backend (Python)
-| Library | Purpose |
+### Бэкенд (Python)
+| Библиотека | Назначение |
 |---|---|
-| FastAPI 0.115.6 | REST API framework |
-| Uvicorn 0.34.0 | ASGI server |
+| FastAPI 0.115.6 | REST API-фреймворк |
+| Uvicorn 0.34.0 | ASGI-сервер |
 | SQLAlchemy 2.0.36 (async) | ORM |
-| PostgreSQL 16 | Relational database |
-| Alembic 1.14.0 | Schema migrations |
-| python-socketio 5.12.1 | Real-time relay for live class |
-| livekit-api 0.8.2 | Room & token management |
-| google-cloud-aiplatform 1.71.1 | Vertex AI / Gemini access |
-| PyJWT 2.10.1 | JWT auth tokens |
-| cloud-sql-python-connector | Cloud SQL (production) |
+| PostgreSQL 16 | Реляционная база данных |
+| Alembic 1.14.0 | Миграции схемы |
+| python-socketio 5.12.1 | Ретрансляция в реальном времени для живого урока |
+| livekit-api 0.8.2 | Управление комнатами и токенами |
+| google-cloud-aiplatform 1.71.1 | Vertex AI / Gemini |
+| PyJWT 2.10.1 | JWT-токены авторизации |
+| cloud-sql-python-connector | Cloud SQL (продакшн) |
 
-### Infrastructure
-| Component | Role |
+### Инфраструктура
+| Компонент | Роль |
 |---|---|
-| Docker Compose | Local development stack |
-| LiveKit Server | WebRTC SFU (video routing) |
-| Google Cloud Run | Backend hosting |
-| Google Cloud SQL | Managed PostgreSQL (production) |
-| GitHub Actions | CI/CD — auto-deploy on push to `dev` / `main` |
+| Docker Compose | Локальный стек разработки |
+| LiveKit Server | WebRTC SFU (маршрутизация видео) |
+| Google Cloud Run | Хостинг бэкенда |
+| Google Cloud SQL | Управляемый PostgreSQL (продакшн) |
+| GitHub Actions | CI/CD — автодеплой при пуше в `dev` / `main` |
 
 ---
 
-## Project Structure
+## Структура проекта
 
 ```
 deaf-blind/
-├── deaf-blind-mobile/              # Flutter app
+├── deaf-blind-mobile/              # Flutter-приложение
 │   ├── lib/
 │   │   ├── main.dart
-│   │   ├── app/                    # Root widget, auth gate
-│   │   ├── config/                 # Routes (GoRouter), env vars
+│   │   ├── app/                    # Корневой виджет, авторизация
+│   │   ├── config/                 # Маршруты (GoRouter), переменные окружения
 │   │   ├── core/
-│   │   │   ├── haptics/            # Vibration service & note patterns
-│   │   │   ├── network/            # Dio client & error handling
-│   │   │   ├── theme/              # Colors & Material theme
-│   │   │   ├── translation/        # Sign-to-text API wrappers
-│   │   │   └── ml/                 # Gesture classifier, MediaPipe bridge
+│   │   │   ├── haptics/            # Сервис вибрации и паттерны нот
+│   │   │   ├── network/            # Dio-клиент и обработка ошибок
+│   │   │   ├── theme/              # Цвета и Material-тема
+│   │   │   ├── translation/        # Обёртки API жест→текст
+│   │   │   └── ml/                 # Классификатор жестов, мост MediaPipe
 │   │   └── features/
-│   │       ├── alphabet_game/      # §2 Letters, pets, exams
-│   │       ├── music_vibration/    # §3 Haptic music
-│   │       ├── live_class/         # §1 LiveKit video meetings
-│   │       ├── ai_translator/      # §7 Gesture camera
-│   │       ├── pronunciation/      # §4 Speech lessons
-│   │       ├── video_translation/  # §6 Async video upload
-│   │       ├── ai_controller/      # §5 Recommendations
-│   │       └── deaf_school/        # Main shell, bottom nav, overlays
+│   │       ├── alphabet_game/      # §2 Буквы, питомцы, экзамены
+│   │       ├── music_vibration/    # §3 Тактильная музыка
+│   │       ├── live_class/         # §1 Видеоконференции LiveKit
+│   │       ├── ai_translator/      # §7 Камера жестов
+│   │       ├── pronunciation/      # §4 Речевые уроки
+│   │       ├── video_translation/  # §6 Асинхронная загрузка видео
+│   │       ├── ai_controller/      # §5 Рекомендации
+│   │       └── deaf_school/        # Главная оболочка, нижняя навигация, оверлеи
 │   └── assets/
-│       ├── images/                 # Pet sprites, UI art
+│       ├── images/                 # Спрайты питомцев, UI-арт
 │       └── html/
-│           └── hand_tracker.html   # MediaPipe JS (runs in WebView)
+│           └── hand_tracker.html   # MediaPipe JS (работает в WebView)
 │
-├── deaf-blind-backend/             # FastAPI backend
+├── deaf-blind-backend/             # FastAPI-бэкенд
 │   ├── app/
-│   │   ├── api/v1/endpoints/       # REST endpoints (auth, meetings, academy…)
-│   │   ├── core/                   # Config, security, Socket.IO, lifespan
-│   │   ├── db/                     # SQLAlchemy session, engine, base
-│   │   ├── models/                 # ORM models (meetings, levels, pets…)
-│   │   ├── schemas/                # Pydantic request/response models
-│   │   └── services/               # Business logic per feature
-│   ├── alembic/                    # Migration config
-│   ├── migrations/                 # Migration scripts
+│   │   ├── api/v1/endpoints/       # REST-эндпоинты (auth, meetings, academy…)
+│   │   ├── core/                   # Конфигурация, безопасность, Socket.IO
+│   │   ├── db/                     # SQLAlchemy сессия, движок, база
+│   │   ├── models/                 # ORM-модели (meetings, levels, pets…)
+│   │   ├── schemas/                # Pydantic-модели запросов/ответов
+│   │   └── services/               # Бизнес-логика по функциям
+│   ├── alembic/                    # Конфигурация миграций
+│   ├── migrations/                 # Скрипты миграций
 │   ├── Dockerfile
 │   └── requirements.txt
 │
 ├── docs/
-│   └── VIDEO_MEETINGS.md           # LiveKit setup & two-device testing guide
-├── docker-compose.yml              # Local: Postgres · LiveKit · Backend
+│   └── VIDEO_MEETINGS.md           # Руководство по настройке LiveKit
+├── docker-compose.yml              # Локально: Postgres · LiveKit · Backend
 └── .github/workflows/
-    └── deploy-backend.yml          # Auto-deploy to Cloud Run on push
+    └── deploy-backend.yml          # Автодеплой на Cloud Run при пуше
 ```
 
 ---
 
-## Local Development
+## Локальная разработка
 
-### Prerequisites
-- Docker & Docker Compose
+### Требования
+- Docker и Docker Compose
 - Flutter SDK 3.12+
-- Android Studio / Xcode (for mobile emulator)
+- Android Studio / Xcode (для эмулятора)
 
-### 1. Start the backend stack
+### 1. Запуск бэкенд-стека
 
 ```bash
 cp deaf-blind-backend/.env.example deaf-blind-backend/.env
-# Defaults work for local dev; fill in JWT_SECRET with any random string
+# Значения по умолчанию работают для локальной разработки
 
 docker compose up --build
 # Postgres  → localhost:5433
@@ -218,22 +218,22 @@ docker compose up --build
 # Backend   → localhost:9000
 ```
 
-### 2. Run database migrations
+### 2. Применение миграций базы данных
 
 ```bash
 cd deaf-blind-backend
 python scripts/run_migration.py
 ```
 
-### 3. Get a dev JWT token
+### 3. Получение dev JWT-токена
 
 ```bash
 curl -X POST http://localhost:9000/api/v1/auth/dev-token \
   -H "Content-Type: application/json" \
-  -d '{"user_id": "user1", "display_name": "Test User"}'
+  -d '{"user_id": "user1", "display_name": "Тестовый пользователь"}'
 ```
 
-### 4. Run the Flutter app
+### 4. Запуск Flutter-приложения
 
 ```bash
 cd deaf-blind-mobile
@@ -241,64 +241,64 @@ flutter pub get
 flutter run
 ```
 
-The app reads `BACKEND_URL` and `LIVEKIT_URL` from `lib/config/env.dart`. Update these to your machine's local IP address when running on a physical device.
+Приложение читает `BACKEND_URL` и `LIVEKIT_URL` из `lib/config/env.dart`. Укажите локальный IP-адрес машины при запуске на физическом устройстве.
 
 ---
 
-## Cloud Deployment (Google Cloud Run)
+## Деплой в облако (Google Cloud Run)
 
-| Branch | Cloud Run service |
+| Ветка | Сервис Cloud Run |
 |---|---|
 | `dev` | `deaf-blind-api-dev` |
 | `main` | `deaf-blind-api-prod` |
 
-The GitHub Actions workflow (`.github/workflows/deploy-backend.yml`) builds the Docker image, pushes it to Artifact Registry, and deploys to Cloud Run automatically on every push.
+GitHub Actions (`.github/workflows/deploy-backend.yml`) автоматически собирает Docker-образ, публикует его в Artifact Registry и деплоит на Cloud Run при каждом пуше.
 
-Production environment uses:
-- **Cloud SQL** (PostgreSQL 16) via the async Cloud SQL connector
-- **Vertex AI** via Application Default Credentials (no service-account key file needed on Cloud Run)
-- **LiveKit Cloud** or a self-hosted LiveKit instance
-
----
-
-## Environment Variables
-
-| Variable | Example | Description |
-|---|---|---|
-| `ENV` | `dev` | `dev` or `prod` |
-| `DB_USER` | `postgres` | Database user |
-| `DB_PASS` | `postgres` | Database password |
-| `DB_NAME` | `deaf_blind` | Database name |
-| `DB_HOST` | `localhost` | Database host |
-| `LIVEKIT_URL` | `ws://livekit:7880` | Internal LiveKit WS URL |
-| `LIVEKIT_PUBLIC_URL` | `ws://127.0.0.1:7880` | Client-facing LiveKit URL |
-| `LIVEKIT_API_KEY` | `devkey` | LiveKit API key |
-| `LIVEKIT_API_SECRET` | `secret` | LiveKit API secret |
-| `JWT_SECRET` | `change-in-prod` | JWT signing secret |
-| `GCP_PROJECT_ID` | `deaf-blind-500005` | Google Cloud project |
-| `VERTEX_SERVICE_ACCOUNT` | `./credentials/….json` | SA key (local only) |
+Продакшн-окружение использует:
+- **Cloud SQL** (PostgreSQL 16) через асинхронный коннектор Cloud SQL
+- **Vertex AI** через Application Default Credentials (ключ сервисного аккаунта не нужен на Cloud Run)
+- **LiveKit Cloud** или собственный экземпляр LiveKit
 
 ---
 
-## API Overview
+## Переменные окружения
 
-| Method | Path | Description |
+| Переменная | Пример | Описание |
 |---|---|---|
-| `POST` | `/api/v1/auth/dev-token` | Issue dev JWT |
-| `POST` | `/api/v1/meetings/create` | Create meeting room |
-| `POST` | `/api/v1/meetings/join` | Join by ID or code |
-| `POST` | `/api/v1/meetings/leave` | Leave gracefully |
-| `POST` | `/api/v1/meetings/end` | Host ends meeting for all |
-| `GET` | `/api/v1/meetings/recent` | Recent meetings for user |
-| `GET` | `/api/v1/academy/levels` | Alphabet game levels |
-| `POST` | `/api/v1/academy/gesture-check` | Validate gesture attempt |
-| `POST` | `/api/v1/academy/exam/{level_id}/grade` | Grade exam |
-| `GET` | `/api/v1/music/notes` | Music note list |
-| `POST` | `/api/v1/music/game/answer` | Submit note answer |
-| `POST` | `/api/v1/translation/sign-to-text` | Gesture labels → Russian text |
-| `POST` | `/api/v1/translation/text-to-sign` | Russian text → avatar animation IDs |
-| `POST` | `/api/v1/video-translation/jobs` | Submit video for translation |
-| `GET` | `/api/v1/video-translation/jobs/{id}` | Poll job status |
-| `GET` | `/api/v1/health` | Health check |
+| `ENV` | `dev` | `dev` или `prod` |
+| `DB_USER` | `postgres` | Пользователь базы данных |
+| `DB_PASS` | `postgres` | Пароль базы данных |
+| `DB_NAME` | `deaf_blind` | Имя базы данных |
+| `DB_HOST` | `localhost` | Хост базы данных |
+| `LIVEKIT_URL` | `ws://livekit:7880` | Внутренний WS-адрес LiveKit |
+| `LIVEKIT_PUBLIC_URL` | `ws://127.0.0.1:7880` | Публичный WS-адрес LiveKit для клиентов |
+| `LIVEKIT_API_KEY` | `devkey` | API-ключ LiveKit |
+| `LIVEKIT_API_SECRET` | `secret` | API-секрет LiveKit |
+| `JWT_SECRET` | `change-in-prod` | Секрет подписи JWT |
+| `GCP_PROJECT_ID` | `deaf-blind-500005` | Проект Google Cloud |
+| `VERTEX_SERVICE_ACCOUNT` | `./credentials/….json` | Ключ сервисного аккаунта (только локально) |
 
-Full LiveKit setup and two-device testing instructions are in [`docs/VIDEO_MEETINGS.md`](docs/VIDEO_MEETINGS.md).
+---
+
+## Обзор API
+
+| Метод | Путь | Описание |
+|---|---|---|
+| `POST` | `/api/v1/auth/dev-token` | Выпустить dev JWT |
+| `POST` | `/api/v1/meetings/create` | Создать комнату для встречи |
+| `POST` | `/api/v1/meetings/join` | Войти по ID или коду |
+| `POST` | `/api/v1/meetings/leave` | Покинуть корректно |
+| `POST` | `/api/v1/meetings/end` | Учитель завершает встречу для всех |
+| `GET` | `/api/v1/meetings/recent` | Недавние встречи пользователя |
+| `GET` | `/api/v1/academy/levels` | Уровни игры «Алфавит» |
+| `POST` | `/api/v1/academy/gesture-check` | Проверить попытку жеста |
+| `POST` | `/api/v1/academy/exam/{level_id}/grade` | Оценить экзамен |
+| `GET` | `/api/v1/music/notes` | Список музыкальных нот |
+| `POST` | `/api/v1/music/game/answer` | Отправить ответ в игре |
+| `POST` | `/api/v1/translation/sign-to-text` | Метки жестов → русский текст |
+| `POST` | `/api/v1/translation/text-to-sign` | Русский текст → ID анимации аватара |
+| `POST` | `/api/v1/video-translation/jobs` | Отправить видео на перевод |
+| `GET` | `/api/v1/video-translation/jobs/{id}` | Опросить статус задачи |
+| `GET` | `/api/v1/health` | Проверка работоспособности |
+
+Полные инструкции по настройке LiveKit и тестированию на двух устройствах — в [`docs/VIDEO_MEETINGS.md`](docs/VIDEO_MEETINGS.md).

@@ -1120,12 +1120,7 @@ class _ControlButton extends StatelessWidget {
 // ─── PROFILE ─────────────────────────────────────────────────────────────────
 
 class ProfileScreen extends StatelessWidget {
-  const ProfileScreen({
-    super.key,
-    required this.onAlphabetMap,
-  });
-
-  final VoidCallback onAlphabetMap;
+  const ProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -1218,27 +1213,6 @@ class ProfileScreen extends StatelessWidget {
                 _WeakLetter('Буква П', 0.62, const Color(0xFFFFB23E), const Color(0xFFFFF2DF)),
                 const SizedBox(height: 10),
                 _WeakLetter('Буква М', 0.92, AppColors.success, const Color(0xFFE2F6EC)),
-                const SizedBox(height: 16),
-                GestureDetector(
-                  onTap: onAlphabetMap,
-                  child: Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(vertical: 13),
-                    decoration: BoxDecoration(
-                      color: AppColors.grey100,
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    alignment: Alignment.center,
-                    child: const Text(
-                      'Повторить слабые буквы',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w800,
-                        fontSize: 14,
-                        color: AppColors.primary,
-                      ),
-                    ),
-                  ),
-                ),
               ],
             ),
           ),

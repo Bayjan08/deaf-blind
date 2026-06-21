@@ -2,14 +2,43 @@ import 'dart:math' as math;
 
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
-import '../../../../core/theme/app_theme.dart';
-import '../../../../core/theme/design_colors.dart';
-import '../widgets/design_widgets.dart';
 
-class HomeScreen extends StatelessWidget {
+// ─── LEVEL MAP DATA ──────────────────────────────────────────────────────────
+
+class LevelDef {
+  final int num;
+  final String name;
+  final double cx, cy, w, ar;
+  final String img;
+  final bool active;
+  const LevelDef(this.num, this.name, this.cx, this.cy, this.w, this.ar,
+      this.img, this.active);
+}
+
+const double _kDesignW = 390;
+const double _kCanvasH = 1160;
+
+const List<LevelDef> _kLevels = [
+  LevelDef(1, 'Letters', 196, 168, 154, 970 / 875, 'assets/level1_house.png', true),
+  LevelDef(2, 'Syllables', 114, 448, 124, 475 / 526, 'assets/level2_house.png', false),
+  LevelDef(3, 'Words', 276, 718, 106, 515 / 955, 'assets/level3_house.png', false),
+  LevelDef(4, 'Sentences', 150, 1000, 152, 1199 / 1319, 'assets/level4_castle.png', false),
+];
+
+const ColorFilter _kGrayscale = ColorFilter.matrix(<double>[
+  0.2126, 0.7152, 0.0722, 0, 0,
+  0.2126, 0.7152, 0.0722, 0, 0,
+  0.2126, 0.7152, 0.0722, 0, 0,
+  0, 0, 0, 1, 0,
+]);
+
+// ─── HOME SCREEN (level map) ─────────────────────────────────────────────────
+
+class HomeScreen extends StatefulWidget {
   const HomeScreen({
     super.key,
     required this.onProfile,
@@ -22,322 +51,396 @@ class HomeScreen extends StatelessWidget {
   final VoidCallback onSubjects;
 
   @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
+  late final AnimationController _bob;
+  late final AnimationController _pulse;
+
+  @override
+  void initState() {
+    super.initState();
+    _bob = AnimationController(vsync: this, duration: const Duration(milliseconds: 3400))
+      ..repeat(reverse: true);
+    _pulse = AnimationController(vsync: this, duration: const Duration(milliseconds: 2600))
+      ..repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _bob.dispose();
+    _pulse.dispose();
+    super.dispose();
+  }
+
+  void _toast(String msg) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(
+        content: Text(msg,
+            textAlign: TextAlign.center,
+            style: GoogleFonts.nunito(fontWeight: FontWeight.w700, color: Colors.white)),
+        backgroundColor: const Color(0xFF33485A),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+        duration: const Duration(milliseconds: 2300),
+        margin: const EdgeInsets.fromLTRB(60, 0, 60, 28),
+      ));
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(20, 60, 20, 130),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'С возвращением',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: DesignColors.textMuted,
-                        fontWeight: FontWeight.w700,
+    final screenW = MediaQuery.of(context).size.width;
+    final s = screenW / _kDesignW;
+
+    return Stack(
+      children: [
+        SingleChildScrollView(
+          child: SizedBox(
+            width: screenW,
+            height: _kCanvasH * s,
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Positioned.fill(
+                  child: DecoratedBox(
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        stops: [0.0, 0.48, 1.0],
+                        colors: [
+                          Color(0xFFEAF7FC),
+                          Color(0xFFD8EEF8),
+                          Color(0xFFD6ECDA),
+                        ],
                       ),
                     ),
-                    Text(
-                      'Привет, Артём!',
-                      style: AppTheme.baloo(
-                        fontSize: 26,
-                        fontWeight: FontWeight.w700,
-                        height: 1.1,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const StreakBadge(),
-              const SizedBox(width: 10),
-              GestureDetector(
-                onTap: onProfile,
-                child: const AvatarImage(size: 46),
-              ),
-            ],
-          ),
-          const SizedBox(height: 22),
-          _AiRecommendationCard(onTap: onAlphabetMap),
-          const SizedBox(height: 24),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Продолжить',
-                style: AppTheme.baloo(fontSize: 18, fontWeight: FontWeight.w700),
-              ),
-              GestureDetector(
-                onTap: onSubjects,
-                child: const Text(
-                  'Все предметы',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w800,
-                    fontSize: 13,
-                    color: DesignColors.purple,
                   ),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          GestureDetector(
-            onTap: onAlphabetMap,
-            child: Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(24),
-                boxShadow: [
-                  BoxShadow(
-                    color: DesignColors.textDark.withValues(alpha: 0.15),
-                    blurRadius: 24,
-                    offset: const Offset(0, 10),
-                  ),
-                ],
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    width: 58,
-                    height: 58,
+                _hill(s, left: -60, top: 430, size: 240, color: const Color(0xFFCFE9D3)),
+                _hill(s, right: -80, top: 760, size: 280, color: const Color(0xFFC8E6CF)),
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  height: 200 * s,
+                  child: const DecoratedBox(
                     decoration: BoxDecoration(
-                      color: DesignColors.purpleSoft,
-                      borderRadius: BorderRadius.circular(18),
-                    ),
-                    alignment: Alignment.center,
-                    child: Text(
-                      'Аа',
-                      style: AppTheme.baloo(
-                        fontSize: 26,
-                        fontWeight: FontWeight.w800,
-                        color: DesignColors.purple,
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [Color(0x00C8E6CD), Color(0xFFC2E3C6)],
                       ),
                     ),
                   ),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                ),
+                Positioned.fill(child: CustomPaint(painter: _LevelPathPainter(s))),
+                for (final l in _kLevels) _buildNode(l, s),
+              ],
+            ),
+          ),
+        ),
+        _buildHeader(s),
+      ],
+    );
+  }
+
+  Widget _hill(double s,
+      {double? left, double? right, required double top, required double size, required Color color}) {
+    return Positioned(
+      left: left == null ? null : left * s,
+      right: right == null ? null : right * s,
+      top: top * s,
+      child: Container(
+        width: size * s,
+        height: size * s,
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.5),
+          shape: BoxShape.circle,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNode(LevelDef l, double s) {
+    final bool isActive = l.active;
+    final bool isLocked = !l.active;
+    final double w = l.w * s;
+    final double h = w / l.ar;
+    const double slotExtraTop = 56;
+    const double slotExtraBottom = 60;
+    final double slotW = w * 1.4;
+    final double slotH = h + slotExtraTop + slotExtraBottom;
+
+    return Positioned(
+      left: l.cx * s - slotW / 2,
+      top: l.cy * s - (slotExtraTop + h / 2),
+      width: slotW,
+      height: slotH,
+      child: GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        onTap: () => isLocked
+            ? _toast('Complete the previous level to unlock')
+            : widget.onAlphabetMap(),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: slotExtraTop),
+            SizedBox(
+              width: w,
+              height: h,
+              child: AnimatedBuilder(
+                animation: Listenable.merge([_bob, _pulse]),
+                builder: (_, _) {
+                  final bob = isActive ? -8.0 * _wave(_bob.value) * s : 0.0;
+                  return Transform.translate(
+                    offset: Offset(0, bob),
+                    child: Stack(
+                      clipBehavior: Clip.none,
+                      alignment: Alignment.center,
                       children: [
-                        const Text(
-                          'Алфавит жестами',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w800,
-                            fontSize: 16,
-                            color: DesignColors.textDark,
+                        if (isActive)
+                          Container(
+                            width: w * 1.3,
+                            height: w * 1.3,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              gradient: RadialGradient(
+                                colors: [
+                                  const Color(0xFFF3933B).withValues(
+                                      alpha: 0.55 - 0.43 * _wave(_pulse.value)),
+                                  const Color(0x00F3933B),
+                                ],
+                                stops: const [0.0, 0.64],
+                              ),
+                            ),
+                            transform: Matrix4.diagonal3Values(
+                              1.0 + 0.22 * _wave(_pulse.value),
+                              1.0 + 0.22 * _wave(_pulse.value),
+                              1.0,
+                            ),
+                            transformAlignment: Alignment.center,
+                          ),
+                        Positioned(
+                          bottom: 0,
+                          child: Container(
+                            width: w * 0.86,
+                            height: w * 0.26,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              gradient: RadialGradient(
+                                center: const Alignment(0, -0.3),
+                                colors: isLocked
+                                    ? const [Color(0xFFCDD4DA), Color(0xFFAEB8C0)]
+                                    : const [Color(0xFF9ED47A), Color(0xFF6FB24A)],
+                              ),
+                              boxShadow: isLocked
+                                  ? null
+                                  : [
+                                      BoxShadow(
+                                        color: const Color(0xFF507832).withValues(alpha: 0.22),
+                                        blurRadius: 16,
+                                        offset: const Offset(0, 8),
+                                      ),
+                                    ],
+                            ),
                           ),
                         ),
-                        Text(
-                          'Уровень 1 · Буквы',
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: DesignColors.textMuted,
-                            fontWeight: FontWeight.w600,
-                          ),
+                        Positioned.fill(
+                          child: isLocked
+                              ? Opacity(
+                                  opacity: 0.52,
+                                  child: ColorFiltered(
+                                    colorFilter: _kGrayscale,
+                                    child: Image.asset(
+                                      l.img,
+                                      fit: BoxFit.contain,
+                                      alignment: Alignment.bottomCenter,
+                                      errorBuilder: (_, _, _) => const SizedBox(),
+                                    ),
+                                  ),
+                                )
+                              : Image.asset(
+                                  l.img,
+                                  fit: BoxFit.contain,
+                                  alignment: Alignment.bottomCenter,
+                                  errorBuilder: (_, _, _) => const SizedBox(),
+                                ),
                         ),
-                        const SizedBox(height: 8),
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(6),
-                          child: LinearProgressIndicator(
-                            value: 0.6,
-                            minHeight: 8,
-                            backgroundColor: DesignColors.progressBg,
-                            color: DesignColors.purple,
+                        if (isLocked) ...[
+                          Positioned(
+                            top: -22,
+                            child: CustomPaint(
+                              size: const Size(42, 38),
+                              painter: _CastleSilhouette(),
+                            ),
                           ),
-                        ),
+                          Positioned(
+                            right: -2,
+                            bottom: h * 0.24,
+                            child: Container(
+                              width: 32,
+                              height: 32,
+                              decoration: const BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Colors.white,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Color(0x2628374A),
+                                    blurRadius: 8,
+                                    offset: Offset(0, 3),
+                                  ),
+                                ],
+                              ),
+                              child: const Icon(Icons.lock, size: 17, color: Color(0xFF8A96A1)),
+                            ),
+                          ),
+                        ],
+                        if (isActive)
+                          Positioned(
+                            top: -42 * s,
+                            child: Transform.translate(
+                              offset: Offset(0, -7 * _wave(_bob.value) * s),
+                              child: Container(
+                                padding: const EdgeInsets.fromLTRB(18, 7, 18, 8),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFEE7C2E),
+                                  borderRadius: BorderRadius.circular(30),
+                                  boxShadow: const [
+                                    BoxShadow(color: Color(0xFFC95F1A), offset: Offset(0, 5)),
+                                    BoxShadow(
+                                        color: Color(0x59C95F1A),
+                                        blurRadius: 14,
+                                        offset: Offset(0, 9)),
+                                  ],
+                                ),
+                                child: Text(
+                                  'START',
+                                  style: GoogleFonts.baloo2(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w800,
+                                    fontSize: 14,
+                                    letterSpacing: 2.0,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
                       ],
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  const Text(
-                    '3/5',
-                    style: TextStyle(
+                  );
+                },
+              ),
+            ),
+            const SizedBox(height: 12),
+            Opacity(
+              opacity: isLocked ? 0.7 : 1.0,
+              child: Column(
+                children: [
+                  Text(
+                    'LEVEL ${l.num}',
+                    style: GoogleFonts.nunito(
                       fontWeight: FontWeight.w800,
-                      color: DesignColors.purple,
-                      fontSize: 13,
+                      fontSize: 10,
+                      letterSpacing: 1.4,
+                      color: isLocked ? const Color(0xFF9AA6B0) : const Color(0xFFE07A2C),
+                    ),
+                  ),
+                  Text(
+                    l.name,
+                    style: GoogleFonts.baloo2(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 17,
+                      height: 1.1,
+                      color: isLocked ? const Color(0xFF8B97A1) : const Color(0xFF3A4F3A),
                     ),
                   ),
                 ],
               ),
             ),
-          ),
-          const SizedBox(height: 22),
-          Row(
-            children: [
-              Expanded(child: _StatCard(value: '+18%', label: 'Прогресс за неделю', color: DesignColors.green)),
-              const SizedBox(width: 12),
-              Expanded(child: _StatCard(value: '47', label: 'Выучено жестов', color: DesignColors.purple)),
-            ],
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
-}
 
-class _AiRecommendationCard extends StatelessWidget {
-  const _AiRecommendationCard({required this.onTap});
+  double _wave(double t) => math.sin(t * math.pi);
 
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(22),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(28),
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [DesignColors.purple, DesignColors.purpleLight],
+  Widget _buildHeader(double s) {
+    return Positioned(
+      top: 0,
+      left: 0,
+      right: 0,
+      child: Container(
+        padding: EdgeInsets.fromLTRB(18, MediaQuery.of(context).padding.top + 12, 18, 14),
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            stops: [0.0, 0.7, 1.0],
+            colors: [Color(0xEBFFFFFF), Color(0xC7FFFFFF), Color(0x00FFFFFF)],
+          ),
         ),
-        boxShadow: [
-          BoxShadow(
-            color: DesignColors.purple.withValues(alpha: 0.7),
-            blurRadius: 30,
-            offset: const Offset(0, 18),
-          ),
-        ],
-      ),
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          Positioned(
-            right: -30,
-            top: -30,
-            child: Container(
-              width: 130,
-              height: 130,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.white.withValues(alpha: 0.12),
-              ),
-            ),
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    width: 30,
-                    height: 30,
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.22),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: const Icon(Icons.auto_awesome, color: Colors.white, size: 16),
-                  ),
-                  const SizedBox(width: 8),
-                  const Text(
-                    'ИИ-помощник',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w800,
-                      fontSize: 14,
-                      color: Colors.white,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              RichText(
-                text: TextSpan(
-                  style: const TextStyle(
-                    fontSize: 17,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white,
-                    height: 1.35,
-                  ),
-                  children: [
-                    const TextSpan(text: 'Буквы '),
-                    TextSpan(
-                      text: 'Д',
-                      style: AppTheme.baloo(fontSize: 17, color: Colors.white),
-                    ),
-                    const TextSpan(text: ' и '),
-                    TextSpan(
-                      text: 'П',
-                      style: AppTheme.baloo(fontSize: 17, color: Colors.white),
-                    ),
-                    const TextSpan(text: ' даются трудно. Давай быстро повторим их?'),
+        child: Row(
+          children: [
+            GestureDetector(
+              onTap: widget.onSubjects,
+              child: Container(
+                width: 42,
+                height: 42,
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.white,
+                  boxShadow: [
+                    BoxShadow(color: Color(0x2428384A), blurRadius: 8, offset: Offset(0, 2)),
                   ],
                 ),
+                child: const Icon(Icons.chevron_left, color: Color(0xFF46586A), size: 26),
               ),
-              const SizedBox(height: 16),
-              GestureDetector(
-                onTap: onTap,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: const Text(
-                    'Повторить →',
-                    style: TextStyle(
+            ),
+            Expanded(
+              child: Column(
+                children: [
+                  Text(
+                    'Sign Alphabet',
+                    style: GoogleFonts.baloo2(
                       fontWeight: FontWeight.w800,
-                      fontSize: 15,
-                      color: DesignColors.purple,
+                      fontSize: 20,
+                      color: const Color(0xFF33485A),
                     ),
                   ),
-                ),
+                  Text(
+                    'Level 1 of 4 · Letters',
+                    style: GoogleFonts.nunito(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 12,
+                      color: const Color(0xFF7C93A4),
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _StatCard extends StatelessWidget {
-  const _StatCard({
-    required this.value,
-    required this.label,
-    required this.color,
-  });
-
-  final String value;
-  final String label;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(22),
-        boxShadow: [
-          BoxShadow(
-            color: DesignColors.textDark.withValues(alpha: 0.1),
-            blurRadius: 24,
-            offset: const Offset(0, 10),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            value,
-            style: AppTheme.baloo(fontSize: 26, fontWeight: FontWeight.w800, color: color),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 13,
-              color: DesignColors.textMuted,
-              fontWeight: FontWeight.w700,
             ),
-          ),
-        ],
+            SizedBox(
+              width: 42,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: List.generate(4, (i) {
+                  return Container(
+                    margin: const EdgeInsets.only(left: 5),
+                    width: 9,
+                    height: 9,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: i == 0 ? const Color(0xFFEE7C2E) : const Color(0xFFD3DDE4),
+                    ),
+                  );
+                }),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -348,14 +451,12 @@ class _StatCard extends StatelessWidget {
 class SubjectsScreen extends StatelessWidget {
   const SubjectsScreen({
     super.key,
-    required this.onAlphabetMap,
     required this.onMathMap,
     required this.onMusicNotes,
     required this.onPronunciation,
     required this.onFlashcards,
   });
 
-  final VoidCallback onAlphabetMap;
   final VoidCallback onMathMap;
   final VoidCallback onMusicNotes;
   final VoidCallback onPronunciation;
@@ -381,25 +482,6 @@ class SubjectsScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 22),
-          _SubjectCard(
-            onTap: onAlphabetMap,
-            icon: Container(
-              width: 64,
-              height: 64,
-              decoration: BoxDecoration(
-                color: AppColors.primary,
-                borderRadius: BorderRadius.circular(20),
-              ),
-              alignment: Alignment.center,
-              child: const Icon(CupertinoIcons.textformat_abc, color: Colors.white, size: 30),
-            ),
-            title: 'Алфавит жестами',
-            subtitle: 'Игра с питомцем · 4 уровня',
-            badge: 'Уровень 1 · 3/5',
-            badgeBg: AppColors.grey100,
-            badgeColor: AppColors.success,
-          ),
-          const SizedBox(height: 14),
           _SubjectCard(
             onTap: onMathMap,
             icon: Container(
@@ -608,351 +690,82 @@ class _SubjectCard extends StatelessWidget {
   }
 }
 
-// ─── ALPHABET MAP ────────────────────────────────────────────────────────────
+// ─── LEVEL MAP PAINTERS ──────────────────────────────────────────────────────
 
-class AlphabetMapScreen extends StatelessWidget {
-  const AlphabetMapScreen({
-    super.key,
-    required this.onBack,
-    required this.onIntro,
-  });
-
-  final VoidCallback onBack;
-  final VoidCallback onIntro;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [AppColors.grey100, AppColors.background],
-          stops: [0, 0.4],
-        ),
-      ),
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.only(bottom: 130),
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 56, 20, 14),
-              child: Row(
-                children: [
-                  DesignBackButton(onTap: onBack),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      'Алфавит жестами',
-                      style: AppTextStyles.style(fontSize: 20, fontWeight: FontWeight.w700, height: 1),
-                    ),
-                  ),
-                  const AppStreakBadge(compact: true),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(24),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.textPrimary.withValues(alpha: 0.15),
-                      blurRadius: 26,
-                      offset: const Offset(0, 12),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  children: [
-                    _FloatingPet(),
-                    const SizedBox(width: 14),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'Лис растёт вместе с тобой',
-                            style: TextStyle(
-                              fontWeight: FontWeight.w800,
-                              fontSize: 15,
-                              color: AppColors.textPrimary,
-                            ),
-                          ),
-                          const SizedBox(height: 7),
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(6),
-                            child: LinearProgressIndicator(
-                              value: 0.35,
-                              minHeight: 9,
-                              backgroundColor: AppColors.grey200,
-                              color: AppColors.primary,
-                            ),
-                          ),
-                          const SizedBox(height: 5),
-                          Text(
-                            'Ещё 2 буквы до нового уровня',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: AppColors.textSecondary,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            SizedBox(
-              height: 580,
-              child: Stack(
-                children: [
-                  CustomPaint(
-                    size: const Size(double.infinity, 580),
-                    painter: _MapPathPainter(),
-                  ),
-                  const Positioned(
-                    left: 0,
-                    right: 0,
-                    top: 70,
-                    child: Center(
-                      child: LockedLevelNode(
-                        label: 'Замок · Предложения',
-                        large: true,
-                      ),
-                    ),
-                  ),
-                  const Positioned(
-                    left: 235,
-                    top: 225,
-                    child: LockedLevelNode(label: 'Слова'),
-                  ),
-                  const Positioned(
-                    left: 95,
-                    top: 350,
-                    child: LockedLevelNode(label: 'Слоги'),
-                  ),
-                  Positioned(
-                    left: 0,
-                    right: 0,
-                    top: 470,
-                    child: Column(
-                      children: [
-                        _ContinueBubble(),
-                        const SizedBox(height: 8),
-                        GestureDetector(
-                          onTap: onIntro,
-                          child: Container(
-                            width: 96,
-                            height: 84,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(26),
-                              gradient: const LinearGradient(
-                                colors: [AppColors.primary, AppColors.primaryLight],
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: AppColors.primary.withValues(alpha: 0.7),
-                                  blurRadius: 28,
-                                  offset: const Offset(0, 14),
-                                ),
-                              ],
-                            ),
-                            child: Stack(
-                              alignment: Alignment.bottomCenter,
-                              children: [
-                                Positioned(
-                                  top: -16,
-                                  child: CustomPaint(
-                                    size: const Size(60, 22),
-                                    painter: _TrianglePainter(const Color(0xFF7B6BF0)),
-                                  ),
-                                ),
-                                const Padding(
-                                  padding: EdgeInsets.only(bottom: 12),
-                                  child: Icon(Icons.arrow_downward_rounded, color: Colors.white, size: 26),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Уровень 1 · Буквы',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w800,
-                            fontSize: 13,
-                            color: AppColors.primary,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _FloatingPet extends StatefulWidget {
-  @override
-  State<_FloatingPet> createState() => _FloatingPetState();
-}
-
-class _FloatingPetState extends State<_FloatingPet>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _c;
-
-  @override
-  void initState() {
-    super.initState();
-    _c = AnimationController(vsync: this, duration: const Duration(seconds: 3))
-      ..repeat(reverse: true);
-  }
-
-  @override
-  void dispose() {
-    _c.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _c,
-      builder: (_, child) => Transform.translate(
-        offset: Offset(0, -7 * math.sin(_c.value * math.pi)),
-        child: child,
-      ),
-      child: Container(
-        width: 58,
-        height: 58,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(18),
-          color: const Color(0xFFEAF0FF),
-        ),
-        alignment: Alignment.center,
-        child: Text(
-          'питомец\nЛис',
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: 11,
-            fontFamily: 'monospace',
-            color: const Color(0xFF9AA3C0),
-            height: 1.2,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _ContinueBubble extends StatefulWidget {
-  @override
-  State<_ContinueBubble> createState() => _ContinueBubbleState();
-}
-
-class _ContinueBubbleState extends State<_ContinueBubble>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _c;
-
-  @override
-  void initState() {
-    super.initState();
-    _c = AnimationController(vsync: this, duration: const Duration(milliseconds: 2400))
-      ..repeat(reverse: true);
-  }
-
-  @override
-  void dispose() {
-    _c.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _c,
-      builder: (_, child) => Transform.translate(
-        offset: Offset(0, -7 * math.sin(_c.value * math.pi)),
-        child: child,
-      ),
-      child: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-            decoration: BoxDecoration(
-              color: AppColors.textPrimary,
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: const Text(
-              'ПРОДОЛЖИТЬ',
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.w800,
-                fontSize: 12,
-              ),
-            ),
-          ),
-          Transform.rotate(
-            angle: math.pi / 4,
-            child: Container(
-              width: 10,
-              height: 10,
-              color: AppColors.textPrimary,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _MapPathPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = const Color(0xFFD8D5F0)
-      ..strokeWidth = 6
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round;
-
-    final path = Path()
-      ..moveTo(size.width * 0.5, size.height * 0.897)
-      ..quadraticBezierTo(size.width * 0.3, size.height * 0.784, size.width * 0.27, size.height * 0.655)
-      ..quadraticBezierTo(size.width * 0.33, size.height * 0.517, size.width * 0.67, size.height * 0.431)
-      ..quadraticBezierTo(size.width * 0.71, size.height * 0.302, size.width * 0.43, size.height * 0.19);
-
-    canvas.drawPath(path, paint);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
-
-class _TrianglePainter extends CustomPainter {
-  _TrianglePainter(this.color);
-  final Color color;
+class _LevelPathPainter extends CustomPainter {
+  final double s;
+  _LevelPathPainter(this.s);
 
   @override
   void paint(Canvas canvas, Size size) {
-    final path = Path()
-      ..moveTo(size.width / 2, 0)
-      ..lineTo(size.width, size.height)
-      ..lineTo(0, size.height)
+    final pts = _kLevels.map((l) => Offset(l.cx * s, l.cy * s)).toList();
+    final path = Path()..moveTo(pts.first.dx, pts.first.dy);
+    for (int i = 1; i < pts.length; i++) {
+      final a = pts[i - 1], b = pts[i];
+      final c1 = Offset(a.dx, a.dy + (b.dy - a.dy) * 0.45);
+      final c2 = Offset(b.dx, b.dy - (b.dy - a.dy) * 0.45);
+      path.cubicTo(c1.dx, c1.dy, c2.dx, c2.dy, b.dx, b.dy);
+    }
+
+    canvas.drawPath(
+      path,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 17 * s
+        ..strokeCap = StrokeCap.round
+        ..color = Colors.white.withValues(alpha: 0.65),
+    );
+
+    final dotPaint = Paint()..color = const Color(0xFFF3A64F).withValues(alpha: 0.9);
+    final r = 4.5 * s;
+    final step = 22.0 * s;
+    for (final metric in path.computeMetrics()) {
+      double d = 0;
+      while (d < metric.length) {
+        final tan = metric.getTangentForOffset(d);
+        if (tan != null) canvas.drawCircle(tan.position, r, dotPaint);
+        d += step;
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _LevelPathPainter old) => old.s != s;
+}
+
+class _CastleSilhouette extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final sx = size.width / 44, sy = size.height / 40;
+    canvas.scale(sx, sy);
+    final body = Paint()..color = const Color(0xFF7B8893);
+    void rect(double x, double y, double w, double h, [double r = 0]) {
+      canvas.drawRRect(
+        RRect.fromRectAndRadius(Rect.fromLTWH(x, y, w, h), Radius.circular(r)),
+        body,
+      );
+    }
+    rect(3, 15, 9, 24, 1.5);
+    rect(32, 15, 9, 24, 1.5);
+    rect(7, 22, 30, 17);
+    rect(17, 8, 10, 31, 1.5);
+    for (final x in [3.0, 9.0, 32.0, 38.0]) { rect(x, 13, 3, 3); }
+    for (final x in [17.0, 24.0]) { rect(x, 6, 3, 3); }
+    final flag = Path()
+      ..moveTo(27, 9)
+      ..lineTo(27, 1)
+      ..lineTo(36, 5)
       ..close();
-    canvas.drawPath(path, Paint()..color = color);
+    canvas.drawPath(flag, Paint()..color = const Color(0xFF9AA6B0));
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        const Rect.fromLTWH(19, 29, 6, 10),
+        const Radius.circular(3),
+      ),
+      Paint()..color = const Color(0xFF5A6671),
+    );
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  bool shouldRepaint(covariant CustomPainter old) => false;
 }

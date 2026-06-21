@@ -29,6 +29,17 @@ class GestureCameraScreen extends StatefulWidget {
 }
 
 class _GestureCameraScreenState extends State<GestureCameraScreen> {
+  // ── DEMO MODE (hardcoded) ───────────────────────────────────────────────────
+  // For the demonstration video: every captured sign reveals the next word of a
+  // fixed scripted phrase, no matter what was actually shown. No backend/model.
+  // Set _kDemoMode = false to use the real Slovo recognition again.
+  static const bool _kDemoMode = true;
+  static const List<String> _kDemoScript = [
+    'привет', 'меня', 'зовут', 'Б', 'О', 'Ж', 'И', 'и', 'я', 'программист',
+  ];
+  static const String _kDemoSentence = 'Привет, меня зовут Божи, и я программист.';
+  int _demoIndex = 0;
+
   // ── captured gestures ──────────────────────────────────────────────────────
   final List<Map<String, dynamic>> _captured = [];
 
@@ -98,6 +109,23 @@ class _GestureCameraScreenState extends State<GestureCameraScreen> {
   Future<void> _onClip(List<String> frames) async {
     HapticFeedback.heavyImpact();
 
+    // DEMO: ignore the frames, reveal the next scripted word.
+    if (_kDemoMode) {
+      if (_demoIndex >= _kDemoScript.length) return; // script finished
+      final word = _kDemoScript[_demoIndex++];
+      setState(() {
+        _captured.add({'label': word, 'aiWord': word});
+        _sentenceText = null;
+        _error = null;
+        _isClipProcessing = false;
+      });
+      await _speak(word);
+      _webController?.evaluateJavascript(
+        source: "window.clipDone && clipDone(${jsonEncode(word)})",
+      );
+      return;
+    }
+
     setState(() {
       _isClipProcessing = true;
       _sentenceText = null;
@@ -144,6 +172,16 @@ class _GestureCameraScreenState extends State<GestureCameraScreen> {
     if (_captured.isEmpty) return;
     final labels = _captured.map((e) => e['label'] as String).toList();
 
+    // DEMO: hardcoded final sentence — no backend call.
+    if (_kDemoMode) {
+      setState(() {
+        _sentenceText = _kDemoSentence;
+        _isMakingSentence = false;
+      });
+      await _speak(_kDemoSentence);
+      return;
+    }
+
     setState(() {
       _isMakingSentence = true;
       _sentenceText = null;
@@ -183,6 +221,7 @@ class _GestureCameraScreenState extends State<GestureCameraScreen> {
         _captured.clear();
         _sentenceText = null;
         _error = null;
+        _demoIndex = 0; // restart the scripted demo
       });
 
   // ── Build ──────────────────────────────────────────────────────────────────

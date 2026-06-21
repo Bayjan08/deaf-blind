@@ -9,7 +9,7 @@ import '../../../../core/translation/sign_avatar_player.dart';
 import '../providers/ai_translator_provider.dart';
 
 const _guestIntroText =
-    'Привет! Меня зовут ДИЛА. Я здесь, чтобы поделиться с тобой нашим '
+    'Привет! Меня зовут ДИЛИЯ. Я здесь, чтобы поделиться с тобой нашим '
     'проектом. Это приложение помогает глухим и слабовидящим людям общаться, '
     'учиться и познавать мир — через жесты, голос и вибрацию. Спасибо, что '
     'заглянул! Давай покажу, как это работает.';
@@ -222,7 +222,7 @@ class _AiTranslatorScreenState extends ConsumerState<AiTranslatorScreen> with Si
                     color: AppColors.primary,
                   ),
                   label: Text(
-                    'Гостевой режим: познакомиться с ДИЛА',
+                    'Гостевой режим: познакомиться с ДИЛИЕЙ',
                     style: AppTextStyles.style(fontSize: 13, color: AppColors.primary, fontWeight: FontWeight.w800),
                   ),
                 ),

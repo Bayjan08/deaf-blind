@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
-import '../app_screen.dart';
 import '../widgets/design_widgets.dart';
 
 // ─── ALPHABET INTRO ─────────────────────────────────────────────────────────
@@ -260,6 +259,8 @@ class _RingBorderState extends State<_RingBorder>
 }
 
 // ─── ALPHABET PRACTICE ───────────────────────────────────────────────────────
+
+enum PracticeState { ready, checking, success }
 
 class AlphabetPracticeScreen extends StatelessWidget {
   const AlphabetPracticeScreen({

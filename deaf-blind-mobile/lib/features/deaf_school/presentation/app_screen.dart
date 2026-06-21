@@ -2,10 +2,6 @@
 enum AppScreen {
   home,
   subjects,
-  alphabetMap,
-  alphabetIntro,
-  alphabetPractice,
-  alphabetSuccess,
   musicNotes,
   musicGame,
   pronunciation,
@@ -19,17 +15,11 @@ enum AppScreen {
   profile,
 }
 
-enum PracticeState { ready, checking, success }
-
 enum NavTab { home, subjects, class_, profile }
 
 NavTab navTabForScreen(AppScreen screen) {
   const subjectScreens = {
     AppScreen.subjects,
-    AppScreen.alphabetMap,
-    AppScreen.alphabetIntro,
-    AppScreen.alphabetPractice,
-    AppScreen.alphabetSuccess,
     AppScreen.musicNotes,
     AppScreen.musicGame,
     AppScreen.pronunciation,
@@ -50,11 +40,7 @@ NavTab navTabForScreen(AppScreen screen) {
 }
 
 bool showBottomNav(AppScreen screen) =>
-    screen != AppScreen.alphabetPractice &&
-    screen != AppScreen.mathPractice &&
-    screen != AppScreen.liveclass;
+    screen != AppScreen.mathPractice && screen != AppScreen.liveclass;
 
 bool showAiFab(AppScreen screen) =>
-    screen != AppScreen.alphabetPractice &&
-    screen != AppScreen.mathPractice &&
-    screen != AppScreen.liveclass;
+    screen != AppScreen.mathPractice && screen != AppScreen.liveclass;

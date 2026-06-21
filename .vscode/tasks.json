@@ -12,7 +12,9 @@
       },
       "isBackground": true,
       "problemMatcher": {
-        "pattern": { "regexp": "^$" },
+        "pattern": {
+          "regexp": "^$"
+        },
         "background": {
           "activeOnStart": true,
           "beginsPattern": "Building|Started",
@@ -23,7 +25,7 @@
     {
       "label": "Run Mobile",
       "type": "shell",
-      "command": "flutter pub get && flutter run --dart-define=BACKEND_URL=http://10.0.2.2:9000",
+      "command": "flutter pub get; flutter run --dart-define=BACKEND_URL=http://10.0.2.2:9000",
       "options": {
         "cwd": "${workspaceFolder}/deaf-blind-mobile"
       },
@@ -36,7 +38,10 @@
     },
     {
       "label": "Run Both",
-      "dependsOn": ["Run Backend", "Run Mobile"],
+      "dependsOn": [
+        "Run Backend",
+        "Run Mobile"
+      ],
       "dependsOrder": "parallel",
       "presentation": {
         "reveal": "always",

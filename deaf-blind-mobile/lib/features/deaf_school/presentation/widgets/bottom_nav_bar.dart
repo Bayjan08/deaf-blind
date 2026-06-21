@@ -63,8 +63,8 @@ class DesignBottomNav extends StatelessWidget {
   }
 
   static Widget _homeIcon(bool active) => Icon(
-        Icons.home_rounded,
-        size: 25,
+        Icons.abc_rounded,
+        size: 28,
         color: active ? _on : _off,
       );
 

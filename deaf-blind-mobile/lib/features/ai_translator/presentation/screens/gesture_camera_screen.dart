@@ -107,7 +107,7 @@ class _GestureCameraScreenState extends State<GestureCameraScreen> {
     try {
       final res = await _api.dio.post<Map<String, dynamic>>(
         '/translation/ai/recognize-clip',
-        data: {'frames': frames},
+        data: {'frames': frames, 'mode': 'auto'},
       );
       final word = (res.data?['text'] as String?)?.trim() ?? '';
 
@@ -118,6 +118,8 @@ class _GestureCameraScreenState extends State<GestureCameraScreen> {
             _error = 'Жест не распознан — повторите';
           });
         } else {
+          // Auto mode: words, letters and numbers all come back as plain text
+          // and are added the same way.
           setState(() {
             _captured.add({'label': word, 'aiWord': word});
             _isClipProcessing = false;
@@ -184,6 +186,15 @@ class _GestureCameraScreenState extends State<GestureCameraScreen> {
         _sentenceText = null;
         _error = null;
       });
+
+  // Manually trigger a fixed-cadence 32-frame capture in the WebView. More
+  // reliable than waiting for the auto motion trigger, and works for signs held
+  // still (letters/numbers).
+  void _captureNow() {
+    if (_isClipProcessing) return;
+    setState(() => _error = null);
+    _webController?.evaluateJavascript(source: 'window.captureNow && captureNow()');
+  }
 
   // ── Build ──────────────────────────────────────────────────────────────────
   @override
@@ -308,17 +319,16 @@ class _GestureCameraScreenState extends State<GestureCameraScreen> {
           ),
           const SizedBox(height: 8),
 
-          // Captured word chips
+          // Captured word chips — wrap onto new rows, scroll vertically if many
           if (_captured.isNotEmpty)
-            SizedBox(
-              height: 36,
-              child: ListView(
-                scrollDirection: Axis.horizontal,
-                children: _captured.asMap().entries.map((e) {
-                  final aiWord = e.value['aiWord'] as String;
-                  return Padding(
-                    padding: const EdgeInsets.only(right: 6),
-                    child: InputChip(
+            Expanded(
+              child: SingleChildScrollView(
+                child: Wrap(
+                  spacing: 6,
+                  runSpacing: 6,
+                  children: _captured.asMap().entries.map((e) {
+                    final aiWord = e.value['aiWord'] as String;
+                    return InputChip(
                       label: Text(aiWord,
                           style: const TextStyle(
                               fontSize: 11, fontWeight: FontWeight.w700)),
@@ -327,13 +337,13 @@ class _GestureCameraScreenState extends State<GestureCameraScreen> {
                       backgroundColor: AppColors.grey100,
                       deleteIconColor: AppColors.primary,
                       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    ),
-                  );
-                }).toList(),
+                    );
+                  }).toList(),
+                ),
               ),
-            ),
-
-          const Spacer(),
+            )
+          else
+            const Spacer(),
 
           // Action buttons
           Row(

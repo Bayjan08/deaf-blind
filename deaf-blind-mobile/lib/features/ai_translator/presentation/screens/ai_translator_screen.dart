@@ -1,11 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 import 'package:record/record.dart';
 import 'package:path_provider/path_provider.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/translation/sign_avatar_player.dart';
 import '../providers/ai_translator_provider.dart';
+
+const _guestIntroText =
+    'Привет! Меня зовут ДИЛА. Я здесь, чтобы поделиться с тобой нашим '
+    'проектом. Это приложение помогает глухим и слабовидящим людям общаться, '
+    'учиться и познавать мир — через жесты, голос и вибрацию. Спасибо, что '
+    'заглянул! Давай покажу, как это работает.';
 
 class AiTranslatorScreen extends ConsumerStatefulWidget {
   const AiTranslatorScreen({super.key, this.initialMode = 0});
@@ -21,17 +28,38 @@ class _AiTranslatorScreenState extends ConsumerState<AiTranslatorScreen> with Si
   final _gestureController = TextEditingController();
   final _textController = TextEditingController();
   late final AudioRecorder _audioRecorder;
+  final _tts = FlutterTts();
   bool _isRecording = false;
+  bool _isGuestSpeaking = false;
+  String? _guestText;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this, initialIndex: widget.initialMode);
     _audioRecorder = AudioRecorder();
+    _initTts();
     _tabController.addListener(() {
       // Clear translation state when switching tabs
       setState(() {});
     });
+  }
+
+  Future<void> _initTts() async {
+    await _tts.setLanguage('ru-RU');
+    await _tts.setSpeechRate(0.5);
+    await _tts.setVolume(1.0);
+    await _tts.setPitch(1.0);
+  }
+
+  Future<void> _playGuestIntro() async {
+    setState(() {
+      _guestText = _guestIntroText;
+      _isGuestSpeaking = true;
+    });
+    await _tts.stop();
+    await _tts.speak(_guestIntroText);
+    if (mounted) setState(() => _isGuestSpeaking = false);
   }
 
   @override
@@ -40,6 +68,7 @@ class _AiTranslatorScreenState extends ConsumerState<AiTranslatorScreen> with Si
     _gestureController.dispose();
     _textController.dispose();
     _audioRecorder.dispose();
+    _tts.stop();
     super.dispose();
   }
 
@@ -185,9 +214,36 @@ class _AiTranslatorScreenState extends ConsumerState<AiTranslatorScreen> with Si
                     fontWeight: FontWeight.w700,
                   ),
                 ),
+                const SizedBox(height: 20),
+                TextButton.icon(
+                  onPressed: _isGuestSpeaking ? null : _playGuestIntro,
+                  icon: Icon(
+                    _isGuestSpeaking ? Icons.volume_up_rounded : Icons.record_voice_over_rounded,
+                    color: AppColors.primary,
+                  ),
+                  label: Text(
+                    'Гостевой режим: познакомиться с ДИЛА',
+                    style: AppTextStyles.style(fontSize: 13, color: AppColors.primary, fontWeight: FontWeight.w800),
+                  ),
+                ),
               ],
             ),
           ),
+          if (_guestText != null) ...[
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: AppColors.primary.withValues(alpha: 0.15), width: 2),
+              ),
+              child: Text(
+                _guestText!,
+                style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+              ),
+            ),
+          ],
           const SizedBox(height: 24),
           // Translation Output Section
           if (state.isLoading)

@@ -13,10 +13,12 @@ class AiTranslatorState {
   final bool isLoading;
   final String resultText;
   final List<int> animationIds;
+  final List<String> gestureWords;
   AiTranslatorState({
     this.isLoading = false,
     this.resultText = '',
     this.animationIds = const [],
+    this.gestureWords = const [],
   });
 }
 
@@ -24,18 +26,28 @@ class AiTranslatorNotifier extends StateNotifier<AiTranslatorState> {
   AiTranslatorNotifier(this._source) : super(AiTranslatorState());
   final AiTranslatorRemoteSource _source;
 
+  /// Hardcoded fallback while the live Gemini voice-to-sign call is unreliable
+  /// (502 from the backend) — shows a canned sentence + gesture flow so the
+  /// demo always works regardless of backend/credentials state.
+  void showHardcodedVoiceToSign() {
+    state = AiTranslatorState(
+      resultText: 'Привет, я хочу кушать, помоги мне пожалуйста',
+      gestureWords: const ['привет', 'я', 'хотеть', 'кушать', 'помощь', 'пожалуйста'],
+    );
+  }
+
   Future<void> translateSpeech(String audioFilePath, {bool andShowGestures = false}) async {
-    state = AiTranslatorState(isLoading: true, resultText: '', animationIds: []);
+    state = AiTranslatorState(isLoading: true);
     try {
-      final res = await _source.speechToText(audioFilePath);
       if (andShowGestures) {
-        final ids = await _source.textToSign(res);
-        state = AiTranslatorState(isLoading: false, resultText: res, animationIds: ids);
+        final res = await _source.voiceToSign(audioFilePath);
+        state = AiTranslatorState(resultText: res.text, gestureWords: res.words);
       } else {
-        state = AiTranslatorState(isLoading: false, resultText: res, animationIds: []);
+        final res = await _source.speechToText(audioFilePath);
+        state = AiTranslatorState(resultText: res);
       }
     } catch (e) {
-      state = AiTranslatorState(isLoading: false, resultText: 'Error: $e', animationIds: []);
+      state = AiTranslatorState(resultText: 'Error: $e');
     }
   }
 

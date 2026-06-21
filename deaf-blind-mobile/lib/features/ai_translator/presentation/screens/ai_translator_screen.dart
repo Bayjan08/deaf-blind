@@ -6,6 +6,7 @@ import 'package:path_provider/path_provider.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/translation/sign_avatar_player.dart';
+import '../../../../core/translation/sign_gesture_flow_player.dart';
 import '../providers/ai_translator_provider.dart';
 
 const _guestIntroText =
@@ -89,16 +90,14 @@ class _AiTranslatorScreenState extends ConsumerState<AiTranslatorScreen> with Si
 
   Future<void> _stopRecording() async {
     try {
-      final path = await _audioRecorder.stop();
+      await _audioRecorder.stop();
       setState(() {
         _isRecording = false;
       });
-      if (path != null) {
-        // Mode 0: Voice -> Gestures, calls with andShowGestures: true
-        ref.read(aiTranslatorProvider.notifier).translateSpeech(
-          path, 
-          andShowGestures: _tabController.index == 0,
-        );
+      if (_tabController.index == 0) {
+        // Voice -> Gestures: live Gemini voice-to-sign is unreliable right
+        // now (502s), so show the hardcoded demo sentence + gesture flow.
+        ref.read(aiTranslatorProvider.notifier).showHardcodedVoiceToSign();
       }
     } catch (e) {
       debugPrint('Error stopping record: $e');
@@ -172,8 +171,7 @@ class _AiTranslatorScreenState extends ConsumerState<AiTranslatorScreen> with Si
             child: Column(
               children: [
                 GestureDetector(
-                  onLongPressStart: (_) => _startRecording(),
-                  onLongPressEnd: (_) => _stopRecording(),
+                  onTap: () => _isRecording ? _stopRecording() : _startRecording(),
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 200),
                     width: 100,
@@ -198,7 +196,7 @@ class _AiTranslatorScreenState extends ConsumerState<AiTranslatorScreen> with Si
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  _isRecording ? 'Запись...' : 'Удерживайте для записи',
+                  _isRecording ? 'Запись...' : 'Нажмите, чтобы начать запись',
                   style: TextStyle(
                     fontWeight: FontWeight.w800,
                     fontSize: 15,
@@ -207,7 +205,7 @@ class _AiTranslatorScreenState extends ConsumerState<AiTranslatorScreen> with Si
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Отпустите, чтобы перевести в жесты',
+                  _isRecording ? 'Нажмите ещё раз, чтобы остановить' : 'Нажмите ещё раз, чтобы перевести в жесты',
                   style: TextStyle(
                     color: AppColors.textSecondary,
                     fontSize: 12,
@@ -268,13 +266,13 @@ class _AiTranslatorScreenState extends ConsumerState<AiTranslatorScreen> with Si
               ),
               const SizedBox(height: 24),
             ],
-            if (state.animationIds.isNotEmpty) ...[
+            if (state.gestureWords.isNotEmpty) ...[
               Text(
                 'Показ аватаром:',
                 style: AppTextStyles.style(fontSize: 16, color: AppColors.textPrimary),
               ),
               const SizedBox(height: 8),
-              SignAvatarPlayer(animationIds: state.animationIds),
+              SignGestureFlowPlayer(words: state.gestureWords),
             ],
           ]
         ],

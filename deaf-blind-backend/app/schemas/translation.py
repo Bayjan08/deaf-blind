@@ -17,3 +17,8 @@ class SignToTextRequest(ORMModel):
 
 class TextResponse(ORMModel):
     text: str
+
+
+class VoiceToSignResponse(ORMModel):
+    text: str          # literal transcript of the spoken sentence
+    words: list[str]   # ordered gloss words to show on the avatar, one by one
